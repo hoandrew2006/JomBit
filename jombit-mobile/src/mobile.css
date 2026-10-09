@@ -11,7 +11,7 @@
 .app-view .page-header { margin-bottom: 20px; gap: 12px; }
 .app-view .page-header h1 { font-size: 28px; line-height: 1.12; }
 .app-view .eyebrow { font-size: 9px; letter-spacing: .1em; }
-.app-view .hero-panel { min-height: 238px; padding: 22px; background: #e4e6e5; border-radius: 23px; }
+.app-view .hero-panel { min-height: 238px; padding: 22px; background: linear-gradient(120deg, #0ceaec, #64f4d9); border-radius: 23px; }
 .app-view .hero-panel h2 { font-size: 30px; line-height: 1.04; max-width: 270px; }
 .app-view .hero-panel p { font-size: 12px; margin-top: 12px; margin-bottom: 15px; }
 .app-view .hero-rings { opacity: .45; }
