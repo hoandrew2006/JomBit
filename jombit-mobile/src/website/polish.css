@@ -37,10 +37,10 @@
 .m-app-toolbar .brand { font-size: 21px; }
 .m-app-toolbar .brand-mark { width: 28px; height: 28px; }
 .m-app-toolbar > span { font-size: 11px; color: #b2c4bd; }
-.m-app-window .hero-panel { min-height: 0; padding: 22px; border-radius: 20px; box-shadow: none; background: #0ceaec; }
+.m-app-window .hero-panel { min-height: 0; padding: 22px; border-radius: 20px; box-shadow: none; background: #e4e6e5; }
 .m-app-window .hero-panel h2 { font-size: 27px; line-height: 1.12; margin-block: 12px; letter-spacing: -.05em; max-width: 300px; }
-.m-app-window .hero-panel p { margin-bottom: 18px; font-size: 12px; max-width: 28ch; line-height: 1.6; }
-.m-app-window .hero-panel .demo-label { font-size: 9px; letter-spacing: .11em; color: #16494a; }
+.m-app-window .hero-panel p { color: #3f4a4d; margin-bottom: 18px; font-size: 12px; max-width: 28ch; line-height: 1.6; }
+.m-app-window .hero-panel .demo-label { font-size: 9px; letter-spacing: .11em; color: #3f4a4d; }
 .m-app-window .hero-rings { width: 210px; height: 210px; right: -100px; top: -110px; opacity: .4; }
 .m-app-window .light-button { color: #f5f9f8; min-height: 43px; font-size: 12px; border-radius: 10px; padding-inline: 14px; }
 .m-app-receipt { padding: 19px 2px 0; }
