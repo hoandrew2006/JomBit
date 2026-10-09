@@ -48,11 +48,11 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .avatar-md { width: 40px; height: 40px; font-size: 12px; }
 .avatar-lg { width: 50px; height: 50px; font-size: 14px; }
 
-.hero-panel { position: relative; overflow: hidden; min-height: 278px; background: var(--cyan); color: #07191a; border-radius: 28px; padding: 34px; display: flex; align-items: center; box-shadow: 0 25px 70px rgba(0,0,0,.35); }
+.hero-panel { position: relative; overflow: hidden; min-height: 278px; background: #29465b; color: #f5f9f8; border-radius: 28px; padding: 34px; display: flex; align-items: center; box-shadow: 0 25px 70px rgba(0,0,0,.35); }
 .hero-copy { position: relative; z-index: 2; max-width: 510px; }
-.hero-panel .demo-label { color: #126466; }
+.hero-panel .demo-label { color: #9fd9e8; }
 .hero-panel h2 { font-size: clamp(31px, 6vw, 48px); line-height: .98; letter-spacing: -.055em; margin: 12px 0 15px; }
-.hero-panel p { max-width: 390px; font-size: 15px; line-height: 1.55; color: #174849; margin-bottom: 22px; }
+.hero-panel p { max-width: 390px; font-size: 15px; line-height: 1.55; color: #d3e1e8; margin-bottom: 22px; }
 .light-button, .primary-button, .secondary-button, .danger-button { min-height: 47px; border-radius: 14px; border: 0; display: inline-flex; align-items: center; justify-content: center; gap: 9px; font-weight: 800; padding: 0 18px; transition: transform .16s ease, background .16s ease; }
 .light-button { background: #151515; color: white; }
 .primary-button { background: var(--cyan); color: #092021; box-shadow: 0 10px 24px rgba(12,234,236,.14); }
@@ -61,8 +61,8 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .primary-button:hover, .secondary-button:hover, .light-button:hover { transform: translateY(-1px); }
 .primary-button.compact { min-height: 40px; padding: 0 14px; border-radius: 12px; font-size: 13px; }
 .hero-rings { position: absolute; right: -95px; top: -80px; width: 340px; height: 340px; opacity: .9; }
-.hero-rings i { position: absolute; border: 1px solid rgba(7,25,26,.2); border-radius: 50%; inset: 0; }
-.hero-rings i:nth-child(2) { inset: 46px; background: rgba(7,25,26,.045); }
+.hero-rings i { position: absolute; border: 1px solid rgba(255,255,255,.18); border-radius: 50%; inset: 0; }
+.hero-rings i:nth-child(2) { inset: 46px; background: rgba(255,255,255,.05); }
 .hero-rings i:nth-child(3) { inset: 98px; background: #151515; box-shadow: 0 0 0 18px rgba(21,21,21,.08); }
 
 .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
