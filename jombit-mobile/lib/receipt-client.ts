@@ -33,20 +33,20 @@ export async function prepareReceiptPhoto(file: File): Promise<PreparedReceipt> 
   } finally { URL.revokeObjectURL(url); }
 }
 
-export async function scanReceipt(photo: PreparedReceipt, signal: AbortSignal): Promise<ScannedReceipt> {
-  if (window.location.protocol === "file:") throw new Error("Gemini scanning needs the local JomBit server. Open http://127.0.0.1:5173/?app=1 after starting it. You can still enter a receipt manually here.");
+export async function scanReceipt(photo: PreparedReceipt, signal: AbortSignal, accessCode = ""): Promise<ScannedReceipt> {
+  if (window.location.protocol === "file:") throw new Error("Open the online JomBit app to scan a receipt, or enter it manually here.");
   let response: Response;
   try {
     response = await fetch("/api/receipt/scan", {
       method: "POST", signal,
-      headers: { "Content-Type": "application/json", "X-JomBit-Scan": "1" },
+      headers: { "Content-Type": "application/json", "X-JomBit-Scan": "1", ...(accessCode ? { "X-JomBit-Access-Code": accessCode.trim() } : {}) },
       body: JSON.stringify({ mimeType: photo.mimeType, imageBase64: photo.imageBase64, consent: true }),
     });
   } catch (error) {
     if (signal.aborted) throw error;
-    throw new Error("The JomBit scanner could not be reached. Start the local app server, then retry.");
+    throw new Error("The scanner could not be reached. Check your connection and try again.");
   }
-  if (!response.headers.get("content-type")?.includes("application/json")) throw new Error("The Gemini backend is not available on this website. Run the independent JomBit app locally.");
+  if (!response.headers.get("content-type")?.includes("application/json")) throw new Error("Scanning is unavailable right now. Please try again or enter the receipt manually.");
   const body = await response.json();
   if (!response.ok) throw new Error(typeof body.error === "string" ? body.error : "Receipt scanning failed. Please retry.");
   if (!body.receipt || !Array.isArray(body.receipt.items) || !Array.isArray(body.receipt.warnings)) throw new Error("The scan returned incomplete details. Please retry.");

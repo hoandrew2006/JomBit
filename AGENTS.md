@@ -8,7 +8,7 @@ JomBit is a Malaysian consumer-fintech **prototype**: split a restaurant receipt
 
 **Nothing here moves real money.** Payments, FX, transfers, staking and cards are simulated in the browser. The only real outside services are optional and local-only:
 
-- **Gemini** (Google) reads receipt photos — only when a developer has put their own key in `jombit-mobile/.env.local`.
+- **Gemini** (Google) reads approved receipt photos through either the loopback-only local API or protected Vercel functions. Keys stay server-side.
 - **CoinGecko** supplies read-only crypto reference prices.
 
 Luno integration is *planned, not connected*. Do not write code, copy or docs that implies a live partnership, real balances, real returns, store listings, regulatory approval or customer numbers.
@@ -38,7 +38,7 @@ JomBit/
 │   │   ├── seed.ts         Sample demo data
 │   │   ├── receipt-client.ts / receipt-review.ts  Photo prep + calls to the local scan API
 │   │   ├── crypto-market.ts, mock-services.ts, staking-config.ts
-│   ├── server/             Local-only backend, run as Vite middleware (not a separate server)
+│   ├── server/             Shared API logic used by Vite middleware and protected Vercel functions
 │   │   ├── receipt-api.mjs   POST /api/receipt/scan → Gemini (key stays server-side)
 │   │   ├── receipt-schema.mjs Validation of Gemini's answer
 │   │   └── crypto-market.mjs GET /api/crypto/quotes → CoinGecko, cached
@@ -48,7 +48,7 @@ JomBit/
 │   ├── public/             Static assets (logo, og.png, font licence)
 │   ├── .env.example        Template for the private .env.local (no real values)
 │   ├── GEMINI-SETUP.md     How to switch on real receipt scanning
-│   └── vercel.json         Static hosting config
+│   └── vercel.json         Vite hosting and receipt-function configuration
 │
 ├── (repo root)             ← OLDER proof of concept, kept for reference only
 │   ├── app/, lib/, tests/  Next.js-style app built with vinext on Cloudflare Workers
@@ -68,9 +68,9 @@ Do not change the root proof of concept unless the task explicitly asks for it.
 - **Icons/QR:** `lucide-react`, `qrcode.react`.
 - **State:** a single `AppState` object in React context, persisted to `localStorage` under `jombit-mobile-demo-state-v1`. No database, no user accounts.
 - **Money:** stored as integer **cents** (`amountCents`, `unitCents`). Never use floating-point currency amounts.
-- **Backend:** two Vite middlewares (`server/`) that run only under `npm run dev` / `npm run preview` and only accept requests from `127.0.0.1`/`localhost`.
+- **Backend:** Vite middleware stays loopback-only. Receipt scanning also has protected Vercel functions gated by exact origin, private tester access code, consent and upload validation. Crypto prices remain local-only.
 - **Tests:** Node's built-in test runner (`node --test`) with `--experimental-strip-types` so tests import `.ts` files directly. Some tests server-render React components to HTML.
-- **Hosting:** Vercel, static (root directory `jombit-mobile`, framework Vite, output `dist`). The static site does **not** include the Gemini or CoinGecko backends.
+- **Hosting:** Vercel (root directory `jombit-mobile`, framework Vite, output `dist`) serves the website/app and receipt functions. CoinGecko middleware remains local-only.
 - **Node:** 22.13 or newer.
 
 The root proof of concept uses vinext (a Vite-based Next.js-compatible framework), Tailwind 4, Cloudflare Workers/Wrangler and Drizzle ORM; its D1 database is not configured.
@@ -94,7 +94,7 @@ Pages:
 - `/?view=demo` — the app inside a phone frame
 - `/?app=1` — the app on its own
 
-Receipt scanning with Gemini needs `jombit-mobile/.env.local` (copy `.env.example`); see `GEMINI-SETUP.md`. Tests mock Gemini and CoinGecko and never need a key or network.
+Local receipt scanning needs `jombit-mobile/.env.local` (copy `.env.example`); hosted setup uses server-only Vercel variables. See `GEMINI-SETUP.md` and `HOSTED-SCANNING.md`. Tests mock Gemini and CoinGecko and never need a key or network.
 
 On Windows PowerShell, use `npm.cmd` if `npm` is blocked.
 
@@ -139,7 +139,7 @@ The founders are not all engineers. In every PR description (and in your final m
 
 - Keep all money, crypto, payments and cards clearly simulated. Do not add real payment, banking, trading or provider integrations without an explicit request and human review.
 - Crypto buying and selling is intentionally **not** offered; `crypto-ledger.ts` rejects it. Don't re-add it.
-- Keep the local backends loopback-only. Don't expose them to the network or add hosting for them without authentication.
+- Keep the local backends loopback-only. Hosted endpoints require authentication/access control, exact-origin checks and human review; never make provider keys public.
 - Don't break saved demo data: `AppState` is persisted in users' browsers, so changes to `lib/models.ts` must still load older saved state.
 - Put business rules in `lib/` with tests in `tests/`; keep components focused on display.
 - Use integer cents for money and add tests for any calculation change.

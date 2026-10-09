@@ -1,0 +1,37 @@
+/* Focused receipt refresh: preserve JomBit's existing palette and controls. */
+.expense-flow .upload-stage { max-width: 560px; padding-top: 38px; padding-bottom: 48px; }
+.receipt-header-label { color: #9baba8; font-size: 12px; }
+.receipt-intro { text-align: left; margin-bottom: 28px; }
+.receipt-intro-icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 18px; background: #0cdade15; color: var(--cyan); margin-bottom: 23px; }
+.receipt-intro .eyebrow { font-size: 10px; letter-spacing: .14em; margin-bottom: 10px; }
+.receipt-intro h1 { font-size: clamp(29px, 5vw, 40px); line-height: 1.12; letter-spacing: -.045em; margin: 0; text-wrap: balance; }
+.receipt-intro > p:last-child { color: #a8b5b2; font-size: 14px; margin-top: 13px; line-height: 1.6; }
+.receipt-capture-panel { padding: 25px; border: 1px solid #2c3a37; border-radius: 24px; background: linear-gradient(140deg, #1c2926, #191e1d); text-align: left; }
+.receipt-capture-heading { display: flex; align-items: flex-start; gap: 14px; }
+.receipt-capture-heading > svg { color: #a4d6cf; flex-shrink: 0; margin-top: 3px; }
+.receipt-capture-heading h2, .receipt-photo-heading h2 { font-size: 17px; letter-spacing: -.025em; margin: 0; }
+.receipt-capture-heading p { color: #a6b7b1; font-size: 12px; line-height: 1.7; margin-top: 7px; }
+.receipt-capture-panel .receipt-capture-actions { grid-template-columns: 1fr; margin: 23px 0 14px; gap: 10px; }
+.receipt-capture-actions .primary-button, .receipt-capture-actions .secondary-button { min-height: 52px; border-radius: 13px; font-size: 14px; box-shadow: none; }
+.receipt-capture-hint { display: block; font-size: 10px; color: #9baaa5; text-align: center; }
+.receipt-availability { font-size: 12px; color: #b6c4c0; line-height: 1.6; margin: 16px 0; }
+.receipt-manual-button { gap: 7px; align-items: center; font-size: 13px; margin: 21px auto 10px; min-height: 44px; }
+.receipt-bottom-note { font-size: 11px; color: #a0ada8; line-height: 1.6; margin-top: 0; }
+.receipt-photo-ready { background: #19211f; border-color: #33433e; padding: 22px; text-align: left; }
+.receipt-photo-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.receipt-photo-heading .text-button { font-size: 12px; min-height: 44px; }
+.receipt-access-field { display: grid; gap: 8px; font-size: 12px; color: #d2dfda; }
+.receipt-access-field input { min-width: 0; width: 100%; border: 1px solid #4b6157; border-radius: 10px; background: #111916; color: #f0f7f4; padding: 13px; }
+.receipt-access-field small { color: #a6b8ae; line-height: 1.6; }
+.receipt-privacy { font-size: 11px; color: #b4c7bb; line-height: 1.75; }
+.receipt-privacy summary { cursor: pointer; padding-block: 6px; }
+.receipt-privacy p { margin: 7px 0; }.receipt-privacy a { color: var(--cyan); }
+.receipt-photo-ready :is(input, summary, button):focus-visible, .receipt-manual-button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
+@media (max-width: 480px) {
+  .expense-flow .upload-stage { padding-top: 28px; }
+  .receipt-capture-panel { padding: 20px; border-radius: 20px; }
+  .receipt-intro { margin-bottom: 23px; }
+  .receipt-photo-ready { padding: 17px; }
+  .receipt-header-label { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) { .expense-flow .scan-line { animation: none; } }
