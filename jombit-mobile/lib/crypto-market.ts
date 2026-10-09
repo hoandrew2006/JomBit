@@ -6,7 +6,7 @@ import { CRYPTO_ASSETS, validQuote } from "./crypto-ledger";
 const demoQuotes = Object.fromEntries(CRYPTO_ASSETS.map((asset) => [asset, { asset, priceMyr: DEMO_CRYPTO_PRICES_MYR[asset], source: "demo", change24h: null, updatedAt: null }])) as Record<CryptoAsset, CryptoQuote>;
 
 export function supportsLiveCryptoPrices(location: { protocol: string; hostname: string }) {
-  return ["http:", "https:"].includes(location.protocol) && ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
+  return location.protocol === "https:" || (location.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname));
 }
 
 export function useCryptoMarket() {
@@ -25,13 +25,13 @@ export function useCryptoMarket() {
     let controller: AbortController | undefined;
     const refresh = async () => {
       if (busy || document.hidden || Date.now() - lastAttempt < 15000) return;
-      if (!supportsLiveCryptoPrices(window.location)) { setError("Live prices require the local JomBit server. Open the app through its localhost link, or choose Demo prices."); return; }
+      if (!supportsLiveCryptoPrices(window.location)) { setError("Live prices require the online JomBit app or local server. Choose Demo prices when opening the standalone file."); return; }
       lastAttempt = Date.now(); busy = true; setLoading(true);
       controller = new AbortController();
       const timer = window.setTimeout(() => controller?.abort(), 12000);
       try {
-        const response = await fetch("/api/crypto/quotes", { signal: controller.signal, cache: "no-store" });
-        if (!response.headers.get("content-type")?.includes("application/json")) throw new Error("The market service is not available here. Run the local JomBit server.");
+        const response = await fetch("/api/crypto/quotes", { signal: controller.signal });
+        if (!response.headers.get("content-type")?.includes("application/json")) throw new Error("The market service is not available on this website.");
         const body = await response.json();
         if (!response.ok) throw new Error(typeof body.error === "string" ? body.error : "Live prices are unavailable.");
         if (!CRYPTO_ASSETS.every((asset) => body.quotes?.[asset]?.source === "coingecko" && body.quotes[asset].asset === asset && validQuote(body.quotes[asset], Date.now()))) throw new Error("The market feed returned outdated or invalid prices.");

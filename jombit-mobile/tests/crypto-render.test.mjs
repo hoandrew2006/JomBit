@@ -32,7 +32,8 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
     const { market } = await server.ssrLoadModule("virtual:jombit-crypto-market");
     const { supportsLiveCryptoPrices } = await server.ssrLoadModule("/lib/crypto-market.ts");
     for (const hostname of ["localhost", "127.0.0.1", "[::1]"]) assert.equal(supportsLiveCryptoPrices({ protocol: "http:", hostname }), true);
-    for (const location of [{ protocol: "file:", hostname: "" }, { protocol: "about:", hostname: "" }, { protocol: "https:", hostname: "static.example" }]) assert.equal(supportsLiveCryptoPrices(location), false, "Offline iframe and static hosts must default to labelled demo prices");
+    assert.equal(supportsLiveCryptoPrices({ protocol: "https:", hostname: "jom-bit-6667.vercel.app" }), true);
+    for (const location of [{ protocol: "file:", hostname: "" }, { protocol: "about:", hostname: "" }, { protocol: "http:", hostname: "static.example" }]) assert.equal(supportsLiveCryptoPrices(location), false, "Offline and insecure non-local hosts must default to labelled demo prices");
     const render = (visible = true) => renderToStaticMarkup(createElement(CryptoDesk, { balancesVisible: visible }));
     let html = render();
     for (const content of ["STAKING OVERVIEW", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Execution price per coin", "Staking &amp; earlier activity", "Earlier demo record", "Staking simulation only", "Demo stake", "Unstake ETH", "Luno integration is planned, not connected", "BTC", "View-only"]) assert.ok(html.includes(content), content);

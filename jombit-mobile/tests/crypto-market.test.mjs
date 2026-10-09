@@ -20,7 +20,7 @@ test("Market proxy requests only fixed public MYR prices and returns timestamps 
   const { get } = await withApi(t, { fetchImpl: async (url, request) => {
     calls++;
     assert.equal(url, MARKET_URL);
-    assert.deepEqual(request.headers, { Accept: "application/json" });
+    assert.deepEqual(request.headers, { Accept: "application/json", "User-Agent": "JomBit/1.0" });
     assert.equal(request.body, undefined);
     assert.equal(request.method, undefined);
     assert.ok(request.signal instanceof AbortSignal);
@@ -120,4 +120,17 @@ test("Only loopback same-origin GET quotes are accepted; unrelated routes pass t
   assert.equal(await (await fetch(`${base}/unrelated`)).text(), "Other route");
   assert.equal(calls, 0);
   assert.equal((await get({ headers: { Origin: base } })).status, 200);
+});
+
+test("Hosted quotes require the configured HTTPS app origin and return shared cache headers", async (t) => {
+  const origin = "https://jom-bit-6667.vercel.app";
+  const hosted = await withApi(t, { hosted: true, env: { JOMBIT_APP_ORIGIN: origin } });
+  const response = await hosted.get();
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "public, max-age=15, s-maxage=60, stale-while-revalidate=60");
+  assert.equal((await hosted.get({ headers: { Origin: origin } })).status, 200);
+  assert.equal((await hosted.get({ headers: { Origin: "https://unrelated.example" } })).status, 403);
+
+  const missing = await withApi(t, { hosted: true, env: {} });
+  assert.equal((await missing.get()).status, 503);
 });

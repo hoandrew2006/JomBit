@@ -36,7 +36,7 @@ The prototype supports **demo staking and unstaking of existing ETH and SOL hold
 
 Balances, acquisition dates, average costs and earlier buy/sell history are preserved, not reset or reclassified as Luno transactions. Missing acquisition data stays unknown. Old card-source preferences remain in storage for compatibility but are no longer actionable: the card concept is fiat-only.
 
-CoinGecko reference prices remain read-only valuation data, separate from Luno and staking rewards. They refresh through the loopback-only local middleware. Directly opened HTML and static hosts default to clearly labelled demo prices. Prices can be unavailable without preventing a demo stake, because staking moves units, not cash.
+CoinGecko reference prices remain read-only valuation data, separate from Luno and staking rewards. They refresh through local middleware or the cached Vercel endpoint. The directly opened standalone HTML defaults to clearly labelled demo prices. Prices can be unavailable without preventing a demo stake, because staking moves units, not cash.
 
 ## Camera and Gemini receipt scanning
 
@@ -76,7 +76,7 @@ npm run build
 npm run preview
 ```
 
-The build creates the static website in `dist`, plus self-contained `dist/JomBit.html` and `dist/JomBit-app-demo.html`. The marketing website can be hosted statically. Gemini scanning also has public Vercel functions in `api/receipt`; configure the private provider key and exact production origin using [HOSTED-SCANNING.md](HOSTED-SCANNING.md). Live crypto prices still require local middleware. `npm run preview` includes both services for loopback-only local testing. No personal name is specified in source or metadata, and this build does not publish to ChatGPT Sites.
+The build creates the static website in `dist`, plus self-contained `dist/JomBit.html` and `dist/JomBit-app-demo.html`. The marketing website can be hosted statically. Gemini scanning has public Vercel functions in `api/receipt`; configure the private provider key and exact production origin using [HOSTED-SCANNING.md](HOSTED-SCANNING.md). Cached live CoinGecko prices use `api/crypto/quotes` and the same `JOMBIT_APP_ORIGIN`; no additional key is required for the public endpoint. `npm run preview` includes both services for loopback-only local testing. No personal name is specified in source or metadata, and this build does not publish to ChatGPT Sites.
 
 ## Social preview
 
