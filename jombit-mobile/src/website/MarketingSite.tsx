@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Brand } from "../../app/components/ui";
-import { productTabs, storeLinks } from "./content";
+import { productTabs, webAppUrl } from "./content";
 import { CardVisual, CurrencyVisual, GroupVisual, JourneyIcon, ReceiptVisual, SettlementVisual } from "./ProductVisuals";
 import "./website.css";
 import "./refresh.css";
@@ -27,10 +27,8 @@ function SectionIntro({ title, description }: { eyebrow?: string; title: string;
 }
 
 function DownloadQr({ platform }: { platform: "ios" | "android" }) {
-  const url = storeLinks[platform];
-  const name = platform === "ios" ? "App Store" : "Google Play";
-  const payload = url ?? `JomBit for ${platform === "ios" ? "iOS" : "Android"} is coming soon. This is a preview QR. The official ${name} download link will be added at launch.`;
-  return <article className="m-download-card"><div className="m-download-platform"><Smartphone size={22} /><div><small>{platform === "ios" ? "FOR IPHONE" : "FOR ANDROID"}</small><h3>{name}</h3></div><span>{url ? "Available" : "Coming soon"}</span></div><div className="m-store-qr"><QRCodeSVG value={payload} size={154} marginSize={3} fgColor="#101a19" bgColor="#fff" title={`JomBit ${name} ${url ? "download" : "coming-soon preview"} QR code`} /></div><strong>{url ? "Scan to download JomBit" : "Your next good bit is on its way."}</strong><p>{url ? `Open your camera and follow the link to ${name}.` : "Preview QR · official store link coming at launch."}</p>{url && <a className="m-store-link" href={url} target="_blank" rel="noreferrer">Open {name} <ArrowUpRight size={15} /></a>}</article>;
+  const name = platform === "ios" ? "iPhone" : "Android";
+  return <article className="m-download-card"><div className="m-download-platform"><Smartphone size={22} /><div><small>OPEN IN YOUR BROWSER</small><h3>{name}</h3></div><span>No installation needed</span></div><div className="m-store-qr"><QRCodeSVG value={webAppUrl} size={154} marginSize={3} fgColor="#101a19" bgColor="#fff" title={`Scan to open the JomBit web app on ${name}`} /></div><strong>Scan to open JomBit</strong><p>Point your camera at the code.<br />Tap the link to open the web app.</p><a className="m-store-link" href={webAppUrl} target="_blank" rel="noreferrer" aria-label={`Open JomBit web app for ${name} in a new tab`}>Open JomBit <ArrowUpRight size={15} /></a></article>;
 }
 
 export function MarketingSite() {
@@ -54,7 +52,7 @@ export function MarketingSite() {
       <a className="m-skip-link" href="#main-content">Skip to content</a>
       <div className="m-announcement"><span>Meet JomBit</span> Good times deserve a better way to split. <a href="#how-it-works">Discover how <ArrowRight size={13} /></a></div>
       <header className="m-site-header" ref={headerRef}>
-        <div className="m-nav-wrap"><a className="m-logo-link" href="#" aria-label="JomBit home"><Brand /></a><nav className={`m-main-nav ${menuOpen ? "is-open" : ""}`} id="site-navigation" aria-label="Main navigation">{navigation.map(([label, id]) => <a key={id} className={id === "crypto" ? "m-crypto-nav" : undefined} href={`#${id}`} onClick={() => setMenuOpen(false)}>{label}</a>)}</nav><div className="m-nav-actions"><a className="m-button m-button-small" href="#download" onClick={() => setMenuOpen(false)}><QrCode size={16} /> App launch</a><button ref={menuButtonRef} type="button" className="m-menu-toggle" aria-label={menuOpen ? "Close menu" : "Open menu"} aria-controls="site-navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button></div></div>
+        <div className="m-nav-wrap"><a className="m-logo-link" href="#" aria-label="JomBit home"><Brand /></a><nav className={`m-main-nav ${menuOpen ? "is-open" : ""}`} id="site-navigation" aria-label="Main navigation">{navigation.map(([label, id]) => <a key={id} className={id === "crypto" ? "m-crypto-nav" : undefined} href={`#${id}`} onClick={() => setMenuOpen(false)}>{label}</a>)}</nav><div className="m-nav-actions"><a className="m-button m-button-small" href="#download" onClick={() => setMenuOpen(false)}><QrCode size={16} /> Open JomBit</a><button ref={menuButtonRef} type="button" className="m-menu-toggle" aria-label={menuOpen ? "Close menu" : "Open menu"} aria-controls="site-navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button></div></div>
       </header>
 
       <main id="main-content">
@@ -114,14 +112,14 @@ export function MarketingSite() {
         </section>
 
         <section className="m-download-section" id="download"><div className="m-container m-download-layout" data-reveal>
-          <div className="m-download-copy"><span className="m-eyebrow">TAKE THE GOOD BITS WITH YOU</span><h2>Your people.<br />Your plans.<br /><em>Your JomBit.</em></h2><p>One app for the shared dinners, spontaneous trips, and everyday moments in between.</p><span className="m-coming-pill"><i /> App launch coming soon</span><small>iOS and Android download QRs will connect to the official store listings at launch.</small></div>
+          <div className="m-download-copy"><span className="m-eyebrow">TAKE THE GOOD BITS WITH YOU</span><h2>Your people.<br />Your plans.<br /><em>Your JomBit.</em></h2><p>One app for the shared dinners, spontaneous trips, and everyday moments in between.</p><span className="m-coming-pill"><i /> Open the JomBit web app</span><small>Scan either code, or tap Open JomBit. No download needed. Prototype data stays in your browser; no real funds move.</small></div>
           <div className="m-download-codes"><DownloadQr platform="ios" /><DownloadQr platform="android" /></div>
         </div></section>
 
         <section className="m-container m-section m-faq-section" id="faq" data-reveal><div><span className="m-eyebrow">A FEW GOOD QUESTIONS</span><h2>Let’s clear<br />things up.</h2><p>What works today.<br />What we’re building next.</p></div><FaqAccordion /></section>
       </main>
 
-      <footer className="m-footer"><div className="m-container"><div className="m-footer-main"><div className="m-footer-brand"><Brand /><p>Good times.<br />Shared fairly.</p><span>Built around life in Malaysia.</span></div><div><h3>Discover JomBit</h3><a href="#the-jombit-way" onClick={() => setActiveTab(0)}>Receipt splitting</a><a href="#the-jombit-way" onClick={() => setActiveTab(1)}>Group expenses</a><a href="#the-jombit-way" onClick={() => setActiveTab(2)}>Simplified settlements</a></div><div><h3>The bigger picture</h3><a href="#wallet">Fiat Wallet</a><a href="#crypto">Crypto Wallet</a><a href="#card">JomBit Card</a></div><div><h3>Company</h3><a href="#company">About JomBit</a><a href="#why-jombit">Our principles</a><a href="#faq">FAQs</a><a href="#download">App launch <ArrowUpRight size={12} /></a></div></div><div className="m-footer-bottom"><span>© {new Date().getFullYear()} JomBit. Every cent, shared fairly.</span><span>Company & product concept</span></div><p className="m-footer-disclosure">JomBit is a proof of concept. Financial, crypto and card services shown are simulated or planned; no real funds move. Store downloads are coming soon. No affiliation with any bank, payment network or card issuer is claimed.</p></div></footer>
+      <footer className="m-footer"><div className="m-container"><div className="m-footer-main"><div className="m-footer-brand"><Brand /><p>Good times.<br />Shared fairly.</p><span>Built around life in Malaysia.</span></div><div><h3>Discover JomBit</h3><a href="#the-jombit-way" onClick={() => setActiveTab(0)}>Receipt splitting</a><a href="#the-jombit-way" onClick={() => setActiveTab(1)}>Group expenses</a><a href="#the-jombit-way" onClick={() => setActiveTab(2)}>Simplified settlements</a></div><div><h3>The bigger picture</h3><a href="#wallet">Fiat Wallet</a><a href="#crypto">Crypto Wallet</a><a href="#card">JomBit Card</a></div><div><h3>Company</h3><a href="#company">About JomBit</a><a href="#why-jombit">Our principles</a><a href="#faq">FAQs</a><a href="#download">Open JomBit <ArrowUpRight size={12} /></a></div></div><div className="m-footer-bottom"><span>© {new Date().getFullYear()} JomBit. Every cent, shared fairly.</span><span>Company & product concept</span></div><p className="m-footer-disclosure">JomBit is a proof of concept. Financial, crypto and card services shown are simulated or planned; no real funds move. Open the web app without an app-store download. No affiliation with any bank, payment network or card issuer is claimed.</p></div></footer>
     </div>
   );
 }

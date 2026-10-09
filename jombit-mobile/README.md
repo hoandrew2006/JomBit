@@ -1,6 +1,6 @@
 # JomBit Website
 
-An independent company and product website for JomBit, built with React, TypeScript and Vite. The main page explains receipt splitting, group expense tracking, simplified settlements, and the wider fiat wallet, crypto wallet and prepaid-card vision. It includes the company mission, FAQs, and preview App Store and Google Play QR cards.
+An independent company and product website for JomBit, built with React, TypeScript and Vite. The main page explains receipt splitting, group expense tracking, simplified settlements, and the wider fiat wallet, crypto wallet and prepaid-card vision. It includes the company mission, FAQs, and iPhone/Android QR cards that open the deployed web app without installation.
 
 The layout takes inspiration from [Bybit’s product website](https://www.bybit.com/en-GB/): bold introductory copy, product discovery, and QR-led downloads. JomBit adds its own four-step receipt story and dedicated crypto concept chapter. The identity and content are JomBit’s own, developed from the supplied product specification. No founders, customer counts, regulatory approvals or launch dates are invented.
 
@@ -59,9 +59,9 @@ Open http://127.0.0.1:5173.
 
 On Windows PowerShell, use `npm.cmd` if script execution policy blocks `npm`.
 
-## Edit the store QR codes
+## Edit the web app QR codes
 
-Replace the two `null` values in `src/website/content.ts` → `storeLinks` with the official App Store and Google Play listing URLs, then rebuild. Until then, the QR codes encode coming-soon text and are visibly labelled as previews. They do not direct visitors to an unrelated app or invented listing.
+Both QR cards and their Open JomBit links use `webAppUrl` in `src/website/content.ts`: `https://jom-bit-6667.vercel.app/?app=1`. This absolute URL opens the full-screen app even when someone scans a local or standalone website preview. Change this one value if the public app address changes, then rebuild and deploy. The existing two-card design is preserved for iPhone and Android; neither card points to an app store. No installation is required. The website and app share one Vercel deployment; `/app` is not configured.
 
 Product tabs, mobile navigation and FAQ accordions work. “Try the demo” opens the phone-framed app. Other calls to action navigate to sections of this informational page; they do not execute financial operations.
 

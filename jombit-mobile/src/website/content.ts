@@ -1,9 +1,5 @@
-// Replace null with the official listing URL when each JomBit app is published.
-// Preview QRs contain explanatory text, never an invented store listing.
-export const storeLinks: { ios: string | null; android: string | null } = {
-  ios: null,
-  android: null,
-};
+// Use the public app URL so QRs also work from local and standalone website previews.
+export const webAppUrl = "https://jom-bit-6667.vercel.app/?app=1";
 
 export const productTabs = [
   {
@@ -62,8 +58,8 @@ export const questions = [
     answer: "Deposit MYR into one JomBit Fiat Wallet, then see what the same balance is worth in SGD, THB and IDR. Those figures are estimates, not extra balances. For a simulated foreign-currency transfer, review the MYR deduction before confirming. The prototype uses static demo rates and does not connect to a bank or move real funds.",
   },
   {
-    question: "Is JomBit available on the App Store and Google Play?",
-    answer: "JomBit’s iOS and Android apps are coming soon. The download section currently shows preview QR codes, not live store links. These will connect to the official App Store and Google Play listings when the app is published.",
+    question: "How do I open JomBit on my phone?",
+    answer: "Scan either QR code or tap Open JomBit to open the web app in your browser. It works on iPhone and Android without an app-store download or installation. Both codes open the same app. This is a prototype: ledger data stays in your browser, financial services are simulated, and Gemini scanning requires the configured local backend.",
   },
   {
     question: "Are the payment, crypto and card services live?",
