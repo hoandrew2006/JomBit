@@ -68,7 +68,7 @@ Do not change the root proof of concept unless the task explicitly asks for it.
 - **Icons/QR:** `lucide-react`, `qrcode.react`.
 - **State:** a single `AppState` object in React context, persisted to `localStorage` under `jombit-mobile-demo-state-v1`. No database, no user accounts.
 - **Money:** stored as integer **cents** (`amountCents`, `unitCents`). Never use floating-point currency amounts.
-- **Backend:** Vite middleware stays loopback-only. Receipt scanning also has protected Vercel functions gated by exact origin, private tester access code, consent and upload validation. Crypto prices remain local-only.
+- **Backend:** Vite middleware stays loopback-only. Receipt scanning also has public Vercel functions gated by exact origin, consent, upload validation and short-burst protection. Crypto prices remain local-only.
 - **Tests:** Node's built-in test runner (`node --test`) with `--experimental-strip-types` so tests import `.ts` files directly. Some tests server-render React components to HTML.
 - **Hosting:** Vercel (root directory `jombit-mobile`, framework Vite, output `dist`) serves the website/app and receipt functions. CoinGecko middleware remains local-only.
 - **Node:** 22.13 or newer.
@@ -139,7 +139,7 @@ The founders are not all engineers. In every PR description (and in your final m
 
 - Keep all money, crypto, payments and cards clearly simulated. Do not add real payment, banking, trading or provider integrations without an explicit request and human review.
 - Crypto buying and selling is intentionally **not** offered; `crypto-ledger.ts` rejects it. Don't re-add it.
-- Keep the local backends loopback-only. Hosted endpoints require authentication/access control, exact-origin checks and human review; never make provider keys public.
+- Keep the local backends loopback-only. Hosted endpoints require exact-origin checks, strict validation and human review; never make provider keys public. Public endpoints also need provider-side quota/billing safeguards.
 - Don't break saved demo data: `AppState` is persisted in users' browsers, so changes to `lib/models.ts` must still load older saved state.
 - Put business rules in `lib/` with tests in `tests/`; keep components focused on display.
 - Use integer cents for money and add tests for any calculation change.

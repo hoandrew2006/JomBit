@@ -33,13 +33,13 @@ export async function prepareReceiptPhoto(file: File): Promise<PreparedReceipt> 
   } finally { URL.revokeObjectURL(url); }
 }
 
-export async function scanReceipt(photo: PreparedReceipt, signal: AbortSignal, accessCode = ""): Promise<ScannedReceipt> {
+export async function scanReceipt(photo: PreparedReceipt, signal: AbortSignal): Promise<ScannedReceipt> {
   if (window.location.protocol === "file:") throw new Error("Open the online JomBit app to scan a receipt, or enter it manually here.");
   let response: Response;
   try {
     response = await fetch("/api/receipt/scan", {
       method: "POST", signal,
-      headers: { "Content-Type": "application/json", "X-JomBit-Scan": "1", ...(accessCode ? { "X-JomBit-Access-Code": accessCode.trim() } : {}) },
+      headers: { "Content-Type": "application/json", "X-JomBit-Scan": "1" },
       body: JSON.stringify({ mimeType: photo.mimeType, imageBase64: photo.imageBase64, consent: true }),
     });
   } catch (error) {

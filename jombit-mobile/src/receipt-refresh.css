@@ -20,9 +20,6 @@
 .receipt-photo-ready { background: #19211f; border-color: #33433e; padding: 22px; text-align: left; }
 .receipt-photo-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .receipt-photo-heading .text-button { font-size: 12px; min-height: 44px; }
-.receipt-access-field { display: grid; gap: 8px; font-size: 12px; color: #d2dfda; }
-.receipt-access-field input { min-width: 0; width: 100%; border: 1px solid #4b6157; border-radius: 10px; background: #111916; color: #f0f7f4; padding: 13px; }
-.receipt-access-field small { color: #a6b8ae; line-height: 1.6; }
 .receipt-privacy { font-size: 11px; color: #b4c7bb; line-height: 1.75; }
 .receipt-privacy summary { cursor: pointer; padding-block: 6px; }
 .receipt-privacy p { margin: 7px 0; }.receipt-privacy a { color: var(--cyan); }
