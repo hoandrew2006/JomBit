@@ -24,7 +24,7 @@ Preview deployments are not automatically authorised to scan. They must have a d
 - No request bodies, photos or provider error details are logged by our handlers. The Gemini key stays on the server. Photos are not saved by JomBit's backend; browser photo retention is opt-in.
 - Google's unpaid-service terms allow product improvement and human review. Use only redacted/sample receipts without personal, sensitive or confidential information. The UI keeps upload consent and links to these terms.
 - The refreshed flow has no sample receipt button and no silent demo fallback. Manual entry remains available if scanning fails. Finance/staking features still remain simulations; group data is browser-local.
-- Live crypto prices on Vercel are a separate upcoming task; this change enables receipt scanning only.
+- Live crypto prices use a separate cached Vercel function backed by CoinGecko's fixed public MYR endpoint. They remain reference valuations only and are not used for buying or selling.
 
 ## Validation and troubleshooting
 

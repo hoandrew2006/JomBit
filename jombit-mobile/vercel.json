@@ -3,6 +3,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "functions": {
-    "api/receipt/scan.js": { "maxDuration": 60 }
+    "api/receipt/scan.js": { "maxDuration": 60 },
+    "api/crypto/quotes.js": { "maxDuration": 15 }
   }
 }

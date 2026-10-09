@@ -9,7 +9,7 @@ JomBit is a Malaysian consumer-fintech **prototype**: split a restaurant receipt
 **Nothing here moves real money.** Payments, FX, transfers, staking and cards are simulated in the browser. The only real outside services are optional and local-only:
 
 - **Gemini** (Google) reads approved receipt photos through either the loopback-only local API or protected Vercel functions. Keys stay server-side.
-- **CoinGecko** supplies read-only crypto reference prices.
+- **CoinGecko** supplies read-only crypto reference prices through local middleware or a public, fixed-route Vercel function.
 
 Luno integration is *planned, not connected*. Do not write code, copy or docs that implies a live partnership, real balances, real returns, store listings, regulatory approval or customer numbers.
 
@@ -68,9 +68,9 @@ Do not change the root proof of concept unless the task explicitly asks for it.
 - **Icons/QR:** `lucide-react`, `qrcode.react`.
 - **State:** a single `AppState` object in React context, persisted to `localStorage` under `jombit-mobile-demo-state-v1`. No database, no user accounts.
 - **Money:** stored as integer **cents** (`amountCents`, `unitCents`). Never use floating-point currency amounts.
-- **Backend:** Vite middleware stays loopback-only. Receipt scanning also has public Vercel functions gated by exact origin, consent, upload validation and short-burst protection. Crypto prices remain local-only.
+- **Backend:** Vite middleware stays loopback-only. Receipt scanning has public Vercel functions gated by exact origin, consent, upload validation and short-burst protection. A separate fixed-route Vercel function provides cached CoinGecko reference prices.
 - **Tests:** Node's built-in test runner (`node --test`) with `--experimental-strip-types` so tests import `.ts` files directly. Some tests server-render React components to HTML.
-- **Hosting:** Vercel (root directory `jombit-mobile`, framework Vite, output `dist`) serves the website/app and receipt functions. CoinGecko middleware remains local-only.
+- **Hosting:** Vercel (root directory `jombit-mobile`, framework Vite, output `dist`) serves the website/app, receipt functions and cached read-only CoinGecko quotes.
 - **Node:** 22.13 or newer.
 
 The root proof of concept uses vinext (a Vite-based Next.js-compatible framework), Tailwind 4, Cloudflare Workers/Wrangler and Drizzle ORM; its D1 database is not configured.
