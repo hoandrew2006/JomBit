@@ -38,3 +38,7 @@ yarn-error.log*
 /.wrangler/
 /outputs/
 /work/
+
+# Independent JomBit app build artifacts
+/jombit-mobile/node_modules/
+/jombit-mobile/dist/

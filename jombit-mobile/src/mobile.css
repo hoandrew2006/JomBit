@@ -1,0 +1,75 @@
+/* The app has its own viewport inside the device, so fixed controls stay on screen. */
+.app-view { color-scheme: dark; background: #151515; scrollbar-width: thin; scrollbar-color: #38443f transparent; }
+.app-view body { background: #151515; }
+.app-view #root { min-height: 100dvh; }
+.storage-notice { background: #302a16; color: #e5d398; padding: 10px 14px; font-size: 11px; line-height: 1.5; }
+.app-view button, .app-view a { touch-action: manipulation; }
+.app-view input, .app-view select, .app-view textarea { min-width: 0; font-size: 16px; }
+.app-view :focus-visible { outline: 2px solid #0ceaec; outline-offset: 3px; }
+.app-view .topbar { height: 54px; }
+.app-view .screen { padding-top: 23px; }
+.app-view .page-header { margin-bottom: 20px; gap: 12px; }
+.app-view .page-header h1 { font-size: 28px; line-height: 1.12; }
+.app-view .eyebrow { font-size: 9px; letter-spacing: .1em; }
+.app-view .hero-panel { min-height: 238px; padding: 22px; background: linear-gradient(120deg, #0ceaec, #64f4d9); border-radius: 23px; }
+.app-view .hero-panel h2 { font-size: 30px; line-height: 1.04; max-width: 270px; }
+.app-view .hero-panel p { font-size: 12px; margin-top: 12px; margin-bottom: 15px; }
+.app-view .hero-rings { opacity: .45; }
+.app-view .hero-panel .light-button { min-height: 42px; font-size: 12px; }
+.app-view .summary-card { padding: 15px; }
+.app-view .summary-card strong { font-size: 23px; }
+.app-view .summary-card span { font-size: 11px; }
+.app-view .summary-card small { font-size: 10px; line-height: 1.5; }
+.app-view .mini-summary { font-size: 10px; gap: 7px; }
+.app-view .mini-summary svg { flex-shrink: 0; }
+.app-view .bottom-nav { bottom: max(10px, env(safe-area-inset-bottom)); height: 68px; border-radius: 22px; }
+.app-view .section-block { margin-top: 26px; }
+.app-view .onboarding-card { padding: 20px 21px 30px; }
+.app-view .onboarding-top { margin-bottom: 32px; }
+.app-view .onboarding-top .demo-pill { font-size: 9px; padding: 6px 9px; }
+.app-view .onboarding-copy h1 { font-size: 42px; line-height: 1.04; margin-bottom: 17px; }
+.app-view .onboarding-copy > p:last-child { font-size: 12px; line-height: 1.65; }
+.app-view .onboarding-form { gap: 13px; margin-top: 22px; }
+.app-view .qr-upload { min-height: 70px; }
+.app-view .qr-upload small { line-height: 1.4; }
+.app-view .fine-print { color: #969b98; }
+.app-view .topbar-demo { font-size: 9px; width: auto; height: auto; padding: 6px 10px; }
+.app-view .groups-grid { flex-direction: column; overflow-x: visible; }
+.app-view .group-card, .app-view .new-group-card { width: 100%; min-width: 0; }
+.app-view .new-group-card { min-height: 140px; }
+.app-view .group-hero h1 { overflow-wrap: anywhere; }
+.app-view .group-total-card strong { font-size: 21px; }
+.app-view .settlement-list > button { gap: 8px; font-size: 11px; padding: 11px; grid-template-columns: 1fr auto; }
+.app-view .settlement-list > button > .settle-avatars { display: none; }
+.app-view .settlement-list > button > strong { grid-column: 2; }
+.app-view .settlement-list small { line-height: 1.4; }
+.app-view .expense-row .activity-icon { display: none; }
+.app-view .expense-main { font-size: 12px; }
+.app-view .expense-main small { line-height: 1.5; }
+.app-view .expense-flow, .app-view .settlement-screen { min-height: 100dvh; }
+.app-view .flow-stage { padding-top: 30px; }
+.app-view .flow-stage h1 { font-size: 30px; line-height: 1.1; }
+.app-view .flow-stage > p, .app-view .stage-heading p:last-child { font-size: 12px; line-height: 1.6; }
+.app-view .receipt-dropzone { min-height: 205px; padding: 22px; }
+.app-view .editable-item { grid-template-columns: 25px 1fr 80px; }
+.app-view .editable-item .qty-field { width: 100%; grid-column: 1 / 2; min-width: 48px; }
+.app-view .editable-item .price-field { grid-column: 2 / 3; margin-left: 26px; }
+.app-view .editable-item .icon-button { grid-column: 3; }
+.app-view .editable-item .qty-field input { padding: 0 5px; }
+.app-view .sticky-flow-action { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+.app-view .sticky-flow-action .primary-button { font-size: 12px; }
+.app-view .member-chips button { min-height: 44px; }
+.app-view .modal-sheet { max-height: calc(100dvh - 24px); padding-bottom: max(26px, env(safe-area-inset-bottom)); }
+.app-view .modal-head h2 { font-size: 23px; }
+.app-view .two-col > label { flex: 1; min-width: 0; }
+.app-view .wallet-hero { min-height: 250px; }
+.app-view .asset-list strong { font-size: 12px; }
+.app-view .card-controls select { font-size: 13px; }
+.app-view .profile-identity { padding: 16px; }
+.app-view .profile-identity h2 { font-size: 21px; }
+.app-view .profile-identity > span { display: none; }
+.app-view .danger-zone { flex-wrap: wrap; }
+.app-view .profile-qr-upload { gap: 10px; }
+.app-view .profile-qr-upload small { line-height: 1.4; }
+.app-view .poc-warning { color: #959995 !important; }
+@media (min-width: 721px) { .app-view .onboarding-shell { display: block; } .app-view .onboarding-visual { display: none; } .app-view .onboarding-card { max-width: 460px; min-height: 100dvh; } }

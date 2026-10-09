@@ -1,5 +1,15 @@
 # JomBit
 
+## Current website and app
+
+The current JomBit marketing website and app live in **[jombit-mobile](jombit-mobile/README.md)**. The older proof of concept below is retained for reference.
+
+For Vercel, select `jombit-mobile` as the **Root Directory**, **Vite** as the framework, `npm run build` as the build command, and `dist` as the output directory. The default `/` route is the company website; `/?view=demo` opens the phone-framed app demo.
+
+The current version includes receipt splitting, a MYR-funded fiat wallet and staking-only crypto demonstrations. Luno integration is planned, not connected. Gemini scanning and live market prices require the local backend; they are not included as hosted APIs in a static Vercel deployment. Never commit `.env.local` or API keys.
+
+## Original proof of concept
+
 JomBit is a polished proof-of-concept for group expenses and everyday fintech. Its hero flow turns a restaurant receipt into an editable, item-level split, keeps a running group ledger, simplifies the group’s debts, and records a demo settlement. The same local demo also shows a multi-currency fiat wallet, internal cross-border transfers, crypto trading and staking, and future prepaid cards.
 
 ## Run locally

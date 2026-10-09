@@ -1,0 +1,172 @@
+/* Brand-preserving refresh. Controls: 10px; panels: 20px; device: 30px.
+   Existing cyan, purple crypto chapter and paper receipt surfaces are retained.
+   Layer order remains base content, sticky navigation, then app overlays. */
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("../../node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?inline") format("woff2");
+}
+.marketing-site { font-family: "Manrope", "Segoe UI", sans-serif; --m-ease: cubic-bezier(.2,.75,.25,1); }
+.marketing-site .brand { font-family: Arial, Helvetica, sans-serif; }
+.marketing-site h1, .marketing-site h2, .marketing-site h3 { text-wrap: balance; }
+.marketing-site p { text-wrap: pretty; }
+.marketing-site button, .marketing-site a { -webkit-tap-highlight-color: transparent; }
+.m-container { width: min(1240px, calc(100% - 96px)); }
+.m-section { padding-block: clamp(72px, 8vw, 112px); }
+.m-section-intro { max-width: 720px; margin-bottom: 38px; }
+.m-section-intro h2 { margin-top: 0; font-size: clamp(30px, 3.4vw, 45px); line-height: 1.16; letter-spacing: -.045em; }
+.m-section-intro p { max-width: 58ch; }
+.m-eyebrow { font-size: 12px; letter-spacing: .08em; }
+.m-button { border-radius: 10px; padding: 15px 22px; font-size: 14px; font-weight: 750; transition: transform .22s var(--m-ease), background .22s; }
+.m-button-small { padding: 11px 17px; font-size: 12px; }
+.m-button:active, .m-coin-picker button:active, .m-use-case:active { transform: scale(.98); }
+.m-nav-wrap { min-height: 72px; }
+.m-main-nav a { font-weight: 600; }
+.m-hero { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 76px); min-height: 620px; padding-block: 46px 60px; }
+.m-hero h1 { font-size: clamp(39px, 4.1vw, 56px); line-height: 1.14; letter-spacing: -.055em; font-weight: 800; margin-block: 22px 24px; }
+.m-hero h1 > span { display: block; }
+.m-hero h1 > span:last-child { color: var(--m-accent); }
+.m-hero-content > p { max-width: 44ch; font-size: 16px; line-height: 1.85; }
+.m-hero-ctas { gap: 10px 24px; margin-top: 30px; }
+.m-hero-ctas .m-text-link { font-size: 13px; }
+.m-app-preview { min-width: 0; width: 100%; max-width: 430px; margin: 0; justify-self: end; }
+.m-app-window { border: 1px solid #4a5d58; border-radius: 30px; background: #151c1b; padding: 20px; box-shadow: 0 24px 60px #06151270; }
+.m-app-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.m-app-toolbar .brand { font-size: 21px; }
+.m-app-toolbar .brand-mark { width: 28px; height: 28px; }
+.m-app-toolbar > span { font-size: 11px; color: #b2c4bd; }
+.m-app-window .hero-panel { min-height: 0; padding: 22px; border-radius: 20px; box-shadow: none; background: #0ceaec; }
+.m-app-window .hero-panel h2 { font-size: 27px; line-height: 1.12; margin-block: 12px; letter-spacing: -.05em; max-width: 300px; }
+.m-app-window .hero-panel p { margin-bottom: 18px; font-size: 12px; max-width: 28ch; line-height: 1.6; }
+.m-app-window .hero-panel .demo-label { font-size: 9px; letter-spacing: .11em; color: #16494a; }
+.m-app-window .hero-rings { width: 210px; height: 210px; right: -100px; top: -110px; opacity: .4; }
+.m-app-window .light-button { color: #f5f9f8; min-height: 43px; font-size: 12px; border-radius: 10px; padding-inline: 14px; }
+.m-app-receipt { padding: 19px 2px 0; }
+.m-app-receipt-heading { display: flex; justify-content: space-between; gap: 14px; font-size: 12px; font-weight: 700; align-items: start; }
+.m-app-receipt-heading small { display: block; font-size: 10px; color: #a5b9b2; font-weight: 400; margin-top: 5px; }
+.m-app-receipt-heading > strong { font-size: 17px; font-variant-numeric: tabular-nums; }
+.m-app-receipt dl { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; margin: 16px 0; }
+.m-app-receipt dl > div { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; }
+.m-app-receipt dt { color: #b1c4bc; }
+.m-app-receipt dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.m-app-receipt > a { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #34433e; min-height: 44px; color: var(--m-accent); font-size: 12px; }
+.m-app-preview figcaption { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10px; line-height: 1.6; color: #a8bab3; margin-top: 14px; text-align: center; }
+.m-principles { background: #171f1d; }
+.m-principles strong { font-weight: 700; font-size: 18px; }
+.m-use-cases { grid-template-columns: 1.15fr 1fr; grid-template-rows: auto auto; gap: 18px; }
+.m-use-case { border-radius: 20px; padding: 30px; background: #19231f; }
+.m-use-case:first-child { grid-row: span 2; padding: 38px; background: #213b32; justify-content: center; }
+.m-use-case:first-child h3 { font-size: 32px; max-width: 10ch; }
+.m-use-case:first-child .m-journey-icon { width: 72px; height: 72px; margin-bottom: 30px; }
+.m-use-case:not(:first-child) { display: grid; grid-template-columns: 48px 1fr; gap: 9px 22px; }
+.m-use-case:not(:first-child) .m-journey-icon { width: 48px; height: 48px; grid-row: span 3; margin: 0; }
+.m-use-case:not(:first-child) h3, .m-use-case:not(:first-child) p, .m-use-case:not(:first-child) > span:last-child { grid-column: 2; }
+.m-use-case p { max-width: 40ch; }
+.m-use-case > span:last-child { padding-top: 22px; }
+.m-values-grid { grid-template-columns: 1fr; gap: 0; }
+.m-values-grid > article { display: grid; grid-template-columns: 44px minmax(180px, .8fr) minmax(0, 1.4fr); gap: 24px; align-items: start; padding: 30px 0; }
+.m-values-grid > article + article { border-top: 1px solid var(--m-line); }
+.m-values-grid h3 { font-size: 21px; margin: 0; }
+.m-values-grid p { margin: 0; max-width: 58ch; }
+.m-company-section { gap: 80px; }
+.m-company-copy h2 { font-size: clamp(34px, 3.6vw, 46px); }
+.m-company-copy p { max-width: 55ch; }
+.m-company-manifesto { border-radius: 20px; }
+.m-crypto-layout { gap: 54px; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); }
+.m-crypto-copy h2 { font-size: clamp(34px, 3.6vw, 48px); }
+.m-crypto-copy > p { max-width: 43ch; }
+.m-crypto-panel { border-radius: 20px; padding: 28px; background: #211d28; box-shadow: 0 24px 60px #100e1938; }
+.m-crypto-scene { min-height: 485px; }
+.m-crypto-options button { border-radius: 10px; }
+.m-portfolio-preview { padding: 22px 0; }
+.m-coin-picker { display: inline-flex; padding: 4px; gap: 4px; border-radius: 10px; background: #14131a; }
+.m-coin-picker button { min-height: 40px; min-width: 64px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #c7bbd3; cursor: pointer; font-size: 12px; font-weight: 700; transition: background .2s, transform .2s; }
+.m-coin-picker button:hover { background: #302739; }
+.m-coin-picker button[aria-pressed=true] { background: #d2b7f2; color: #261736; }
+.m-position-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 21px; }
+.m-position-title h3 { font-size: 24px; }
+.m-position-title > span { color: #c4b5d2; font-size: 11px; }
+.m-position-facts { font-variant-numeric: tabular-nums; }
+.m-portfolio-preview .crypto-price-pair { margin-top: 18px; border-color: #463a50; gap: 20px; }
+.m-portfolio-preview .crypto-price-pair span, .m-portfolio-preview .crypto-position-grid dt { font-size: 11px; color: #c4b6cf; }
+.m-portfolio-preview .crypto-price-pair strong { font-size: clamp(16px, 1.7vw, 23px); letter-spacing: -.035em; }
+.m-portfolio-preview .crypto-price-pair > div:first-child strong { color: #e5ceff; }
+.m-portfolio-preview .crypto-position-grid { gap: 17px 22px; margin-block: 20px; }
+.m-portfolio-preview .crypto-position-grid dd { font-size: 13px; }
+.m-price-note { font-size: 11px; color: #c4b6cf; margin-top: 16px !important; }
+.m-crypto-scene-caption p { font-size: 13px; }
+.m-crypto-disclosure { max-width: 95ch; }
+.m-provider-preview { padding: 30px 0; min-height: 325px; }
+.m-provider-preview > svg { color: #d2b7f2; }
+.m-provider-preview h3 { margin: 16px 0 12px; font-size: 27px; }
+.m-provider-preview p, .m-provider-preview li { font-size: 13px; line-height: 1.8; color: #c4b6cf; }
+.m-provider-preview ul { padding-left: 18px; margin: 18px 0; }
+.m-download-copy > .m-button { margin-top: 24px; width: fit-content; }
+.m-faq-section { gap: 80px; }
+.m-card-copy > .m-eyebrow, .m-download-copy > .m-eyebrow, .m-faq-section > div > .m-eyebrow, .m-feature-copy > .m-eyebrow { display: none; }
+
+/* Motion explains entry and selection. Nothing pins or hijacks the scroll. */
+@media (prefers-reduced-motion: no-preference) {
+  .m-app-preview { animation: m-panel-enter .65s var(--m-ease) .12s both; }
+  .m-position-facts { animation: m-panel-enter .26s var(--m-ease) both; }
+  .m-revealed { animation-timing-function: var(--m-ease); }
+  .m-use-case { transition: transform .25s var(--m-ease), border-color .25s; }
+}
+@media (max-width: 1100px) {
+  .m-container { width: calc(100% - 64px); }
+  .m-hero { gap: 30px; min-height: 590px; }
+  .m-hero h1 { font-size: 3.95vw; }
+  .m-hero-ctas { flex-direction: column; align-items: flex-start; }
+  .m-app-window { padding: 16px; }
+  .m-app-window .hero-panel { padding: 19px; }
+  .m-app-window .hero-panel h2 { font-size: 24px; }
+  .m-crypto-layout { gap: 32px; }
+  .m-crypto-panel { padding: 22px; }
+  .m-company-section { gap: 45px; }
+}
+@media (max-width: 950px) {
+  .m-nav-wrap { justify-content: space-between; min-height: 72px; }
+  .m-menu-toggle { display: grid; }
+  .m-main-nav { display: none; position: absolute; top: 72px; left: 0; width: 100%; padding: 12px 20px; background: #131e17; border-bottom: 1px solid #435d49; }
+  .m-main-nav.is-open { display: grid; gap: 0; }
+  .m-main-nav a { padding: 14px 7px; font-size: 15px; border-bottom: 1px solid #2a3e30; }
+  .m-main-nav a:last-child { border-bottom: 0; }
+}
+@media (max-width: 760px) {
+  .m-container { width: calc(100% - 40px); }
+  .m-section { padding-block: 64px; }
+  .m-hero { grid-template-columns: 1fr; gap: 34px; min-height: 0; padding-block: 44px; }
+  .m-hero-content { max-width: 600px; }
+  .m-hero h1 { font-size: clamp(33px, 7.5vw, 52px); margin-block: 18px 21px; }
+  .m-hero-content > p { font-size: 15px; }
+  .m-hero-ctas { margin-top: 24px; gap: 8px; }
+  .m-app-preview { justify-self: center; }
+  .m-app-window .hero-panel h2 { font-size: 28px; }
+  .m-app-preview figcaption { font-size: 10px; }
+  .m-use-cases { grid-template-columns: 1fr; grid-template-rows: auto; }
+  .m-use-case:first-child { grid-row: auto; padding: 28px; display: flex; }
+  .m-use-case:first-child h3 { max-width: none; font-size: 27px; }
+  .m-use-case:first-child .m-journey-icon { width: 52px; height: 52px; margin-bottom: 20px; }
+  .m-use-case:not(:first-child) { padding: 24px; gap: 8px 17px; }
+  .m-use-case p { font-size: 14px; }
+  .m-values-grid > article { grid-template-columns: 32px 1fr; gap: 10px 17px; padding-block: 25px; }
+  .m-values-grid > article > svg { grid-row: span 2; }
+  .m-values-grid p { grid-column: 2; }
+  .m-crypto-layout { grid-template-columns: 1fr; gap: 30px; }
+  .m-crypto-panel { padding: 22px; }
+  .m-crypto-scene { min-height: 495px; }
+  .m-portfolio-preview .crypto-price-pair strong { font-size: 21px; }
+  .m-company-section, .m-faq-section { gap: 35px; }
+}
+@media (max-width: 360px) {
+  .m-container { width: calc(100% - 32px); }
+  .m-hero h1 { font-size: 30px; }
+  .m-app-window { padding: 13px; }
+  .m-app-window .hero-panel { padding: 17px; }
+  .m-app-window .hero-panel h2 { font-size: 25px; }
+  .m-crypto-panel { padding: 18px; }
+  .m-portfolio-preview .crypto-price-pair strong { font-size: 17px; }
+  .m-portfolio-preview .crypto-position-grid dd { font-size: 12px; }
+}
