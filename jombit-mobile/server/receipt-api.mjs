@@ -64,7 +64,7 @@ export function createReceiptApi({ env = process.env, fetchImpl = fetch, now = D
       const key = env.GEMINI_API_KEY?.trim();
       const model = env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
       const configured = Boolean(key && !key.startsWith("your_") && /^[a-zA-Z0-9._-]+$/.test(model) && (!hosted || hostedScanConfigured(env)));
-      if (path === "/api/receipt/status" && req.method === "GET") return reply(res, 200, { configured, accessRequired: hosted });
+      if (path === "/api/receipt/status" && req.method === "GET") return reply(res, 200, { configured, accessRequired: false });
       if (path !== "/api/receipt/scan") return reply(res, 404, { error: "Not found." });
       if (req.method !== "POST") return reply(res, 405, { error: "Use POST to scan a receipt." });
       if (hosted) {

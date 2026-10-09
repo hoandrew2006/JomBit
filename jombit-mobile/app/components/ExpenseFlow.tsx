@@ -59,8 +59,6 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
   const [reviewed, setReviewed] = useState(false);
   const [retainPhoto, setRetainPhoto] = useState(Boolean(editingExpense?.receiptPreview));
   const [backend, setBackend] = useState<"checking" | "ready" | "setup" | "offline">("checking");
-  const [accessRequired, setAccessRequired] = useState(false);
-  const [accessCode, setAccessCode] = useState("");
   const workId = useRef(0);
   const scanController = useRef<AbortController | null>(null);
 
@@ -70,7 +68,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
     else fetch("/api/receipt/status", { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10000)]) }).then(async (response) => {
       if (!response.ok || !response.headers.get("content-type")?.includes("application/json")) throw new Error("Unavailable");
       const status = await response.json();
-      if (!controller.signal.aborted) { setBackend(status.configured ? "ready" : "setup"); setAccessRequired(status.accessRequired === true); }
+      if (!controller.signal.aborted) setBackend(status.configured ? "ready" : "setup");
     }).catch(() => { if (!controller.signal.aborted) setBackend("offline"); });
     return () => { controller.abort(); scanController.current?.abort(); workId.current++; };
   }, []);
@@ -104,7 +102,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
     scanController.current = controller;
     setSource("gemini"); setPhase("scanning"); setError(""); setReviewed(false);
     try {
-      const result = await scanReceipt(photo, AbortSignal.any([controller.signal, AbortSignal.timeout(70000)]), accessCode);
+      const result = await scanReceipt(photo, AbortSignal.any([controller.signal, AbortSignal.timeout(70000)]));
       if (id !== workId.current) return;
       setMerchant(result.merchant); setDate(result.date); setItems(result.items);
       setTaxCents(result.taxCents); setServiceCents(result.serviceCents);
@@ -220,10 +218,9 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
             <div className="receipt-photo-heading"><h2>Ready to scan?</h2><button className="text-button" onClick={() => { setPhoto(undefined); setPreview(undefined); setConsent(false); }}>Change photo</button></div>
             <img src={photo.preview} alt="Receipt photo ready for your approval" />
             <p>Make sure the text is clear and personal details are covered.</p>
-            {accessRequired && <label className="receipt-access-field"><span>Scan access code</span><input type="password" value={accessCode} maxLength={256} autoComplete="off" onChange={(event) => setAccessCode(event.target.value)} placeholder="Enter your invite code" /><small>Provided by the JomBit team. Never enter an API key here.</small></label>}
             <label className="receipt-consent"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /><span>I agree to send this redacted photo to Google for processing. It contains no sensitive information.</span></label>
             <details className="receipt-privacy"><summary>How your photo is handled</summary><p>Under Google's unpaid-service terms, uploads may be used to improve products and reviewed by people. Use only sample or redacted receipts without personal or confidential information. JomBit does not save the photo unless you choose to keep it. <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noreferrer">Read Google's data terms</a>.</p></details>
-            <button className="primary-button" disabled={!consent || backend !== "ready" || preparing || (accessRequired && !accessCode.trim())} onClick={beginGeminiScan}><Sparkles size={18} /> Scan receipt <ArrowRight size={17} /></button>
+            <button className="primary-button" disabled={!consent || backend !== "ready" || preparing} onClick={beginGeminiScan}><Sparkles size={18} /> Scan receipt <ArrowRight size={17} /></button>
           </div>}
           {error && <p className="form-error" role="alert">{error}</p>}
           <button className="text-button receipt-manual-button" disabled={preparing} onClick={beginManual}><Plus size={16} /> Enter manually</button>

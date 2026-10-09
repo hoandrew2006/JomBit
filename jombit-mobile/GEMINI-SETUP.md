@@ -32,7 +32,7 @@ Photos are resized/re-encoded locally, removing EXIF metadata, before the approv
 
 ## Local use versus a real phone or public hosting
 
-The Vite scanner is intentionally local-only: its API accepts loopback requests from the same local website, with an origin check and request limits. It runs in both `npm.cmd run dev` and, after a build, `npm.cmd run preview` (port 4173). Separate Vercel handlers enable hosted scanning with an exact-origin check and private tester access code; see the hosted guide.
+The Vite scanner is intentionally local-only: its API accepts loopback requests from the same local website, with an origin check and request limits. It runs in both `npm.cmd run dev` and, after a build, `npm.cmd run preview` (port 4173). Separate public Vercel handlers enable hosted scanning with an exact-origin check, consent and strict upload validation; see the hosted guide.
 
 On this computer, **Take a photo** uses its available camera/webcam. For a physical phone, use the configured HTTPS Vercel app. Do not expose Vite to the network or tunnel its local endpoint. Hosted shared-code access is for trusted testers; individual accounts and per-user quotas are still needed before a broad public rollout.
 

@@ -76,7 +76,7 @@ npm run build
 npm run preview
 ```
 
-The build creates the static website in `dist`, plus self-contained `dist/JomBit.html` and `dist/JomBit-app-demo.html`. The marketing website can be hosted statically. Gemini scanning also has Vercel functions in `api/receipt`; configure their private credentials, access code and durable budget using [HOSTED-SCANNING.md](HOSTED-SCANNING.md). Live crypto prices still require local middleware. `npm run preview` includes both services for loopback-only local testing. No personal name is specified in source or metadata, and this build does not publish to ChatGPT Sites.
+The build creates the static website in `dist`, plus self-contained `dist/JomBit.html` and `dist/JomBit-app-demo.html`. The marketing website can be hosted statically. Gemini scanning also has public Vercel functions in `api/receipt`; configure the private provider key and exact production origin using [HOSTED-SCANNING.md](HOSTED-SCANNING.md). Live crypto prices still require local middleware. `npm run preview` includes both services for loopback-only local testing. No personal name is specified in source or metadata, and this build does not publish to ChatGPT Sites.
 
 ## Social preview
 

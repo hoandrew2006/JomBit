@@ -7,7 +7,6 @@ import { hostedScanConfigured } from "../server/hosted-scan-guard.mjs";
 
 const env = {
   GEMINI_API_KEY: "test-provider-secret", JOMBIT_APP_ORIGIN: "https://jom-bit-6667.vercel.app",
-  JOMBIT_SCAN_ACCESS_CODE: "test-access-code-32-characters-long",
 };
 const photo = { consent: true, mimeType: "image/jpeg", imageBase64: Buffer.from([255, 216, 255, 224, 1]).toString("base64") };
 const extracted = { isReceipt: true, merchant: "Test cafe", date: "2026-10-09", currency: "MYR", items: [{ name: "Tea", quantity: 1, lineTotalCents: 500 }], taxCents: 0, serviceCents: 0, totalCents: 500, warnings: [] };
@@ -24,7 +23,7 @@ async function setup(t, options = {}, parsedBody = false) {
   const base = `http://127.0.0.1:${server.address().port}`;
   const scan = (headers = {}, body = photo) => fetch(`${base}/api/receipt/scan`, { method: "POST", headers: {
     "Content-Type": "application/json", Origin: env.JOMBIT_APP_ORIGIN, "X-JomBit-Scan": "1",
-    "X-JomBit-Access-Code": env.JOMBIT_SCAN_ACCESS_CODE, ...headers,
+    ...headers,
   }, body: JSON.stringify(body) });
   return { scan, base, calls: () => providerCalls };
 }
@@ -32,23 +31,22 @@ async function setup(t, options = {}, parsedBody = false) {
 test("Hosted scanning handles Vercel-parsed JSON and keeps secrets server-side", async (t) => {
   const { scan, base, calls } = await setup(t, {}, true);
   const status = await (await fetch(`${base}/api/receipt/status`)).json();
-  assert.deepEqual(status, { configured: true, accessRequired: true });
+  assert.deepEqual(status, { configured: true, accessRequired: false });
   const response = await scan();
   assert.equal(response.status, 200);
   const text = await response.text();
   assert.equal(JSON.parse(text).receipt.totalCents, 500);
-  for (const secret of [env.GEMINI_API_KEY, env.JOMBIT_SCAN_ACCESS_CODE]) assert.ok(!text.includes(secret));
+  assert.ok(!text.includes(env.GEMINI_API_KEY));
   assert.equal(calls(), 1);
 });
 
-test("Hosted scanner denies missing/wrong codes, cross-origin and null-origin requests", async (t) => {
+test("Hosted scanner accepts same-origin requests and denies cross/null origins", async (t) => {
   const { scan, calls } = await setup(t);
-  assert.equal((await scan({ "X-JomBit-Access-Code": "" })).status, 401);
-  assert.equal((await scan({ "X-JomBit-Access-Code": "wrong" })).status, 401);
+  assert.equal((await scan()).status, 200);
   assert.equal((await scan({ Origin: "https://other.example" })).status, 403);
   assert.equal((await scan({ Origin: "null" })).status, 403);
   assert.equal((await scan({ "X-JomBit-Scan": "" })).status, 403);
-  assert.equal(calls(), 0);
+  assert.equal(calls(), 1);
 });
 
 test("Hosted configuration fails closed without all safeguards", async (t) => {
@@ -59,7 +57,6 @@ test("Hosted configuration fails closed without all safeguards", async (t) => {
     assert.equal(calls(), 0);
   }
   assert.equal(hostedScanConfigured({ ...env, JOMBIT_APP_ORIGIN: "http://example.com" }), false);
-  assert.equal(hostedScanConfigured({ ...env, JOMBIT_SCAN_ACCESS_CODE: "short" }), false);
 });
 
 test("Consent and upload validation run before contacting Gemini", async (t) => {

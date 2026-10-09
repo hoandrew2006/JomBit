@@ -20,7 +20,7 @@ test("Receipt entry prioritises real photos and manual entry without demo/provid
     const { ExpenseFlow } = await server.ssrLoadModule("/app/components/ExpenseFlow.tsx");
     const html = renderToStaticMarkup(createElement(ExpenseFlow, { onClose() {}, onSaved() {} }));
     for (const text of ["Start with a receipt.", "Take a photo", "Choose a photo", "Enter manually", "Review", "Assign"]) assert.ok(html.includes(text), text);
-    assert.doesNotMatch(html, /Try the demo receipt|Gemini|API_KEY|local app|demo-paper/);
+    assert.doesNotMatch(html, /Try the demo receipt|Gemini|API_KEY|access code|local app|demo-paper/);
     assert.match(html, /type="file" accept="image\/\*" aria-label="Choose a receipt image"/);
   } finally { await server.close(); }
 });
