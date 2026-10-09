@@ -2,13 +2,15 @@
 
 The app now supports a real camera preview, taking a photo, choosing an existing photo, sending an approved photo to Gemini, and reviewing/editing the extracted receipt before assigning items. The company website is unchanged. Payments and wallet services are still simulated.
 
-## One-time setup
+For the deployed Vercel app, follow [HOSTED-SCANNING.md](HOSTED-SCANNING.md). The instructions below describe the loopback-only local server. The app no longer has a demo receipt button; choose a photo or enter items manually.
+
+## One-time local setup
 
 1. Create a Gemini API key in [Google AI Studio](https://aistudio.google.com/apikey). Choose a project with the free-tier access you intend to use; JomBit does not enable billing or create a Google project for you. Keep the key private.
 2. Open `.env.local` in this `jombit-mobile` folder. A blank template has been created in the working project. If you downloaded the source archive, copy `.env.example` to `.env.local` first.
 3. Paste the key after `GEMINI_API_KEY=` and save. Do not paste it into chat, the browser, a `VITE_` variable, or a public repository. Leave the model setting as `gemini-3.5-flash-lite` unless you deliberately choose another supported image-and-structured-output model.
 4. In a terminal in this folder, run `npm.cmd install` if dependencies are missing, then `npm.cmd run dev`. If the server is already running, stop it with Ctrl+C and run it again after saving your key.
-5. Open [JomBit app](http://127.0.0.1:5173/?app=1), go to **Scan**, and allow the camera when asked. You can also choose an existing receipt photo. After reviewing the privacy notice, tick the confirmation and press **Scan with Gemini**.
+5. Open [JomBit app](http://127.0.0.1:5173/?app=1), go to **Scan**, and allow the camera when asked. You can also choose an existing receipt photo. After reviewing the privacy notice, tick the confirmation and press **Scan receipt**.
 
 If the default port is already occupied, you can run `npm.cmd run dev -- --port 5174` and open `http://127.0.0.1:5174/?app=1` instead. Use the port printed by the terminal. Browser-local demo data is separate for each port.
 
@@ -30,11 +32,11 @@ Photos are resized/re-encoded locally, removing EXIF metadata, before the approv
 
 ## Local use versus a real phone or public hosting
 
-The scanner is intentionally local-only: its API accepts loopback requests from the same local website, with an origin check and request limits. It runs in both `npm.cmd run dev` and, after a build, `npm.cmd run preview` (port 4173).
+The Vite scanner is intentionally local-only: its API accepts loopback requests from the same local website, with an origin check and request limits. It runs in both `npm.cmd run dev` and, after a build, `npm.cmd run preview` (port 4173). Separate Vercel handlers enable hosted scanning with an exact-origin check and private tester access code; see the hosted guide.
 
-On this computer, **Take a photo** uses its available camera/webcam. The mobile camera/upload controls are included, but scanning from a separate physical phone needs a properly authenticated backend and HTTPS deployment. Simply exposing Vite to the network, tunnelling this unauthenticated endpoint, or uploading `dist` to a static host is not supported. Production authentication, per-user durable quotas and deployment need to be added before opening this service to other people.
+On this computer, **Take a photo** uses its available camera/webcam. For a physical phone, use the configured HTTPS Vercel app. Do not expose Vite to the network or tunnel its local endpoint. Hosted shared-code access is for trusted testers; individual accounts and per-user quotas are still needed before a broad public rollout.
 
-Opening `JomBit-app-demo.html` by double-clicking it still supports manual entry and the sample demo. It cannot run Gemini by itself: the private server is required. Browser camera support inside a local-file phone frame varies; use the server link for camera scanning. Nothing is uploaded merely by opening the camera or choosing a photo.
+Opening `JomBit-app-demo.html` by double-clicking it supports manual entry. It cannot run Gemini by itself: use the online app or local server. Browser camera support inside a local-file phone frame varies. Nothing is uploaded merely by opening the camera or choosing a photo.
 
 ## Limits and troubleshooting
 

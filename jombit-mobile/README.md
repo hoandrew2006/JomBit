@@ -14,7 +14,7 @@ Crypto has a dedicated navigation link and prominent staking balances, planned L
 
 Open `dist/JomBit.html` after building, or use the ready-to-open copy at `../outputs/jombit-independent/JomBit.html`. All interface code, styles, icons and QR codes are bundled into the file. The website needs no network connection and makes no external service requests.
 
-The phone-framed app is available separately at `../outputs/jombit-independent/JomBit-app-demo.html`. Manual expense entry and demo staking work offline. Gemini scanning and live crypto reference prices require the local server described below.
+The phone-framed app is available separately at `../outputs/jombit-independent/JomBit-app-demo.html`. Manual expense entry and demo staking work offline. Gemini scanning works through the configured local server or Vercel functions; see [HOSTED-SCANNING.md](HOSTED-SCANNING.md). Live crypto reference prices still require the local server.
 
 ## Fiat wallet: one MYR balance
 
@@ -40,7 +40,7 @@ CoinGecko reference prices remain read-only valuation data, separate from Luno a
 
 ## Camera and Gemini receipt scanning
 
-See [GEMINI-SETUP.md](GEMINI-SETUP.md) to add your private Gemini key and use the real scanner. The camera, image preparation, upload consent, editable extraction results and total/currency validation are implemented. A live synthetic receipt scan was verified on 2026-10-02: two item lines, tax, service and the MYR 13.92 total were extracted correctly. Real-device camera testing remains separate. No API key is included in shared source or archives. Use sample/redacted receipts under Google’s free-tier data terms.
+See [GEMINI-SETUP.md](GEMINI-SETUP.md) for local setup or [HOSTED-SCANNING.md](HOSTED-SCANNING.md) for Vercel setup. The refreshed receipt flow offers camera, photo upload and manual entry, with no demo receipt button. The camera, image preparation, upload consent, editable extraction results and total/currency validation are implemented. A live synthetic receipt scan was verified on 2026-10-02: two item lines, tax, service and the MYR 13.92 total were extracted correctly. Real-device camera testing remains separate. No API key is included in shared source or archives. Use sample/redacted receipts under Google’s free-tier data terms.
 
 ## Run
 
@@ -76,7 +76,7 @@ npm run build
 npm run preview
 ```
 
-The build creates the static website in `dist`, plus self-contained `dist/JomBit.html` and `dist/JomBit-app-demo.html`. The marketing website can be hosted statically. Gemini scanning and live crypto prices cannot: they require the server-side middleware (and a private key for Gemini). `npm run preview` includes both services for local testing. They are deliberately loopback-only, not production-hosting ready; see the setup guide before planning phone/public access. No personal name is specified in source or metadata, and this build does not publish to ChatGPT Sites.
+The build creates the static website in `dist`, plus self-contained `dist/JomBit.html` and `dist/JomBit-app-demo.html`. The marketing website can be hosted statically. Gemini scanning also has Vercel functions in `api/receipt`; configure their private credentials, access code and durable budget using [HOSTED-SCANNING.md](HOSTED-SCANNING.md). Live crypto prices still require local middleware. `npm run preview` includes both services for loopback-only local testing. No personal name is specified in source or metadata, and this build does not publish to ChatGPT Sites.
 
 ## Social preview
 
@@ -90,6 +90,6 @@ This version has no ChatGPT sign-in, OpenAI SDK, Sites runtime, analytics, or re
 
 ## Working demo
 
-Create a group and mock members, use **Try the demo receipt**, correct items, assign people, and save. The group ledger recalculates shares and simplified debts. Demo payment QRs use `jombit-demo://pay` payloads. Fiat, currency exchange, transfers, crypto and card controls update persistent demo state. **Profile → Reset Demo** restores the sample data.
+Create a group and mock members, choose **Take a photo**, **Choose a photo**, or **Enter manually**, review the receipt, assign people, and save. The group ledger recalculates shares and simplified debts. Demo payment QRs use `jombit-demo://pay` payloads. Fiat, currency exchange, transfers, crypto and card controls update persistent demo state. **Profile → Reset Demo** restores the sample data.
 
-The sample receipt remains simulated; approved photo scans use Gemini once configured. Payment processing, FX, crypto staking and card issuance remain simulated. Crypto buying and selling are not offered. Crypto reference prices can be live or explicitly labelled demo values. No real funds or crypto move. Demo settlement QRs are not valid payment-network QRs. Run `npm test` for receipt/calculation tests, fiat/crypto ledger tests, market API tests, and server-rendered website/wallet-screen checks. Browser/device interaction testing is separate.
+Approved photo scans use Gemini once configured; sample walkthrough data remains confined to the marketing website. Payment processing, FX, crypto staking and card issuance remain simulated. Crypto buying and selling are not offered. Crypto reference prices can be live or explicitly labelled demo values. No real funds or crypto move. Demo settlement QRs are not valid payment-network QRs. Run `npm test` for receipt/calculation tests, fiat/crypto ledger tests, market API tests, and server-rendered website/wallet-screen checks. Browser/device interaction testing is separate.

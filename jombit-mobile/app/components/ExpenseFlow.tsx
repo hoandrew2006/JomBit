@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { calculateExpenseShares, expenseSubtotal, expenseTotal, formatMoney } from "@/lib/calculations";
-import { demoReceiptItems, mockDelay } from "@/lib/mock-services";
 import type { Expense, ExpenseItem, MemberShare } from "@/lib/models";
 import { useAppState } from "@/lib/state";
 import { Avatar, Brand } from "./ui";
@@ -23,6 +22,7 @@ import { ReceiptCamera } from "./ReceiptCamera";
 import { prepareReceiptPhoto, scanReceipt, type PreparedReceipt } from "@/lib/receipt-client";
 import { receiptReviewError } from "@/lib/receipt-review";
 import "../../src/receipt.css";
+import "../../src/receipt-refresh.css";
 
 type Phase = "upload" | "scanning" | "edit" | "assign" | "success";
 
@@ -37,7 +37,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
   const { state, setState } = useAppState();
   const firstGroup = initialGroupId ?? editingExpense?.groupId ?? state.groups[0]?.id ?? "";
   const [phase, setPhase] = useState<Phase>(editingExpense ? "edit" : "upload");
-  const [scanStep, setScanStep] = useState(0);
+
   const [preview, setPreview] = useState<string | undefined>(editingExpense?.receiptPreview);
   const [groupId, setGroupId] = useState(firstGroup);
   const [payerId, setPayerId] = useState(editingExpense?.payerId ?? "me");
@@ -52,23 +52,25 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
   const [preparing, setPreparing] = useState(false);
   const [photo, setPhoto] = useState<PreparedReceipt>();
   const [consent, setConsent] = useState(false);
-  const [source, setSource] = useState<"manual" | "demo" | "gemini">("manual");
+  const [source, setSource] = useState<"manual" | "gemini">("manual");
   const [warnings, setWarnings] = useState<string[]>([]);
   const [receiptCurrency, setReceiptCurrency] = useState("");
   const [printedTotalCents, setPrintedTotalCents] = useState<number | null>(null);
   const [reviewed, setReviewed] = useState(false);
   const [retainPhoto, setRetainPhoto] = useState(Boolean(editingExpense?.receiptPreview));
   const [backend, setBackend] = useState<"checking" | "ready" | "setup" | "offline">("checking");
+  const [accessRequired, setAccessRequired] = useState(false);
+  const [accessCode, setAccessCode] = useState("");
   const workId = useRef(0);
   const scanController = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
     if (window.location.protocol === "file:") setBackend("offline");
-    else fetch("/api/receipt/status", { signal: controller.signal }).then(async (response) => {
+    else fetch("/api/receipt/status", { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10000)]) }).then(async (response) => {
       if (!response.ok || !response.headers.get("content-type")?.includes("application/json")) throw new Error("Unavailable");
       const status = await response.json();
-      if (!controller.signal.aborted) setBackend(status.configured ? "ready" : "setup");
+      if (!controller.signal.aborted) { setBackend(status.configured ? "ready" : "setup"); setAccessRequired(status.accessRequired === true); }
     }).catch(() => { if (!controller.signal.aborted) setBackend("offline"); });
     return () => { controller.abort(); scanController.current?.abort(); workId.current++; };
   }, []);
@@ -102,38 +104,16 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
     scanController.current = controller;
     setSource("gemini"); setPhase("scanning"); setError(""); setReviewed(false);
     try {
-      const result = await scanReceipt(photo, AbortSignal.any([controller.signal, AbortSignal.timeout(70000)]));
+      const result = await scanReceipt(photo, AbortSignal.any([controller.signal, AbortSignal.timeout(70000)]), accessCode);
       if (id !== workId.current) return;
       setMerchant(result.merchant); setDate(result.date); setItems(result.items);
       setTaxCents(result.taxCents); setServiceCents(result.serviceCents);
       setWarnings(result.warnings); setReceiptCurrency(result.currency); setPrintedTotalCents(result.totalCents); setPhase("edit");
     } catch (issue) {
       if (id !== workId.current || controller.signal.aborted) return;
-      setError(issue instanceof Error && issue.name === "TimeoutError" ? "Gemini took too long. Retry or enter the receipt manually." : issue instanceof Error ? issue.message : "Receipt scanning failed. Please retry.");
+      setError(issue instanceof Error && issue.name === "TimeoutError" ? "The scan took too long. Retry or enter the receipt manually." : issue instanceof Error ? issue.message : "Receipt scanning failed. Please retry.");
       setPhase("upload");
     } finally { if (scanController.current === controller) scanController.current = null; }
-  };
-
-  const beginDemo = async () => {
-    const id = ++workId.current;
-    scanController.current?.abort();
-    setSource("demo"); setPhoto(undefined); setPreview(undefined); setError(""); setWarnings([]); setPrintedTotalCents(null); setReviewed(false);
-    setPhase("scanning");
-    setScanStep(0);
-    await mockDelay(500);
-    if (id !== workId.current) return;
-    setScanStep(1);
-    await mockDelay(550);
-    if (id !== workId.current) return;
-    setScanStep(2);
-    await mockDelay(500);
-    if (id !== workId.current) return;
-    setMerchant("Kedai Kopi Rasa Sayang");
-    setItems(demoReceiptItems());
-    setTaxCents(502);
-    setServiceCents(837);
-    setDate(new Date().toISOString().slice(0, 10));
-    setPhase("edit");
   };
 
   const beginManual = () => {
@@ -211,7 +191,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
       <header className="expense-flow-header">
         <button className="back-button" onClick={() => { if (phase === "upload" || editingExpense) { cancelScan(); onClose(); } else if (phase === "assign") setPhase("edit"); else cancelScan(); }}><ArrowLeft size={18} /> Back</button>
         <Brand compact />
-        <span className="demo-pill"><Sparkles size={13} /> {source === "demo" ? "Demo receipt" : "Gemini scan"}</span>
+        <span className="receipt-header-label">{editingExpense ? "Edit expense" : "New expense"}</span>
       </header>
 
       <div className="flow-progress" aria-label="Expense progress">
@@ -223,40 +203,49 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
 
       {phase === "upload" && (
         <section className="flow-stage upload-stage">
-          <p className="eyebrow">ADD A GROUP EXPENSE</p>
-          <h1>Turn a receipt into a fair split.</h1>
-          <p>Take a clear photo or choose one from your gallery. Gemini reads the receipt; you check the details before splitting.</p>
-          <div className="receipt-scan-status" role="status"><strong>{backend === "ready" ? "Gemini is connected to your local app" : backend === "checking" ? "Checking scanner setup…" : backend === "setup" ? "One-time Gemini setup needed" : "Open the local app for Gemini scanning"}</strong><span>{backend === "ready" ? "Requests use your Google project’s quota. A configured key does not guarantee available quota." : backend === "setup" ? <>Add your private key as <code>GEMINI_API_KEY</code> in <code>jombit-mobile/.env.local</code>, then restart the app server. Do not enter your key in this app.</> : backend === "offline" ? <>Start the local app server, then open <a href="http://127.0.0.1:5173/?app=1" target="_blank" rel="noreferrer">JomBit on this computer</a>. The standalone file supports manual entry and the sample demo without a server.</> : "Your key stays on the server, never in this page."}</span></div>
-          <div className="receipt-capture-actions"><button className="primary-button" disabled={preparing} onClick={() => setCameraOpen(true)}><Camera size={19} /> Take a photo</button><label className="receipt-file-button secondary-button"><ImagePlus size={19} /> Choose a photo<input disabled={preparing} type="file" accept="image/*" aria-label="Choose a receipt image" onChange={(event) => { void choosePhoto(event.target.files?.[0]); event.target.value = ""; }} /></label></div>
-          {preparing && <p role="status">Preparing your photo locally…</p>}
-          {photo && <div className="receipt-photo-ready"><img src={photo.preview} alt="Receipt photo ready for your approval" /><p>Check that the whole receipt is clear. Remove names, phone numbers, account/card details and other personal or confidential information before scanning.</p><label className="receipt-consent"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /><span>I confirm this is a sample or redacted receipt without sensitive information, and agree to send this photo to Google Gemini. Under unpaid-service terms, Google may use uploads to improve its products and human reviewers may see them. <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noreferrer">Google’s data terms</a>.</span></label><button className="primary-button" disabled={!consent || backend !== "ready" || preparing} onClick={beginGeminiScan}><Sparkles size={18} /> Scan with Gemini</button></div>}
+          <div className="receipt-intro">
+            <span className="receipt-intro-icon"><ReceiptText size={28} /></span>
+            <p className="eyebrow">SPLIT SOMETHING GOOD</p>
+            <h1>Start with a receipt.</h1>
+            <p>Snap it. Check it. Split it your way.</p>
+          </div>
+          {!photo && <div className="receipt-capture-panel">
+            <div className="receipt-capture-heading"><Camera size={25} /><div><h2>Every item, accounted for.</h2><p>Keep the whole receipt in frame, with good lighting.</p></div></div>
+            <div className="receipt-capture-actions"><button className="primary-button" disabled={preparing} onClick={() => setCameraOpen(true)}><Camera size={19} /> Take a photo</button><label className="receipt-file-button secondary-button"><ImagePlus size={19} /> Choose a photo<input disabled={preparing} type="file" accept="image/*" aria-label="Choose a receipt image" onChange={(event) => { void choosePhoto(event.target.files?.[0]); event.target.value = ""; }} /></label></div>
+            <span className="receipt-capture-hint">JPG, PNG or WebP · Up to 10 MB</span>
+          </div>}
+          {preparing && <p role="status">Preparing your photo…</p>}
+          {backend !== "ready" && <p className="receipt-availability" role="status">{backend === "checking" ? "Connecting to scanner…" : "Scanning is unavailable right now. You can still enter a receipt manually."}</p>}
+          {photo && <div className="receipt-photo-ready">
+            <div className="receipt-photo-heading"><h2>Ready to scan?</h2><button className="text-button" onClick={() => { setPhoto(undefined); setPreview(undefined); setConsent(false); }}>Change photo</button></div>
+            <img src={photo.preview} alt="Receipt photo ready for your approval" />
+            <p>Make sure the text is clear and personal details are covered.</p>
+            {accessRequired && <label className="receipt-access-field"><span>Scan access code</span><input type="password" value={accessCode} maxLength={256} autoComplete="off" onChange={(event) => setAccessCode(event.target.value)} placeholder="Enter your invite code" /><small>Provided by the JomBit team. Never enter an API key here.</small></label>}
+            <label className="receipt-consent"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /><span>I agree to send this redacted photo to Google for processing. It contains no sensitive information.</span></label>
+            <details className="receipt-privacy"><summary>How your photo is handled</summary><p>Under Google's unpaid-service terms, uploads may be used to improve products and reviewed by people. Use only sample or redacted receipts without personal or confidential information. JomBit does not save the photo unless you choose to keep it. <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noreferrer">Read Google's data terms</a>.</p></details>
+            <button className="primary-button" disabled={!consent || backend !== "ready" || preparing || (accessRequired && !accessCode.trim())} onClick={beginGeminiScan}><Sparkles size={18} /> Scan receipt <ArrowRight size={17} /></button>
+          </div>}
           {error && <p className="form-error" role="alert">{error}</p>}
-          <button className="text-button receipt-manual-button" disabled={preparing} onClick={beginManual}>Enter receipt manually — no upload needed</button>
-          <div className="or-divider"><span>or</span></div>
-          <button className="demo-receipt-button" disabled={preparing} onClick={beginDemo}>
-            <span><Camera size={22} /></span>
-            <span><strong>Try the demo receipt</strong><small>Malaysian restaurant · 4 items · SST + service</small></span>
-            <ArrowRight size={18} />
-          </button>
-          <p className="fine-print">The sample demo stays local. Real scans require internet and your Gemini setup. Failed scans never substitute demo data.</p>
+          <button className="text-button receipt-manual-button" disabled={preparing} onClick={beginManual}><Plus size={16} /> Enter manually</button>
+          <p className="receipt-bottom-note">You can check and edit everything before saving.</p>
         </section>
       )}
 
       {phase === "scanning" && (
         <section className="flow-stage scanning-stage">
           <div className="scanner-window">
-            {preview ? <img src={preview} alt="Receipt being processed" /> : <div className="demo-paper"><strong>KEDAI KOPI</strong><span>NASI LEMAK × 2</span><span>CHAR KUEY TEOW</span><span>SATAY PLATTER</span><span>TEH TARIK × 3</span></div>}
+            {preview && <img src={preview} alt="Receipt being processed" />}
             <div className="scan-line" />
           </div>
-          <h1>{source === "gemini" ? "Reading with Gemini…" : ["Reading demo receipt…", "Loading sample items…", "Checking sample totals…"][scanStep]}</h1>
-          <p role="status">{source === "gemini" ? "Your approved photo is being processed by Google. You can cancel this request." : "Loading sample receipt data locally — no AI request"}</p>
+          <h1>Reading your receipt…</h1>
+          <p role="status">Finding the items and checking the totals.</p>
           <button className="secondary-button" onClick={cancelScan}>Cancel scan</button>
         </section>
       )}
 
       {phase === "edit" && (
         <section className="flow-stage review-stage" onChangeCapture={(event) => { if (!(event.target as HTMLElement).hasAttribute("data-review-confirmation")) setReviewed(false); }}>
-          <div className="stage-heading"><div><p className="eyebrow">{source === "gemini" ? "GEMINI RECEIPT RESULT" : source === "demo" ? "SAMPLE RECEIPT" : "YOUR RECEIPT"}</p><h1>Check every detail</h1><p>Everything is editable before it reaches the group ledger.</p></div>{preview && <img src={preview} alt="Receipt preview" />}</div>
+          <div className="stage-heading"><div><p className="eyebrow">YOUR RECEIPT</p><h1>Check every detail</h1><p>Everything is editable before it reaches the group ledger.</p></div>{preview && <img src={preview} alt="Receipt preview" />}</div>
           {source === "gemini" && <div className="receipt-review-notice"><strong>AI can misread receipts. Your review matters.</strong><p>Check every item, price, charge and the printed total. Adjust item prices for any discounts or rounding before continuing.</p>{warnings.length > 0 && <ul>{warnings.map((warning, index) => <li key={index}>{warning}</li>)}</ul>}</div>}
           <div className="review-grid">
             <div className="review-main">

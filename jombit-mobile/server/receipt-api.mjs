@@ -1,4 +1,5 @@
 import { receiptSchema, receiptInstruction, validateReceipt, ScanError } from "./receipt-schema.mjs";
+import { hostedScanConfigured, authorizeHostedScan } from "./hosted-scan-guard.mjs";
 
 const MAX_IMAGE = 3 * 1024 * 1024;
 const MAX_BODY = 4 * 1024 * 1024 + 2048;
@@ -25,6 +26,12 @@ export function validateUpload(body) {
 async function readBody(req) {
   if (!/^application\/json(?:;|$)/i.test(req.headers["content-type"] ?? "")) throw new ScanError(415, "Send a JSON receipt upload.");
   if (Number(req.headers["content-length"]) > MAX_BODY) throw new ScanError(413, "The photo is too large. Choose a smaller image.");
+  // Vercel may parse JSON before invoking its Node handler; Vite supplies a raw stream.
+  if (req.body !== undefined) {
+    const raw = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+    if (Buffer.byteLength(raw) > MAX_BODY) throw new ScanError(413, "The photo is too large. Choose a smaller image.");
+    try { return JSON.parse(raw); } catch { throw new ScanError(400, "The receipt upload could not be read."); }
+  }
   const chunks = [];
   let length = 0;
   for await (const chunk of req) {
@@ -36,7 +43,7 @@ async function readBody(req) {
   catch { throw new ScanError(400, "The receipt upload could not be read."); }
 }
 
-export function createReceiptApi({ env = process.env, fetchImpl = fetch, now = Date.now, timeoutMs = 60000 } = {}) {
+export function createReceiptApi({ env = process.env, fetchImpl = fetch, now = Date.now, timeoutMs = 60000, hosted = false } = {}) {
   let active = false;
   let day = "";
   let dailyCount = 0;
@@ -48,28 +55,31 @@ export function createReceiptApi({ env = process.env, fetchImpl = fetch, now = D
     let controller;
     const onDisconnect = () => { if (!res.writableEnded) controller?.abort(); };
     try {
-      // This unauthed prototype is deliberately loopback-only, even behind a proxy.
+      // Local mode stays loopback-only; hosted mode requires explicit server-side safeguards.
       const host = req.headers.host ?? "";
       const address = req.socket.remoteAddress;
-      if (!/^(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host) || !["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(address) || req.headers["x-forwarded-for"]) {
+      if (!hosted && (!/^(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host) || !["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(address) || req.headers["x-forwarded-for"])) {
         throw new ScanError(403, "The receipt scanner is local-only. Open JomBit on this computer.");
       }
       const key = env.GEMINI_API_KEY?.trim();
       const model = env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
-      const configured = Boolean(key && !key.startsWith("your_") && /^[a-zA-Z0-9._-]+$/.test(model));
-      if (path === "/api/receipt/status" && req.method === "GET") return reply(res, 200, { configured, provider: "Gemini", localOnly: true });
+      const configured = Boolean(key && !key.startsWith("your_") && /^[a-zA-Z0-9._-]+$/.test(model) && (!hosted || hostedScanConfigured(env)));
+      if (path === "/api/receipt/status" && req.method === "GET") return reply(res, 200, { configured, accessRequired: hosted });
       if (path !== "/api/receipt/scan") return reply(res, 404, { error: "Not found." });
       if (req.method !== "POST") return reply(res, 405, { error: "Use POST to scan a receipt." });
-      if (!["http://" + host, "https://" + host].includes(req.headers.origin) || req.headers["x-jombit-scan"] !== "1") throw new ScanError(403, "Open the JomBit app on the same local website to scan.");
+      if (hosted) {
+        if (!configured) throw new ScanError(503, "Scanning is temporarily unavailable. Please enter the receipt manually.");
+        authorizeHostedScan(req, env);
+      } else if (!["http://" + host, "https://" + host].includes(req.headers.origin) || req.headers["x-jombit-scan"] !== "1") throw new ScanError(403, "Open the JomBit app on the same local website to scan.");
       if (!configured) throw new ScanError(503, "Gemini is not configured. Add GEMINI_API_KEY to jombit-mobile/.env.local and restart the app server. Never paste a key into the app.");
       const body = await readBody(req);
       const imageBase64 = validateUpload(body);
       const today = new Date(now()).toISOString().slice(0, 10);
       if (today !== day) { day = today; dailyCount = 0; }
       recent = recent.filter((time) => now() - time < 60000);
-      const configuredLimit = Number(env.JOMBIT_DAILY_SCAN_LIMIT ?? 25);
+      const configuredLimit = hosted ? Number.MAX_SAFE_INTEGER : Number(env.JOMBIT_DAILY_SCAN_LIMIT ?? 25);
       const dailyLimit = Number.isSafeInteger(configuredLimit) && configuredLimit >= 0 ? configuredLimit : 25;
-      if (active || recent.length >= 5 || dailyCount >= dailyLimit) throw new ScanError(429, "JomBit’s local scan limit was reached or another scan is running. Wait and retry, or enter the receipt manually.");
+      if (active || recent.length >= 5 || dailyCount >= dailyLimit) throw new ScanError(429, "Another scan is running or this server instance is busy. Wait and retry, or enter the receipt manually.");
       recent.push(now()); dailyCount++; active = true; release = true;
       controller = new AbortController();
       req.once("aborted", onDisconnect);
@@ -108,7 +118,9 @@ export function createReceiptApi({ env = process.env, fetchImpl = fetch, now = D
         throw new ScanError(502, "Could not reach Gemini. Check the server’s internet connection and try again.");
       }
     } catch (error) {
-      return reply(res, error instanceof ScanError ? error.status : 500, { error: error instanceof ScanError ? error.message : "The receipt scan failed. Please try again." });
+      const status = error instanceof ScanError ? error.status : 500;
+      const hostedErrors = { 429: "The scan limit has been reached. Try later or enter the receipt manually.", 502: "We couldn't read the receipt right now. Please try again or enter it manually.", 504: "The scan took too long. Please try again.", 422: "We couldn't read this receipt. Try a clearer photo or enter it manually." };
+      return reply(res, status, { error: (hosted && hostedErrors[status]) || (error instanceof ScanError ? error.message : "The receipt scan failed. Please try again.") });
     } finally {
       if (release) active = false;
       req.off("aborted", onDisconnect);
