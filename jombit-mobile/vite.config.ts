@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
 import { createReceiptApi } from "./server/receipt-api.mjs";
 import { createCryptoMarketApi } from "./server/crypto-market.mjs";
+import { createFxRatesApi } from "./server/fx-rates.mjs";
 
 const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 
@@ -12,10 +13,12 @@ export default defineConfig({
     name: "jombit-private-receipt-api",
     configureServer(server) {
       server.middlewares.use(createCryptoMarketApi());
+      server.middlewares.use(createFxRatesApi());
       server.middlewares.use(createReceiptApi({ env: { ...loadEnv(server.config.mode, projectRoot, ""), ...process.env } }));
     },
     configurePreviewServer(server) {
       server.middlewares.use(createCryptoMarketApi());
+      server.middlewares.use(createFxRatesApi());
       server.middlewares.use(createReceiptApi({ env: { ...loadEnv(server.config.mode, projectRoot, ""), ...process.env } }));
     },
   }, {

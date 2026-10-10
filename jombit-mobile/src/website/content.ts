@@ -55,7 +55,7 @@ export const questions = [
   },
   {
     question: "Can I use JomBit for travel and different currencies?",
-    answer: "Deposit MYR into one JomBit Fiat Wallet, then see what the same balance is worth in SGD, THB and IDR. Those figures are estimates, not extra balances. For a simulated foreign-currency transfer, review the MYR deduction before confirming. The prototype uses static demo rates and does not connect to a bank or move real funds.",
+    answer: "Deposit MYR into one JomBit Fiat Wallet, then see what the same balance is worth in SGD, THB and IDR. Those figures are estimates, not extra balances. For a simulated foreign-currency transfer, review the MYR deduction before confirming. The online prototype uses live reference exchange rates (static demo rates if they are unavailable) and does not connect to a bank or move real funds.",
   },
   {
     question: "How do I open JomBit on my phone?",
