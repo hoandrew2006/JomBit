@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { executeFiatCommand, FOREIGN_CURRENCIES, legacyMyrCredit, myrBudgetInCurrency, myrDebitForPayment, parseFiatAmount } from "../lib/fiat-ledger.ts";
+import { checkedRates, DEMO_FX_RATES, executeFiatCommand, FOREIGN_CURRENCIES, legacyMyrCredit, myrBudgetInCurrency, myrDebitForPayment, parseFiatAmount } from "../lib/fiat-ledger.ts";
 
 const NOW = Date.parse("2026-10-05T10:00:00Z");
 const state = () => ({ user: { id: "me" }, members: { me: { id: "me", name: "Me" }, maya: { id: "maya", name: "Maya" } }, fiatBalances: { MYR: 10000, SGD: 0, THB: 0, IDR: 0 }, counterpartBalances: { maya: { MYR: 2000, SGD: 300 } }, crypto: { BTC: { available: 0.1 } }, groups: [{ id: "preserved" }], walletTransactions: [] });
@@ -122,4 +122,46 @@ test("Consolidation never silently discards sub-sen holdings or partial changes"
   assert.throws(() => executeFiatCommand(initial, { id: "tiny", action: "consolidate", expectedForeign: { SGD: 1000, THB: 0, IDR: 1 } }, NOW), /less than RM0.01/);
   assert.deepEqual(initial, before);
   assert.throws(() => executeFiatCommand(state(), { id: "empty", action: "consolidate", expectedForeign: { SGD: 0, THB: 0, IDR: 0 } }, NOW), /no earlier/);
+});
+
+const LIVE = { inMyr: { MYR: 1, SGD: 1 / 0.3047, THB: 1 / 7.71, IDR: 1 / 3801.5 }, source: "live", updatedAt: "2026-10-10T00:02:31.000Z" };
+
+test("Live rates drive estimates and transfers, and the record keeps the live rate and its time", () => {
+  assert.equal(myrBudgetInCurrency(10000, "SGD", LIVE), 3047);
+  assert.equal(myrBudgetInCurrency(10000, "THB", LIVE), 77100);
+  // IDR rates are stored to nine decimal places: within 0.001% of the exact 38,015,000.
+  assert.ok(Math.abs(myrBudgetInCurrency(10000, "IDR", LIVE) - 38015000) / 38015000 < 0.00001);
+  const result = executeFiatCommand(state(), send({ rates: LIVE }), NOW);
+  assert.equal(result.walletTransactions[0].amountCents, myrDebitForPayment(1000, "SGD", LIVE));
+  assert.equal(result.walletTransactions[0].amountCents, 3282);
+  assert.deepEqual(result.walletTransactions[0].fiat, { fromCurrency: "MYR", toCurrency: "SGD", fromCents: 3282, toCents: 1000, rate: 0.3047, feeCents: 0, source: "live", rateUpdatedAt: LIVE.updatedAt });
+  assert.match(result.walletTransactions[0].subtitle, /live rate/);
+});
+
+test("Live-rate budgets still always fit within the MYR balance", () => {
+  for (const myr of [0, 1, 2, 99, 101, 10000, 184250, 999999999]) {
+    for (const currency of FOREIGN_CURRENCIES) {
+      const budget = myrBudgetInCurrency(myr, currency, LIVE);
+      assert.ok(myrDebitForPayment(budget, currency, LIVE) <= myr);
+      assert.ok(myrDebitForPayment(budget + 1, currency, LIVE) > myr);
+    }
+  }
+});
+
+test("Live rates convert earlier balances; commands without rates keep the static demo rates", () => {
+  const initial = state(); Object.assign(initial.fiatBalances, { SGD: 10000, THB: 0, IDR: 0 });
+  const result = executeFiatCommand(initial, { id: "c", action: "consolidate", expectedForeign: { SGD: 10000, THB: 0, IDR: 0 }, rates: LIVE }, NOW);
+  assert.equal(result.walletTransactions[0].amountCents, legacyMyrCredit(10000, "SGD", LIVE));
+  assert.equal(result.walletTransactions[0].fiat.source, "live");
+  assert.equal(executeFiatCommand(state(), send(), NOW).walletTransactions[0].fiat.source, "demo");
+  assert.equal(checkedRates(DEMO_FX_RATES), DEMO_FX_RATES);
+});
+
+test("Malformed or implausible rates are rejected before any money moves", () => {
+  const bad = [{ ...LIVE, source: "made-up" }, { ...LIVE, updatedAt: "not a date" }, { ...LIVE, inMyr: { ...LIVE.inMyr, MYR: 2 } }, { ...LIVE, inMyr: { ...LIVE.inMyr, SGD: 0 } }, { ...LIVE, inMyr: { ...LIVE.inMyr, IDR: NaN } }, { ...LIVE, inMyr: { ...LIVE.inMyr, THB: 1 } }];
+  for (const rates of bad) {
+    const initial = state(); const before = structuredClone(initial);
+    assert.throws(() => executeFiatCommand(initial, send({ rates }), NOW), /exchange rates are invalid/);
+    assert.deepEqual(initial, before);
+  }
 });
