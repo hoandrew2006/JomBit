@@ -10,6 +10,7 @@ JomBit is a Malaysian consumer-fintech **prototype**: split a restaurant receipt
 
 - **Gemini** (Google) reads approved receipt photos through either the loopback-only local API or protected Vercel functions. Keys stay server-side.
 - **CoinGecko** supplies read-only crypto reference prices through local middleware or a public, fixed-route Vercel function.
+- **ExchangeRate-API** (free, keyless open-access feed) supplies SGD/THB/IDR reference exchange rates through `GET /api/fx/rates`, cached for an hour. If it fails, the wallet falls back to the static demo rates in `lib/mock-services.ts`.
 
 Luno integration is *planned, not connected*. Do not write code, copy or docs that implies a live partnership, real balances, real returns, store listings, regulatory approval or customer numbers.
 
@@ -41,7 +42,8 @@ JomBit/
 │   ├── server/             Shared API logic used by Vite middleware and protected Vercel functions
 │   │   ├── receipt-api.mjs   POST /api/receipt/scan → Gemini (key stays server-side)
 │   │   ├── receipt-schema.mjs Validation of Gemini's answer
-│   │   └── crypto-market.mjs GET /api/crypto/quotes → CoinGecko, cached
+│   │   ├── crypto-market.mjs GET /api/crypto/quotes → CoinGecko, cached
+│   │   └── fx-rates.mjs     GET /api/fx/rates → ExchangeRate-API, cached for an hour
 │   ├── tests/              Node built-in test runner (*.test.mjs)
 │   ├── scripts/            package-demo.mjs (makes self-contained HTML), export-deliverables.ps1
 │   ├── design/             Design notes and product decisions (read before UI/product changes)
@@ -68,7 +70,7 @@ Do not change the root proof of concept unless the task explicitly asks for it.
 - **Icons/QR:** `lucide-react`, `qrcode.react`.
 - **State:** a single `AppState` object in React context, persisted to `localStorage` under `jombit-mobile-demo-state-v1`. No database, no user accounts.
 - **Money:** stored as integer **cents** (`amountCents`, `unitCents`). Never use floating-point currency amounts.
-- **Backend:** Vite middleware stays loopback-only. Receipt scanning has public Vercel functions gated by exact origin, consent, upload validation and short-burst protection. A separate fixed-route Vercel function provides cached CoinGecko reference prices.
+- **Backend:** Vite middleware stays loopback-only. Receipt scanning has public Vercel functions gated by exact origin, consent, upload validation and short-burst protection. Separate fixed-route Vercel functions provide cached CoinGecko reference prices and cached exchange rates (`api/fx/rates.js`, same-site requests only, so it also works on preview deployments).
 - **Tests:** Node's built-in test runner (`node --test`) with `--experimental-strip-types` so tests import `.ts` files directly. Some tests server-render React components to HTML.
 - **Hosting:** Vercel (root directory `jombit-mobile`, framework Vite, output `dist`) serves the website/app, receipt functions and cached read-only CoinGecko quotes.
 - **Node:** 22.13 or newer.

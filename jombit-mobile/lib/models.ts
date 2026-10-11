@@ -97,7 +97,9 @@ export interface FiatConversionDetails {
   toCents: number;
   rate: number;
   feeCents: number;
-  source: "demo";
+  source: "demo" | "live";
+  // Provider timestamp of the live rate used; absent for static demo rates and older records.
+  rateUpdatedAt?: string;
 }
 
 export type CryptoPriceSource = "demo" | "coingecko";

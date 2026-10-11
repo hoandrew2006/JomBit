@@ -8,11 +8,14 @@
 .fiat-wallet .section-heading h2 { font-size: 18px; }
 .fiat-wallet .section-heading > span { display: flex; align-items: center; gap: 5px; font-size: 10px; }
 .fiat-intro { margin: 0 0 17px; color: #aebbb5; font-size: 12px; line-height: 1.75; }
+.fiat-rate-status { margin: -8px 0 15px; color: #8fa49a; font-size: 10px; line-height: 1.6; }
+.fiat-rate-status a { color: #9fe7c8; text-underline-offset: 2px; }
 .fiat-destinations { display: grid; gap: 9px; }
 .fiat-destinations > button { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 15px 13px; min-height: 76px; text-align: left; color: #fff; border: 1px solid #ffffff15; border-radius: 17px; background: #202523; transition: border-color .2s, background .2s; }
 .fiat-destinations > button:hover { background: #26352f; }
 .fiat-destinations > button[aria-pressed="true"] { background: #17352e; border-color: #6de3bc88; }
-.fiat-destinations .currency-flag { width: 34px; height: 34px; }
+.fiat-destinations .currency-flag { width: 34px; height: 34px; background: none; }
+.country-flag { display: block; width: 30px; height: 20px; border-radius: 4px; box-shadow: 0 0 0 1px #ffffff26; }
 .fiat-destinations strong, .fiat-destinations small { display: block; }
 .fiat-destinations strong { font-size: 13px; }
 .fiat-destinations small { margin-top: 5px; color: #b1c1b9; font-size: 9px; line-height: 1.5; }
@@ -44,6 +47,7 @@
 .fiat-transaction > dl > div:last-child, .fiat-review-details > div:last-child { border: 0; }
 .fiat-transaction dt, .fiat-review-details dt { color: #adbcaf; }
 .fiat-transaction dd, .fiat-review-details dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.fiat-transaction dd small { display: block; margin-top: 3px; color: #8fa49a; font-size: 10px; }
 .fiat-record-note { display: block; color: #a1ada5; font-size: 9px; overflow-wrap: anywhere; margin-bottom: 17px; line-height: 1.5; }
 .fiat-history > button { margin-top: 18px; }
 .fiat-wallet .poc-warning { font-size: 10px; line-height: 1.7; }
@@ -56,6 +60,7 @@
 @media (max-width: 380px) {
   .fiat-destinations > button { grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1fr); gap: 8px; padding: 13px 10px; }
   .fiat-destinations .currency-flag { width: 28px; height: 28px; }
+  .country-flag { width: 27px; height: 18px; }
   .fiat-destinations b { font-size: 12px; }
   .fiat-transaction > summary { grid-template-columns: 18px minmax(0, 1fr) minmax(0, .75fr) 12px; gap: 6px; }
 }
