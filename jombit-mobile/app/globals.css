@@ -23,7 +23,8 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 ::selection { background: var(--cyan); color: #071617; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
 
-.app-loading { min-height: 100vh; display: grid; place-items: center; color: var(--cyan); letter-spacing: .08em; }
+.app-loading { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 22px; color: var(--cyan); letter-spacing: .08em; }
+.app-loading img { height: 76px; width: auto; }
 .app-shell { min-height: 100vh; padding-bottom: 110px; }
 .app-main { width: min(100%, 900px); margin: 0 auto; }
 .topbar { height: 68px; display: flex; align-items: center; justify-content: space-between; width: min(calc(100% - 40px), 900px); margin: 0 auto; border-bottom: 1px solid var(--line); }
@@ -32,11 +33,12 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 
 .brand { display: inline-flex; align-items: center; gap: 11px; font-weight: 900; font-size: 24px; letter-spacing: -.05em; }
 .brand-compact { font-size: 20px; }
-.brand-mark { width: 31px; height: 31px; background: var(--cyan); color: var(--ink); border-radius: 10px; display: grid; grid-template-columns: repeat(3, 4px); gap: 2px; align-content: center; justify-content: center; transform: rotate(-3deg); box-shadow: 0 8px 24px rgba(12,234,236,.18); }
-.brand-mark i { display: block; width: 4px; border-radius: 3px; background: var(--ink); }
-.brand-mark i:nth-child(1) { height: 7px; margin-top: 6px; }
-.brand-mark i:nth-child(2) { height: 13px; }
-.brand-mark i:nth-child(3) { height: 10px; margin-top: 3px; }
+/* Logo images keep their aspect ratio: set the height only, never the width. */
+.brand-logo { display: block; height: 30px; width: auto; flex-shrink: 0; }
+.brand-compact .brand-logo { height: 26px; }
+.brand-wordmark { font-family: "Manrope", "Segoe UI", Arial, sans-serif; font-weight: 800; letter-spacing: -.04em; }
+.brand-logo-large { display: block; height: 88px; width: auto; }
+.onboarding-logo { display: flex; justify-content: center; margin-bottom: 40px; }
 
 .screen { padding: 38px 22px 20px; animation: pageIn .28s ease-out; }
 @keyframes pageIn { from { opacity: 0; transform: translateY(7px); } }
@@ -119,7 +121,7 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 /* Onboarding */
 .onboarding-shell { min-height: 100vh; display: grid; grid-template-columns: minmax(420px, 620px) 1fr; background: #101010; overflow: hidden; }
 .onboarding-card { padding: clamp(30px, 7vw, 76px); display: flex; flex-direction: column; justify-content: center; max-width: 690px; margin: 0 auto; }
-.onboarding-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 54px; }
+.onboarding-top { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 24px; }
 .onboarding-copy h1 { font-size: clamp(42px, 6vw, 72px); line-height: .9; letter-spacing: -.065em; margin: 15px 0 22px; }
 .onboarding-copy h1 span { color: var(--cyan); }
 .onboarding-copy > p:last-child { color: var(--muted); font-size: 16px; max-width: 530px; line-height: 1.6; }
@@ -437,7 +439,7 @@ select { color-scheme: dark; }
   .activity-row { padding: 11px; }
   .onboarding-shell { display: block; }
   .onboarding-card { padding: 30px 20px 50px; }
-  .onboarding-top { margin-bottom: 42px; }.onboarding-copy h1 { font-size: 47px; }.onboarding-visual { display: none; }
+  .onboarding-top { margin-bottom: 18px; }.onboarding-logo { margin-bottom: 30px; }.brand-logo-large { height: 76px; }.onboarding-copy h1 { font-size: 47px; }.onboarding-visual { display: none; }
   .group-hero { align-items: flex-start; flex-wrap: wrap; }.group-hero-emoji { width: 60px; height: 60px; }.group-hero h1 { font-size: 28px; }.group-hero .primary-button { flex: 1 0 100%; }
   .group-total-card { grid-template-columns: 1fr 1fr; }.group-total-card > div { padding: 17px; }.group-total-card strong { font-size: 23px; }
   .settlement-block { padding: 16px; }.settlement-list > button { display: grid; grid-template-columns: auto 1fr auto; }.settlement-list > button > svg { display: none; }.settlement-list > button > strong { grid-column: 3; }

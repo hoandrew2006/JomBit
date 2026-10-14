@@ -47,7 +47,8 @@ JomBit/
 │   ├── tests/              Node built-in test runner (*.test.mjs)
 │   ├── scripts/            package-demo.mjs (makes self-contained HTML), export-deliverables.ps1
 │   ├── design/             Design notes and product decisions (read before UI/product changes)
-│   ├── public/             Static assets (logo, og.png, font licence)
+│   ├── public/             Static assets: og.png, manifest.webmanifest, font licence
+│   │   └── brand/          JomBit logo, favicons and app icons (see "Brand" below)
 │   ├── .env.example        Template for the private .env.local (no real values)
 │   ├── GEMINI-SETUP.md     How to switch on real receipt scanning
 │   └── vercel.json         Vite hosting and receipt-function configuration
@@ -149,3 +150,10 @@ The founders are not all engineers. In every PR description (and in your final m
 - Read the relevant notes in `jombit-mobile/design/` before product or UI changes, and update the README/docs when behaviour changes.
 - Don't add new dependencies without a clear reason stated in the PR.
 - Edit source files, never generated output (`dist/`, `outputs/`).
+
+### 5. Brand
+
+- Logo files live in `jombit-mobile/public/brand/`; paths are listed in `lib/brand.ts`. Use the shared `Brand` (logo + "JomBit" wordmark) or `BrandLogo` (large mark) components from `app/components/ui.tsx`, not new logo markup.
+- `jombit-logo.png` is for dark backgrounds; `jombit-logo-on-light.png` (`<Brand onLight />`) only for light backgrounds.
+- Never stretch, recolour or crop the logo: set only its height in CSS (`width: auto`) and keep clear space around it. The `-120`/`-288` files are proportional downsizes for speed.
+- Favicons: `favicon-16.png` is a deliberately simplified (thicker-stroke) version for legibility at 16px; all other icons use the unaltered artwork.

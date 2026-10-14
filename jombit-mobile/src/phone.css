@@ -2,6 +2,7 @@
 .phone-showcase { position: relative; isolation: isolate; min-height: 100dvh; overflow: hidden; display: grid; grid-template-columns: minmax(0,1fr) 430px; grid-template-rows: auto 1fr auto; gap: 12px 80px; padding: 30px max(40px, calc((100vw - 1120px) / 2)); background: radial-gradient(ellipse at 76% 50%, #112a29 0%, #111918 22%, transparent 58%), #0c0e0e; }
 .showcase-header { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; z-index: 1; }
 .showcase-header .brand { font-size: 28px; }
+.showcase-header .brand-logo { height: 34px; }
 .showcase-header > a { color: #adb7b5; font-size: 12px; text-decoration: none; display: flex; align-items: center; gap: 8px; border: 1px solid #2a3432; padding: 11px 16px; border-radius: 30px; }
 .showcase-copy { align-self: center; padding: 30px 0 70px; z-index: 1; }
 .showcase-kicker { font-size: 10px; font-weight: 700; letter-spacing: .14em; color: #b9c6c1; display: flex; align-items: center; gap: 9px; }

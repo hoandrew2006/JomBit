@@ -3,18 +3,23 @@
 
 import { X } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
+import { LOGO_LARGE, LOGO_ON_DARK, LOGO_ON_LIGHT } from "@/lib/brand";
 
-export function Brand({ compact = false }: { compact?: boolean }) {
+// Logo mark + "JomBit" wordmark. The image carries the accessible name, so the wordmark is hidden
+// from screen readers. Use onLight only on light backgrounds.
+export function Brand({ compact = false, onLight = false }: { compact?: boolean; onLight?: boolean }) {
+  const logo = onLight ? LOGO_ON_LIGHT : LOGO_ON_DARK;
   return (
     <div className={`brand ${compact ? "brand-compact" : ""}`}>
-      <span className="brand-mark" aria-hidden="true">
-        <i />
-        <i />
-        <i />
-      </span>
-      <span>JomBit</span>
+      <img className="brand-logo" src={logo.src} width={logo.width} height={logo.height} alt="JomBit" decoding="async" />
+      <span className="brand-wordmark" aria-hidden="true">JomBit</span>
     </div>
   );
+}
+
+// Large centred logo for the sign-up and loading screens (dark backgrounds only).
+export function BrandLogo({ className = "" }: { className?: string }) {
+  return <img className={`brand-logo-large ${className}`} src={LOGO_LARGE.src} width={LOGO_LARGE.width} height={LOGO_LARGE.height} alt="JomBit" decoding="async" />;
 }
 
 export function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg" }) {
