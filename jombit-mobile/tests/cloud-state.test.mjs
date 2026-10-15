@@ -29,4 +29,3 @@ test("invalid database documents are rejected instead of replacing live state", 
   assert.equal(isAppState({ user: { name: "Incomplete" } }), false);
   assert.equal(normalizeCloudState({ state: "not-jombit" }), undefined);
 });
-

@@ -23,4 +23,3 @@ export function getSupabase(): SupabaseClient | undefined {
   }
   return client;
 }
-

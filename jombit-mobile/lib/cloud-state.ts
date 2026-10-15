@@ -48,4 +48,3 @@ export function createCloudState(user: Pick<User, "email" | "user_metadata">): A
     members: { ...state.members, me: { ...state.members.me, name } },
   };
 }
-

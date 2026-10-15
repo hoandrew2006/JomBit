@@ -85,4 +85,3 @@ function AuthScreen() {
     </main>
   );
 }
-

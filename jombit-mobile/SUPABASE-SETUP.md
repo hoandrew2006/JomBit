@@ -49,4 +49,3 @@ Run `npm run dev`, open `http://127.0.0.1:5173/?app=1`, create an account, and m
 This milestone moves the complete current `AppState` document behind Supabase Auth and Row Level Security. It is a safe bridge from the browser-only prototype: existing screens do not need to be rewritten at once, local demo mode still works, and cloud users get account-based persistence and Realtime updates.
 
 True multi-account group collaboration, invitations and per-group permissions require normalized group/expense tables rather than one state document. Private receipt image storage and moving the Gemini, CoinGecko and FX server functions to Supabase Edge Functions are the next backend milestones. Until those are completed, receipt/provider APIs continue to run through the existing Vercel functions.
-
