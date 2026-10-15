@@ -13,6 +13,7 @@ import "../../src/fiat.css";
 
 const places: Record<ForeignCurrency, string> = { SGD: "Singapore", THB: "Thailand", IDR: "Indonesia" };
 type Action = "deposit" | "send" | "consolidate";
+const MYR_HISTORY_KINDS: WalletTransaction["kind"][] = ["topup", "transfer", "exchange", "card", "settlement"];
 const rateLabel = (from: Currency, to: Currency, rate: number) => `1 ${from} ≈ ${rate.toLocaleString("en-MY", { maximumFractionDigits: to === "IDR" ? 2 : 6 })} ${to}`;
 const dateLabel = (date: string) => Number.isFinite(Date.parse(date)) ? new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kuala_Lumpur" }).format(new Date(date)) + " MYT" : "Date not recorded";
 
@@ -44,7 +45,8 @@ export function FiatWallet({ balancesVisible }: { balancesVisible: boolean }) {
   const hide = (value: string) => balancesVisible ? value : "••••••";
   const legacy = FOREIGN_CURRENCIES.filter((code) => state.fiatBalances[code] > 0);
   const legacyTotal = legacy.reduce((sum, code) => sum + legacyMyrCredit(state.fiatBalances[code], code, rates), 0);
-  const history = state.walletTransactions.filter((tx) => tx.amountCents !== undefined).sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+  // MYR money movements only. Crypto stays in the user's Luno account, so it never appears here.
+  const history = state.walletTransactions.filter((tx) => MYR_HISTORY_KINDS.includes(tx.kind) && tx.amountCents !== undefined).sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
   let debit: number | null = null;
   try { if (action === "send") debit = myrDebitForPayment(parseFiatAmount(amount), currency, rates); } catch { /* Incomplete input is validated on review. */ }
 

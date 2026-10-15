@@ -24,12 +24,20 @@ export function validQuote(quote: CryptoQuote | undefined, now: number) {
   return Number.isFinite(age) && age >= -30_000 && age <= LIVE_QUOTE_MAX_AGE;
 }
 
+// Total held in the linked Luno account and its estimated MYR value at a reference price.
+// JomBit never buys crypto, so there is no purchase cost or profit/loss to show.
 export function holdingMetrics(holding: CryptoHolding, priceMyr?: number) {
   const total = quantity(units(holding.available) + units(holding.staked));
-  const cost = Number.isSafeInteger(holding.costBasisCents) && Number(holding.costBasisCents) >= 0 ? holding.costBasisCents! : null;
   const value = priceMyr && Number.isFinite(priceMyr) && priceMyr > 0 ? Math.round(total * priceMyr * 100) : null;
-  const pnl = cost !== null && value !== null ? value - cost : null;
-  return { total, cost, value, averagePrice: total > 0 && cost !== null ? cost / 100 / total : null, pnl, pnlPercent: cost && pnl !== null ? pnl / cost * 100 : null };
+  return { total, value };
+}
+
+export const STAKING_ACTIVITY_KINDS = ["stake", "unstake", "staking-reward"] as const;
+export const isStakingActivity = (tx: WalletTransaction) => (STAKING_ACTIVITY_KINDS as readonly string[]).includes(tx.kind);
+
+// Sum of demo staking rewards recorded for an asset (paid into the user's Luno account).
+export function stakingRewardsReceived(transactions: WalletTransaction[], asset: CryptoAsset) {
+  return quantity(transactions.filter((tx) => tx.kind === "staking-reward" && tx.crypto?.asset === asset).reduce((sum, tx) => sum + units(tx.crypto!.quantity), 0));
 }
 
 function parseAmount(value: string, decimals: number) {
@@ -39,7 +47,7 @@ function parseAmount(value: string, decimals: number) {
   return result;
 }
 
-// Staking-only simulation. Moves existing units, never cash, and preserves acquisition history.
+// Staking-only simulation of the linked Luno account. Moves units between unstaked and staked; never cash.
 export function executeCryptoCommand(state: AppState, command: CryptoCommand, now = Date.now()): AppState {
   if (!["stake", "unstake"].includes(command.action)) throw new Error("JomBit does not support buying or selling crypto.");
   if (!command.id || state.walletTransactions.some((tx) => tx.id === command.id)) throw new Error("This demo activity was already recorded.");
@@ -63,18 +71,22 @@ export function executeCryptoCommand(state: AppState, command: CryptoCommand, no
     id: command.id, date: new Date(now).toISOString(), kind: action,
     title: `${action === "stake" ? "Staked" : "Unstaked"} ${asset} - Demo`,
     subtitle: "Local staking simulation. Not sent to Luno.", direction: "neutral",
-    crypto: { asset, quantity: quantity(moved), priceMyr: null, priceSource: null, priceUpdatedAt: null, feeCents: 0 },
+    crypto: { asset, quantity: quantity(moved) },
   };
   return { ...state, crypto: { ...state.crypto, [asset]: { ...holding, available: quantity(available), staked: quantity(staked) } }, walletTransactions: [transaction, ...state.walletTransactions] };
 }
 
+// Applied to every saved state (browser and cloud). Earlier prototypes recorded simulated crypto
+// purchases and sales; JomBit never buys or sells crypto, so those records and purchase-cost fields
+// are removed. Balances (now shown as held in the linked Luno account) and staking history are kept.
+const RETIRED_TRADE_KINDS = new Set(["crypto-buy", "crypto-sell"]);
 export function normalizeCryptoHistory(state: AppState): AppState {
-  // Preserve old balances and transactions. Missing history is not evidence of a purchase.
   const crypto = { ...state.crypto };
   for (const asset of CRYPTO_ASSETS) {
     const holding = crypto[asset];
     if (!holding) continue;
-    crypto[asset] = { ...holding, costBasisCents: holding.costBasisCents ?? ((holding.available + holding.staked) === 0 ? 0 : null), firstBoughtAt: holding.firstBoughtAt ?? null, lastBoughtAt: holding.lastBoughtAt ?? null };
+    crypto[asset] = { asset: holding.asset ?? asset, available: holding.available, staked: holding.staked };
   }
-  return { ...state, crypto };
+  const walletTransactions = (state.walletTransactions ?? []).filter((tx) => !RETIRED_TRADE_KINDS.has(tx.kind as string));
+  return { ...state, crypto, walletTransactions };
 }

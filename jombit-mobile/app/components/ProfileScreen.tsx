@@ -68,7 +68,7 @@ export function ProfileScreen() {
       <section className="danger-zone"><div><RefreshCcw size={21} /><span><strong>Reset JomBit demo</strong><small>Restore groups, balances, history and onboarding</small></span></div><button onClick={() => setResetOpen(true)}>Reset Demo</button></section>
       <p className="profile-footer">JomBit proof of concept · Version 1.0 · Built for demonstration</p>
 
-      <Modal open={resetOpen} onClose={() => setResetOpen(false)} title="Reset all demo data?" eyebrow="START FRESH"><div className="form-stack"><p className="modal-copy">This clears every {backendMode === "cloud" ? "cloud-synced" : "local"} change and restores JomBit’s original sample groups, wallet balances, crypto holdings and card state.</p><button className="danger-button" onClick={resetDemo}>Yes, reset JomBit</button><button className="secondary-button" onClick={() => setResetOpen(false)}>Keep my demo data</button></div></Modal>
+      <Modal open={resetOpen} onClose={() => setResetOpen(false)} title="Reset all demo data?" eyebrow="START FRESH"><div className="form-stack"><p className="modal-copy">This clears every {backendMode === "cloud" ? "cloud-synced" : "local"} change and restores JomBit’s original sample groups, wallet balances, sample Luno balances and card state.</p><button className="danger-button" onClick={resetDemo}>Yes, reset JomBit</button><button className="secondary-button" onClick={() => setResetOpen(false)}>Keep my demo data</button></div></Modal>
       <Toast message={toast} />
     </div>
   );

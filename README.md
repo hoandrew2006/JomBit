@@ -10,6 +10,8 @@ The current version includes receipt splitting, a MYR-funded fiat wallet and sta
 
 ## Original proof of concept
 
+> **Outdated business model.** This older prototype simulated crypto buying and selling. That is not what JomBit does: JomBit is not a digital-asset exchange, never buys, sells or holds crypto, and only shows the user's linked Luno balances with staking through Luno. See [AGENTS.md](AGENTS.md#business-rules). The old prototype's code is kept unchanged for reference only.
+
 JomBit is a polished proof-of-concept for group expenses and everyday fintech. Its hero flow turns a restaurant receipt into an editable, item-level split, keeps a running group ledger, simplifies the group’s debts, and records a demo settlement. The same local demo also shows a multi-currency fiat wallet, internal cross-border transfers, crypto trading and staking, and future prepaid cards.
 
 ## Run locally
