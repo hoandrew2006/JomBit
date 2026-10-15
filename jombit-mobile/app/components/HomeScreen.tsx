@@ -103,7 +103,7 @@ export function HomeScreen({ onScan, onCreateGroup, onOpenGroup, onSettleGroup, 
             <button className="group-preview" key={group.id} onClick={() => onOpenGroup(group)}>
               <span className="group-emoji">{group.emoji}</span>
               <span className="group-name">{group.name}</span>
-              <small>{group.memberIds.length} people · {formatMoney(spent, group.currency)}</small>
+              <small>{group.memberIds.length} people, {formatMoney(spent, group.currency)}</small>
               <span className={balances.me >= 0 ? "positive" : "negative"}>
                 {balances.me >= 0 ? "You’re owed " : "You owe "}{formatMoney(Math.abs(balances.me), group.currency)}
               </span>
@@ -121,14 +121,14 @@ export function HomeScreen({ onScan, onCreateGroup, onOpenGroup, onSettleGroup, 
             return (
               <button className="activity-row" key={expense.id} onClick={() => onOpenGroup(group)}>
                 <span className="activity-icon"><ReceiptText size={18} /></span>
-                <span><strong>{expense.merchant}</strong><small>{group.name} · {expense.date}</small></span>
+                <span><strong>{expense.merchant}</strong><small>{group.name}, {expense.date}</small></span>
                 <span className="activity-amount"><strong>{formatMoney(total, expense.currency)}</strong><small>Your share {formatMoney(expense.shares.me?.totalCents ?? 0, expense.currency)}</small></span>
               </button>
             );
           })}
           <button className="activity-row" onClick={onWallet}>
             <span className="activity-icon wallet-icon"><ArrowDownLeft size={18} /></span>
-            <span><strong>Demo wallet top up</strong><small>JomBit Wallet · simulated</small></span>
+            <span><strong>Demo wallet top up</strong><small>JomBit Wallet, simulated</small></span>
             <span className="activity-amount positive"><strong>+{formatMoney(50000)}</strong><small>No real funds moved</small></span>
           </button>
         </div>

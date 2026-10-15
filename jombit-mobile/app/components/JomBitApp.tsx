@@ -63,20 +63,20 @@ function JomBitExperience() {
   }
 
   return (
-    <div className="app-shell">
-      <header className="topbar"><Brand compact /><span className="topbar-demo"><Sparkles size={13} /> Proof of concept · {backendMode === "cloud" ? (syncStatus === "saving" ? "saving" : "cloud synced") : "local demo"}</span></header>
-      <main className="app-main">
+    <div className="app-shell" data-bd-group="app-shell">
+      <header className="topbar" data-bd-align-group="app-column"><Brand compact /><span className="topbar-demo"><Sparkles size={13} /> Proof of concept · {backendMode === "cloud" ? (syncStatus === "saving" ? "saving" : "cloud synced") : "local demo"}</span></header>
+      <main className="app-main" data-bd-align-group="app-column">
         {nav === "home" && <HomeScreen onScan={() => openExpense()} onCreateGroup={() => { setNav("groups"); setSelectedGroupId(undefined); }} onOpenGroup={openGroup} onSettleGroup={openSuggestedSettlement} onWallet={() => setNav("wallet")} />}
         {nav === "groups" && <GroupsScreen selectedGroupId={selectedGroupId} onSelectGroup={setSelectedGroupId} onAddExpense={(groupId) => openExpense(groupId)} onEditExpense={(expense) => openExpense(expense.groupId, expense)} onSettle={(group, fromId, toId, amountCents) => setSettlement({ group, fromId, toId, amountCents })} />}
         {nav === "wallet" && <WalletScreen />}
         {nav === "profile" && <ProfileScreen />}
       </main>
       <nav className="bottom-nav" aria-label="Primary navigation">
-        <button className={nav === "home" ? "active" : ""} onClick={() => setNav("home")}><Home size={21} /><span>Home</span></button>
-        <button className={nav === "groups" ? "active" : ""} onClick={() => setNav("groups")}><Users size={21} /><span>Groups</span></button>
+        <button className={nav === "home" ? "active" : ""} aria-current={nav === "home" ? "page" : undefined} onClick={() => setNav("home")}><Home size={21} /><span>Home</span></button>
+        <button className={nav === "groups" ? "active" : ""} aria-current={nav === "groups" ? "page" : undefined} onClick={() => setNav("groups")}><Users size={21} /><span>Groups</span></button>
         <button className="scan-nav" onClick={() => openExpense()} aria-label="Scan receipt"><span><Camera size={24} /></span><small>Scan</small></button>
-        <button className={nav === "wallet" ? "active" : ""} onClick={() => setNav("wallet")}><WalletCards size={21} /><span>Wallet</span></button>
-        <button className={nav === "profile" ? "active" : ""} onClick={() => setNav("profile")}><UserRound size={21} /><span>Profile</span></button>
+        <button className={nav === "wallet" ? "active" : ""} aria-current={nav === "wallet" ? "page" : undefined} onClick={() => setNav("wallet")}><WalletCards size={21} /><span>Wallet</span></button>
+        <button className={nav === "profile" ? "active" : ""} aria-current={nav === "profile" ? "page" : undefined} onClick={() => setNav("profile")}><UserRound size={21} /><span>Profile</span></button>
       </nav>
     </div>
   );
