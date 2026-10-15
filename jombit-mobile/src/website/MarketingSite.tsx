@@ -108,7 +108,7 @@ export function MarketingSite() {
 
         <section className="m-container m-section m-company-section" id="company" data-reveal>
           <div className="m-company-copy"><span className="m-eyebrow">ABOUT JOMBIT</span><h2>We believe the best<br />things in life<br />are <em>shared.</em></h2><p>JomBit starts with a familiar moment: a table full of friends, an excellent meal, and one very complicated bill.</p><p>Our mission is to make shared money simple, fair, and easy to understand—so people can spend more time enjoying the moment and less time working out who owes what.</p><p>We’re developing a group-expense and fintech concept that connects those everyday moments to a wider wallet experience. Receipt by receipt, group by group, it begins with getting the small things right.</p></div>
-          <div className="m-company-manifesto"><span className="m-company-mark"><Brand /></span><div className="m-manifesto-lines"><span>More <b>together.</b></span><span>Less <b>“you owe me.”</b></span><span>That’s <em>JomBit.</em></span></div><div className="m-company-bottom"><span>OUR PURPOSE</span><p>Good moments.<br />Shared fairly.</p><Sparkles size={25} /></div></div>
+          <div className="m-company-manifesto"><span className="m-company-mark"><Brand onLight /></span><div className="m-manifesto-lines"><span>More <b>together.</b></span><span>Less <b>“you owe me.”</b></span><span>That’s <em>JomBit.</em></span></div><div className="m-company-bottom"><span>OUR PURPOSE</span><p>Good moments.<br />Shared fairly.</p><Sparkles size={25} /></div></div>
         </section>
 
         <section className="m-download-section" id="download"><div className="m-container m-download-layout" data-reveal>

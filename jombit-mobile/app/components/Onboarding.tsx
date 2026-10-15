@@ -4,7 +4,7 @@ import { Camera, Check, QrCode, Sparkles } from "lucide-react";
 import { useState } from "react";
 import type { Currency } from "@/lib/models";
 import { useAppState } from "@/lib/state";
-import { Brand } from "./ui";
+import { BrandLogo } from "./ui";
 
 export function Onboarding() {
   const { state, setState } = useAppState();
@@ -32,9 +32,9 @@ export function Onboarding() {
     <main className="onboarding-shell">
       <section className="onboarding-card">
         <div className="onboarding-top">
-          <Brand />
           <span className="demo-pill"><Sparkles size={14} /> Proof of concept</span>
         </div>
+        <div className="onboarding-logo"><BrandLogo /></div>
         <div className="onboarding-copy">
           <p className="eyebrow">Welcome to JomBit</p>
           <h1>Split the bill.<br /><span>Keep the good bits.</span></h1>

@@ -32,6 +32,8 @@ export default defineConfig({
       return [
         { tag: "meta", attrs: { property: "og:url", content: base.href } },
         { tag: "meta", attrs: { property: "og:image", content: preview } },
+        { tag: "meta", attrs: { property: "og:image:width", content: "1200" } },
+        { tag: "meta", attrs: { property: "og:image:height", content: "630" } },
         { tag: "meta", attrs: { property: "og:image:alt", content: "JomBit — Life’s shared. Money should be simple." } },
         { tag: "meta", attrs: { name: "twitter:card", content: "summary_large_image" } },
         { tag: "meta", attrs: { name: "twitter:image", content: preview } },

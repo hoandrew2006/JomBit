@@ -14,6 +14,7 @@ import { createSeedState } from "./seed";
 import type { AppState } from "./models";
 import { executeCryptoCommand, normalizeCryptoHistory, type CryptoCommand } from "./crypto-ledger";
 import { executeFiatCommand, type FiatCommand } from "./fiat-ledger";
+import { LOGO_LARGE } from "./brand";
 
 const STORAGE_KEY = "jombit-mobile-demo-state-v1";
 
@@ -83,7 +84,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   return (
     <StateContext.Provider value={value}>
       {storageUnavailable && <div className="storage-notice" role="status">Your browser has disabled saving. This session works, but changes may be lost when you close it.</div>}
-      {hydrated ? children : <div className="app-loading">Preparing JomBit…</div>}
+      {hydrated ? children : <div className="app-loading"><img src={LOGO_LARGE.src} width={LOGO_LARGE.width} height={LOGO_LARGE.height} alt="JomBit" /><span>Preparing JomBit…</span></div>}
     </StateContext.Provider>
   );
 }

@@ -80,11 +80,15 @@ npm run preview
 
 The build creates the static website in `dist`, plus self-contained `dist/JomBit.html` and `dist/JomBit-app-demo.html`. The marketing website can be hosted statically. Gemini scanning has public Vercel functions in `api/receipt`; configure the private provider key and exact production origin using [HOSTED-SCANNING.md](HOSTED-SCANNING.md). Cached live CoinGecko prices use `api/crypto/quotes` and the same `JOMBIT_APP_ORIGIN`; no additional key is required for the public endpoint. `npm run preview` includes both services for loopback-only local testing. No personal name is specified in source or metadata, and this build does not publish to ChatGPT Sites.
 
+## Brand assets
+
+The JomBit logo, favicons and app icons are in `public/brand/` (see `lib/brand.ts`). Browser icons are linked from `index.html`; `public/manifest.webmanifest` lists the 192/512 app icons (also as maskable) with theme colour `#151515`. The standalone HTML export embeds every referenced brand image, so it still needs no network.
+
 ## Social preview
 
-The original generated preview card is saved at `public/og.png`. Set the build environment variable `JOMBIT_SITE_URL` to the final website URL before a hosted production build. The build then includes absolute Open Graph and X image URLs. Without an actual hostname, image metadata is deliberately omitted rather than using a fake URL. This variable does not introduce an API connection.
+The 1200×630 preview card (logo, “JomBit” and the tagline on `#151515`) is saved at `public/og.png`. Set the build environment variable `JOMBIT_SITE_URL` to the final website URL before a hosted production build. The build then includes absolute Open Graph and X image URLs. Without an actual hostname, image metadata is deliberately omitted rather than using a fake URL. This variable does not introduce an API connection.
 
-The card was created using the built-in image-generation tool. Its generation prompt is recorded in `design/social-preview-prompt.txt`. The interface itself uses CSS illustrations and bundled icons.
+The card is laid out with the official logo file and the bundled Manrope font (no generated artwork); `design/social-preview-prompt.txt` records the earlier, replaced card. The interface itself uses CSS illustrations and bundled icons.
 
 ## Independent runtime
 

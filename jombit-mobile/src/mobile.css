@@ -25,7 +25,9 @@
 .app-view .bottom-nav { bottom: max(10px, env(safe-area-inset-bottom)); height: 68px; border-radius: 22px; }
 .app-view .section-block { margin-top: 26px; }
 .app-view .onboarding-card { padding: 20px 21px 30px; }
-.app-view .onboarding-top { margin-bottom: 32px; }
+.app-view .onboarding-top { margin-bottom: 14px; }
+.app-view .onboarding-logo { margin-bottom: 26px; }
+.app-view .brand-logo-large { height: 68px; }
 .app-view .onboarding-top .demo-pill { font-size: 9px; padding: 6px 9px; }
 .app-view .onboarding-copy h1 { font-size: 42px; line-height: 1.04; margin-bottom: 17px; }
 .app-view .onboarding-copy > p:last-child { font-size: 12px; line-height: 1.65; }
