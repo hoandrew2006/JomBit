@@ -2,6 +2,14 @@
 
 An independent company and product website for JomBit, built with React, TypeScript and Vite. The main page explains receipt splitting, group expense tracking, simplified settlements, and the wider fiat wallet, crypto wallet and prepaid-card vision. It includes the company mission, FAQs, and iPhone/Android QR cards that open the deployed web app without installation.
 
+## Supabase accounts and cloud data
+
+JomBit now has an optional Supabase backend mode. When `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are configured, the app shows email sign-up/sign-in and stores each account's current JomBit state in a private Row Level Security-protected database row. Changes are debounced, synchronized across signed-in devices with Realtime, and never use a service-role key in the browser. Profile shows whether data is saved or still syncing and provides sign-out.
+
+Without those public configuration values, the app keeps the existing browser-only demo mode and local-storage key. This preserves standalone HTML exports and makes backend rollout reversible. Follow [SUPABASE-SETUP.md](SUPABASE-SETUP.md) to create the tables, access rules, authentication URLs and Vercel variables.
+
+This is the migration bridge for the current prototype, not the final collaborative data model. A later milestone will normalize groups, memberships, expenses and settlements so different accounts can participate in one group with per-group permissions. Private receipt files and the Gemini, CoinGecko and FX server functions also remain on the existing path until their dedicated Storage and Edge Function migrations.
+
 The layout takes inspiration from [Bybit’s product website](https://www.bybit.com/en-GB/): bold introductory copy, product discovery, and QR-led downloads. JomBit adds its own four-step receipt story and dedicated crypto concept chapter. The identity and content are JomBit’s own, developed from the supplied product specification. No founders, customer counts, regulatory approvals or launch dates are invented.
 
 ## Website refresh
