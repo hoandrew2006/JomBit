@@ -1,0 +1,239 @@
+/* Brand-preserving app polish: calmer rhythm, layered dark surfaces, clearer states. */
+.app-view {
+  --app-bg: #101211;
+  --app-surface: #1b1e1d;
+  --app-surface-raised: #222625;
+  --app-surface-soft: #171a19;
+  --app-line: rgba(238, 255, 252, .095);
+  --app-line-strong: rgba(238, 255, 252, .15);
+  --app-muted: #a4aaa7;
+  --app-ease: cubic-bezier(.2, .78, .25, 1);
+  --app-shadow-1: inset 0 1px 0 rgba(255,255,255,.045), 0 1px 2px rgba(0,0,0,.24), 0 7px 18px -12px rgba(0,0,0,.8);
+  --app-shadow-2: inset 0 1px 0 rgba(255,255,255,.06), 0 2px 3px -1px rgba(0,0,0,.3), 0 12px 28px -16px rgba(0,0,0,.85);
+  --app-shadow-5: inset 0 1px 0 rgba(255,255,255,.07), 0 1px 1px rgba(0,0,0,.26), 0 4px 8px -3px rgba(0,0,0,.38), 0 18px 42px -18px rgba(0,0,0,.82);
+}
+
+.app-view body {
+  background:
+    radial-gradient(circle at 50% -18%, rgba(12,234,236,.085), transparent 28rem),
+    var(--app-bg);
+  font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+  letter-spacing: -.008em;
+}
+
+.app-view .app-shell { background: linear-gradient(180deg, rgba(255,255,255,.012), transparent 26rem); }
+.app-view .app-main { padding-bottom: 8px; }
+
+.app-view .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  border-bottom-color: var(--app-line);
+  background: rgba(16,18,17,.82);
+  backdrop-filter: blur(18px) saturate(1.25);
+}
+
+.app-view .topbar-demo,
+.app-view .demo-pill {
+  color: #b8c2be;
+  border-color: var(--app-line-strong);
+  background: rgba(255,255,255,.028);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+.app-view .screen { animation: appPageIn .34s var(--app-ease) both; }
+@keyframes appPageIn { from { opacity: 0; transform: translateY(8px) scale(.995); } }
+
+.app-view .page-header { align-items: center; }
+.app-view .page-header > div { min-width: 0; }
+.app-view .page-header h1,
+.app-view .stage-heading h1,
+.app-view .flow-stage > h1 {
+  text-wrap: balance;
+  letter-spacing: -.048em;
+}
+.app-view .eyebrow,
+.app-view .demo-label { letter-spacing: .13em; }
+
+.app-view .avatar {
+  border-color: rgba(255,255,255,.2);
+  box-shadow: 0 0 0 4px rgba(12,234,236,.055), var(--app-shadow-1);
+}
+
+.app-view .hero-panel {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.32), 0 24px 60px -34px rgba(12,234,236,.65), 0 18px 40px -25px rgba(0,0,0,.72);
+}
+.app-view .hero-panel h2 { text-wrap: balance; }
+.app-view .hero-rings { right: 0; width: min(340px, 100%); }
+.app-view .hero-panel .light-button { min-height: 44px; }
+
+.app-view .summary-card,
+.app-view .mini-summary,
+.app-view .group-preview,
+.app-view .group-card,
+.app-view .new-group-card,
+.app-view .activity-list,
+.app-view .expense-list,
+.app-view .balance-list,
+.app-view .profile-card,
+.app-view .profile-identity,
+.app-view .activate-card-panel,
+.app-view .physical-card-grid article,
+.app-view .asset-list,
+.app-view .currency-card {
+  border-color: var(--app-line);
+  background-color: var(--app-surface);
+  box-shadow: var(--app-shadow-1);
+}
+
+.app-view .summary-card { min-height: 118px; display: flex; flex-direction: column; justify-content: center; }
+.app-view .summary-card strong { font-variant-numeric: tabular-nums; }
+.app-view .summary-card small,
+.app-view .group-preview small,
+.app-view .activity-row small { color: var(--app-muted); }
+
+.app-view .section-heading { margin-bottom: 12px; }
+.app-view .section-heading h2 { font-size: 16px; letter-spacing: -.018em; }
+.app-view .section-heading > span,
+.app-view .section-heading button { color: var(--app-muted); }
+.app-view .section-heading button { min-height: 44px; padding: 0 8px; border-radius: 10px; }
+.app-view .primary-button.compact { min-height: 44px; }
+
+.app-view .quick-actions button,
+.app-view .wallet-actions button {
+  border-color: var(--app-line);
+  background: linear-gradient(155deg, var(--app-surface-raised), var(--app-surface));
+  box-shadow: var(--app-shadow-1);
+  transition: transform .18s var(--app-ease), border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.app-view .quick-actions button span {
+  background: rgba(12,234,236,.075);
+  border: 1px solid rgba(12,234,236,.09);
+}
+
+.app-view .group-preview,
+.app-view .group-card,
+.app-view .new-group-card,
+.app-view .activity-row,
+.app-view .expense-main,
+.app-view .settlement-list > button,
+.app-view .asset-list button {
+  transition: transform .18s var(--app-ease), border-color .18s ease, background-color .18s ease, box-shadow .18s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-view .quick-actions button:hover,
+  .app-view .group-preview:hover,
+  .app-view .group-card:hover,
+  .app-view .new-group-card:hover,
+  .app-view .settlement-list > button:hover {
+    transform: translateY(-2px);
+    border-color: rgba(12,234,236,.2);
+    box-shadow: var(--app-shadow-2);
+  }
+  .app-view .activity-row:hover,
+  .app-view .asset-list button:hover { background: rgba(255,255,255,.028); }
+  .app-view .primary-button:hover { filter: brightness(1.04); }
+  .app-view input:hover,
+  .app-view select:hover,
+  .app-view textarea:hover { border-color: rgba(255,255,255,.2); }
+}
+
+.app-view button:active { transform: translateY(1px) scale(.99); }
+.app-view .primary-button,
+.app-view .light-button,
+.app-view .secondary-button,
+.app-view .danger-button { transition: transform .18s var(--app-ease), filter .18s ease, box-shadow .18s ease; }
+.app-view .primary-button { box-shadow: 0 12px 28px -16px rgba(12,234,236,.9), inset 0 1px 0 rgba(255,255,255,.32); }
+.app-view .secondary-button { border-color: var(--app-line-strong); background: var(--app-surface-raised); box-shadow: var(--app-shadow-1); }
+
+.app-view input,
+.app-view select,
+.app-view textarea,
+.app-view .money-input,
+.app-view .auth-input {
+  border-color: var(--app-line-strong);
+  background: var(--app-surface-raised);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025), 0 1px 1px rgba(0,0,0,.2);
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+.app-view input:focus,
+.app-view select:focus,
+.app-view textarea:focus,
+.app-view .money-input:focus-within {
+  border-color: rgba(12,234,236,.62);
+  box-shadow: 0 0 0 3px rgba(12,234,236,.085), inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+.app-view .segmented {
+  border-color: var(--app-line);
+  background: #151817;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.28);
+}
+.app-view .segmented button { min-height: 44px; color: #a3aaa7; transition: color .16s ease, background .16s ease, box-shadow .16s ease; }
+.app-view .segmented button.active { box-shadow: inset 0 1px 0 rgba(255,255,255,.34), 0 5px 14px -8px rgba(12,234,236,.75); }
+
+.app-view .bottom-nav {
+  border-color: var(--app-line-strong);
+  background: rgba(24,27,26,.9);
+  box-shadow: var(--app-shadow-5);
+}
+.app-view .bottom-nav button:not(.scan-nav) {
+  border-radius: 15px;
+  transition: color .16s ease, background-color .16s ease, transform .16s var(--app-ease);
+}
+.app-view .bottom-nav button.active { color: var(--cyan); background: rgba(12,234,236,.075); }
+.app-view .bottom-nav .scan-nav > span { box-shadow: 0 12px 28px -12px rgba(12,234,236,.72), inset 0 1px 0 rgba(255,255,255,.35); }
+
+.app-view .modal-backdrop { background: rgba(0,0,0,.76); backdrop-filter: blur(8px) saturate(.85); }
+.app-view .modal-sheet {
+  border-color: var(--app-line-strong);
+  background: #181b1a;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 -28px 80px rgba(0,0,0,.58);
+  animation-timing-function: var(--app-ease);
+}
+.app-view .modal-handle { background: #4d5551; }
+.app-view .toast { box-shadow: 0 18px 38px -16px rgba(12,234,236,.55), var(--app-shadow-2); }
+
+.app-view .auth-card {
+  border-color: var(--app-line-strong);
+  background: rgba(24,27,26,.95);
+  box-shadow: var(--app-shadow-5);
+}
+.app-view .auth-tabs { background: #141716; box-shadow: inset 0 1px 3px rgba(0,0,0,.3); }
+
+.app-view .wallet-hero,
+.app-view .group-total-card,
+.app-view .jombit-card-visual { box-shadow: var(--app-shadow-2); }
+.app-view .activity-amount strong,
+.app-view .wallet-hero > strong,
+.app-view .group-total-card strong { font-variant-numeric: tabular-nums; }
+
+.app-view .receipt-dropzone {
+  border-color: rgba(12,234,236,.32);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 18px 40px -28px rgba(12,234,236,.35);
+}
+
+@media (max-width: 720px) {
+  .app-view .screen { padding-inline: 18px; }
+  .app-view .page-header { margin-bottom: 22px; }
+  .app-view .summary-grid { gap: 10px; }
+  .app-view .summary-card { min-height: 108px; }
+  .app-view .quick-actions { gap: 8px; }
+  .app-view .quick-actions button { min-height: 86px; padding: 8px 4px; font-size: 10px; line-height: 1.2; }
+  .app-view .quick-actions button span { width: 40px; height: 40px; }
+  .app-view .horizontal-groups { display: grid; grid-template-columns: 1fr; overflow: visible; padding-bottom: 0; }
+  .app-view .horizontal-groups .group-preview { min-width: 0; }
+  .app-view .activity-row { min-height: 72px; }
+  .app-view .bottom-nav { width: min(calc(100% - 22px), 660px); }
+}
+
+@media (max-width: 360px) {
+  .app-view .screen { padding-inline: 14px; }
+  .app-view .quick-actions button { font-size: 9px; }
+  .app-view .topbar-demo { max-width: 118px; overflow: hidden; white-space: nowrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-view .screen { animation: none; }
+}

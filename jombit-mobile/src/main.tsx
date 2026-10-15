@@ -6,6 +6,7 @@ import { MarketingSite } from "./website/MarketingSite";
 import "../app/globals.css";
 import "./mobile.css";
 import "./phone.css";
+import "./app-polish.css";
 
 const embedded = new URLSearchParams(window.location.search).get("app") === "1" || document.documentElement.dataset.jombitApp === "true";
 const phoneDemo = new URLSearchParams(window.location.search).get("view") === "demo" || document.documentElement.dataset.jombitView === "demo";

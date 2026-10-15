@@ -42,13 +42,13 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="page-header">
+    <header className="page-header" data-bd-group="page-header" data-bd-symmetry="horizontal">
       <div>
         {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h1>{title}</h1>
       </div>
       {action}
-    </div>
+    </header>
   );
 }
 
@@ -89,11 +89,17 @@ export function Modal({
   wide?: boolean;
 }) {
   const dialog = useRef<HTMLElement>(null);
+  const previousOverflow = useRef("");
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement;
+    previousOverflow.current = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     dialog.current?.focus();
-    return () => { if (previous instanceof HTMLElement && previous.isConnected) previous.focus(); };
+    return () => {
+      document.body.style.overflow = previousOverflow.current;
+      if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
+    };
   }, [open]);
   if (!open) return null;
   return (

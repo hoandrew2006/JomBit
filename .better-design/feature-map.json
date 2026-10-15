@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "product": "JomBit",
+  "features": [
+    {
+      "id": "account-entry",
+      "name": "Account entry",
+      "flows": [
+        {
+          "id": "sign-in-and-onboard",
+          "name": "Sign in and onboard",
+          "steps": [
+            {
+              "name": "Authenticate",
+              "route": "/?app=1",
+              "screen": "jombit-mobile/app/components/AuthGate.tsx",
+              "components": ["AuthGate"],
+              "data": ["Supabase session"]
+            },
+            {
+              "name": "Create profile",
+              "route": "/?app=1",
+              "screen": "jombit-mobile/app/components/Onboarding.tsx",
+              "components": ["Onboarding"],
+              "data": ["User profile", "DuitNow QR"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shared-expenses",
+      "name": "Shared expenses",
+      "flows": [
+        {
+          "id": "review-ledger",
+          "name": "Review group ledger",
+          "steps": [
+            {
+              "name": "Home overview",
+              "route": "/?app=1",
+              "screen": "jombit-mobile/app/components/HomeScreen.tsx",
+              "components": ["HomeScreen", "GroupLedgerHero"],
+              "data": ["Groups", "Expenses", "Balances"]
+            },
+            {
+              "name": "Group ledger",
+              "route": "/?app=1",
+              "screen": "jombit-mobile/app/components/GroupsScreen.tsx",
+              "components": ["GroupsScreen"],
+              "data": ["Group members", "Expenses", "Settlement suggestions"]
+            }
+          ]
+        },
+        {
+          "id": "scan-and-split",
+          "name": "Scan and split receipt",
+          "steps": [
+            {
+              "name": "Capture receipt",
+              "route": "/?app=1",
+              "screen": "jombit-mobile/app/components/ExpenseFlow.tsx",
+              "components": ["ExpenseFlow", "ReceiptCamera"],
+              "data": ["Receipt photo", "Gemini extraction"]
+            },
+            {
+              "name": "Review and assign",
+              "route": "/?app=1",
+              "screen": "jombit-mobile/app/components/ExpenseFlow.tsx",
+              "components": ["ExpenseFlow"],
+              "data": ["Expense items", "Member allocations", "Tax and service"]
+            }
+          ]
+        },
+        {
+          "id": "settle-balance",
+          "name": "Settle a balance",
+          "steps": [
+            {
+              "name": "Review payment",
+              "route": "/?app=1",
+              "screen": "jombit-mobile/app/components/SettlementScreen.tsx",
+              "components": ["SettlementScreen"],
+              "data": ["Simplified debt", "Demo payment QR"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wallet",
+      "name": "Wallet",
+      "flows": [
+        {
+          "id": "manage-fiat",
+          "name": "Manage MYR wallet",
+          "steps": [
+            {
+              "name": "Fiat overview and actions",
+              "route": "/?app=1",
+              "screen": "jombit-mobile/app/components/FiatWallet.tsx",
+              "components": ["WalletScreen", "FiatWallet", "CountryFlag"],
+              "data": ["MYR balance", "FX estimates", "Wallet history"]
+            }
+          ]
+        },
+        {
+          "id": "manage-staking",
+          "name": "Review and simulate staking",
+          "steps": [
+            {
+              "name": "Staking desk",
+              "route": "/?app=1",
+              "screen": "jombit-mobile/app/components/CryptoDesk.tsx",
+              "components": ["WalletScreen", "CryptoDesk", "CryptoHoldingFacts"],
+              "data": ["Holdings", "Live reference prices", "Demo staking history"]
+            }
+          ]
+        },
+        {
+          "id": "manage-card",
+          "name": "Manage demo card",
+          "steps": [
+            {
+              "name": "Card controls",
+              "route": "/?app=1",
+              "screen": "jombit-mobile/app/components/WalletScreen.tsx",
+              "components": ["WalletScreen"],
+              "data": ["Demo card state", "MYR balance"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "profile",
+      "name": "Profile and settings",
+      "flows": [
+        {
+          "id": "manage-profile",
+          "name": "Manage profile",
+          "steps": [
+            {
+              "name": "Profile settings",
+              "route": "/?app=1",
+              "screen": "jombit-mobile/app/components/ProfileScreen.tsx",
+              "components": ["ProfileScreen"],
+              "data": ["Profile", "Cloud sync status", "DuitNow QR"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
