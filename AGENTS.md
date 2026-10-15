@@ -34,7 +34,7 @@ JomBit/
 │   │   ├── models.ts       All data types (AppState, Expense, Group, WalletTransaction…)
 │   │   ├── calculations.ts Item splitting, tax/service allocation, balances, debt simplification
 │   │   ├── fiat-ledger.ts  MYR wallet commands (deposit, send, convert legacy balances)
-│   │   ├── crypto-ledger.ts Stake/unstake commands (buy/sell is deliberately rejected)
+│   │   ├── crypto-ledger.ts Stake/unstake commands for the linked Luno account (buy/sell is rejected)
 │   │   ├── state.tsx       React context; saves state to browser localStorage
 │   │   ├── seed.ts         Sample demo data
 │   │   ├── receipt-client.ts / receipt-review.ts  Photo prep + calls to the local scan API
@@ -107,6 +107,18 @@ The old root app: `npm install && npm run dev` / `npm test` at the repo root.
 
 **Before opening a PR, `npm test` and `npm run build` must both pass in `jombit-mobile/`.** If you changed the root app, run its `npm test` and `npm run lint` too. There is no CI yet, so you must run these yourself.
 
+## Business rules
+
+These describe what JomBit *is*. Every change to code, demo data, copy and docs must follow them.
+
+- **JomBit is not a digital-asset exchange.** It never buys, sells or holds crypto.
+- **Crypto never leaves the user's own Luno account.** JomBit only shows the balances in the user's linked Luno account and offers staking through Luno.
+- Crypto activity is **staking only**: staked, staking rewards and unstaked. Never add buy, sell, trade, swap, deposit or withdraw actions, records or demo data for crypto.
+- Show crypto balances as "Held in your Luno account". Never show purchase prices, average cost, cost basis, purchase dates or profit/loss for crypto: JomBit has no purchases to report.
+- The MYR wallet and its history contain MYR money movements only. Never show crypto purchases, sales or crypto-funded payments there; the JomBit Card is fiat-only.
+- Avoid wording that implies trading in JomBit ("Buy", "Sell", "Bought", "Trade", "order", "portfolio", "position", "average cost", "P/L"). Stating that JomBit does *not* buy or sell is fine.
+- The Luno link is planned, not connected (see "What JomBit is"): label demo balances and staking as demo/sample.
+
 ## Rules for every agent (Claude Code, Codex, others)
 
 ### 1. Branches and pull requests — never commit to `main`
@@ -141,7 +153,7 @@ The founders are not all engineers. In every PR description (and in your final m
 ### 4. Keep the app honest and safe
 
 - Keep all money, crypto, payments and cards clearly simulated. Do not add real payment, banking, trading or provider integrations without an explicit request and human review.
-- Crypto buying and selling is intentionally **not** offered; `crypto-ledger.ts` rejects it. Don't re-add it.
+- Crypto buying and selling is intentionally **not** offered; `crypto-ledger.ts` rejects it. Don't re-add it (see "Business rules").
 - Keep the local backends loopback-only. Hosted endpoints require exact-origin checks, strict validation and human review; never make provider keys public. Public endpoints also need provider-side quota/billing safeguards.
 - Don't break saved demo data: `AppState` is persisted in users' browsers, so changes to `lib/models.ts` must still load older saved state.
 - Put business rules in `lib/` with tests in `tests/`; keep components focused on display.

@@ -115,10 +115,11 @@ export function createSeedState(): AppState {
       daniel: { MYR: 9300 },
       aiman: { SGD: 4500 },
     },
+    // Demo balances held in the user's linked Luno account. JomBit never buys, sells or holds crypto.
     crypto: {
-      BTC: { asset: "BTC", available: 0.00182, staked: 0, costBasisCents: 72800, firstBoughtAt: "2026-09-24T03:00:00.000Z", lastBoughtAt: "2026-09-24T03:00:00.000Z" },
-      ETH: { asset: "ETH", available: 0.042, staked: 0.018, costBasisCents: 72000, firstBoughtAt: "2026-09-26T04:00:00.000Z", lastBoughtAt: "2026-09-26T04:00:00.000Z" },
-      SOL: { asset: "SOL", available: 1.4, staked: 2.2, costBasisCents: 234000, firstBoughtAt: "2026-09-25T05:00:00.000Z", lastBoughtAt: "2026-09-25T05:00:00.000Z" },
+      BTC: { asset: "BTC", available: 0.00182, staked: 0 },
+      ETH: { asset: "ETH", available: 0.042, staked: 0.018 },
+      SOL: { asset: "SOL", available: 1.4, staked: 2.2 },
     },
     walletTransactions: [
       {
@@ -141,21 +142,12 @@ export function createSeedState(): AppState {
         date: "2026-09-29T10:15:00.000Z",
         direction: "out",
       },
-      {
-        id: "tx-3",
-        kind: "crypto-buy",
-        title: "Bought ETH",
-        subtitle: "Seeded fictional purchase · 0.06000000 ETH",
-        amountCents: 72000,
-        currency: "MYR",
-        date: "2026-09-26T04:00:00.000Z",
-        direction: "out",
-        crypto: { asset: "ETH", quantity: 0.06, priceMyr: 12000, priceSource: "demo", priceUpdatedAt: null, feeCents: 0, seeded: true },
-      },
-      { id: "seed-sol-buy", kind: "crypto-buy", title: "Bought SOL — Demo", subtitle: "Seeded fictional purchase", amountCents: 234000, currency: "MYR", date: "2026-09-25T05:00:00.000Z", direction: "out", crypto: { asset: "SOL", quantity: 3.6, priceMyr: 650, priceSource: "demo", priceUpdatedAt: null, feeCents: 0, seeded: true } },
-      { id: "seed-btc-buy", kind: "crypto-buy", title: "Bought BTC — Demo", subtitle: "Seeded fictional purchase", amountCents: 72800, currency: "MYR", date: "2026-09-24T03:00:00.000Z", direction: "out", crypto: { asset: "BTC", quantity: 0.00182, priceMyr: 400000, priceSource: "demo", priceUpdatedAt: null, feeCents: 0, seeded: true } },
-      { id: "seed-sol-stake", kind: "stake", title: "Staked SOL — Demo", subtitle: "Seeded fictional allocation", date: "2026-09-26T06:00:00.000Z", direction: "neutral", crypto: { asset: "SOL", quantity: 2.2, priceMyr: null, priceSource: null, priceUpdatedAt: null, feeCents: 0, seeded: true } },
-      { id: "seed-eth-stake", kind: "stake", title: "Staked ETH — Demo", subtitle: "Seeded fictional allocation", date: "2026-09-26T05:00:00.000Z", direction: "neutral", crypto: { asset: "ETH", quantity: 0.018, priceMyr: null, priceSource: null, priceUpdatedAt: null, feeCents: 0, seeded: true } },
+      // Staking activity only (staked, rewards, unstaked). SOL: 2.5 staked − 0.3 unstaked = 2.2 staked.
+      { id: "seed-sol-reward", kind: "staking-reward", title: "SOL staking reward — Demo", subtitle: "Illustrative example paid into your Luno account. Not a promise of future rewards.", date: "2026-10-03T02:00:00.000Z", direction: "in", crypto: { asset: "SOL", quantity: 0.0124, seeded: true } },
+      { id: "seed-sol-unstake", kind: "unstake", title: "Unstaked SOL — Demo", subtitle: "Seeded example in your Luno account", date: "2026-10-02T09:30:00.000Z", direction: "neutral", crypto: { asset: "SOL", quantity: 0.3, seeded: true } },
+      { id: "seed-eth-reward", kind: "staking-reward", title: "ETH staking reward — Demo", subtitle: "Illustrative example paid into your Luno account. Not a promise of future rewards.", date: "2026-10-01T02:00:00.000Z", direction: "in", crypto: { asset: "ETH", quantity: 0.00004, seeded: true } },
+      { id: "seed-sol-stake", kind: "stake", title: "Staked SOL — Demo", subtitle: "Seeded example in your Luno account", date: "2026-09-26T06:00:00.000Z", direction: "neutral", crypto: { asset: "SOL", quantity: 2.5, seeded: true } },
+      { id: "seed-eth-stake", kind: "stake", title: "Staked ETH — Demo", subtitle: "Seeded example in your Luno account", date: "2026-09-26T05:00:00.000Z", direction: "neutral", crypto: { asset: "ETH", quantity: 0.018, seeded: true } },
     ],
     card: {
       virtualActive: false,

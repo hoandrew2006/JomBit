@@ -35,6 +35,12 @@ test("Fiat screen presents one MYR wallet, equivalent values, privacy and preser
     assert.doesNotMatch(html, />(SG|TH|ID)<|🇸🇬|🇹🇭|🇮🇩/);
     assert.doesNotMatch(html, /Balances from the previous demo|Currency balances|Approximate wallet value|NaN|Infinity|\bundefined\b|\bWEY\b/);
     assert.match(html, /aria-pressed="true"/);
+    // Business rule: the MYR wallet history never contains crypto, even if an old record slipped through.
+    fixture.state.walletTransactions.unshift({ id: "legacy-buy", kind: "crypto-buy", title: "Bought ETH", subtitle: "Old record", date: "2026-10-04T00:00:00Z", direction: "out", amountCents: 72000, currency: "MYR" });
+    html = render();
+    assert.doesNotMatch(html, /Bought|Staked|staking reward|Unstaked/i);
+    fixture.state.walletTransactions.shift();
+    html = render();
     assert.match(render(false), /••••••/);
     assert.doesNotMatch(render(false), /RM1,842\.50/);
     fixture.state.fiatBalances.SGD = 18450;

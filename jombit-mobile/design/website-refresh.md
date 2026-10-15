@@ -16,7 +16,7 @@ photography, invented social proof or live financial claims is introduced.
 The audit found Arial throughout, a forced three-line hero, a separate illustrative
 phone interface, decorative orbiting crypto tokens and repeated equal-card rows.
 The refresh uses self-hosted Manrope, a shorter hero, a shared app component,
-shared crypto position details and asymmetric feature layouts. Real component
+shared Luno balance details and asymmetric feature layouts. Real component
 previews serve the product story without generated screenshots or stock imagery.
 
 ## Preview boundaries
@@ -26,7 +26,7 @@ previews serve the product story without generated screenshots or stock imagery.
 - `CryptoHoldingFacts` is shared with the app. Website holdings come from seed
   data and prices from the existing static demo price map.
 - Marketing previews never load the app state provider, read local storage,
-  fetch market prices, execute trades or call Gemini.
+  fetch market prices, contact Luno or call Gemini.
 - “Try the demo” opens `?view=demo`. The store QR section remains coming soon.
 - Existing keyboard tabs, focus rings and reduced-motion behavior remain intact.
 

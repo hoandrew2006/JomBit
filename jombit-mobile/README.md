@@ -1,6 +1,6 @@
 # JomBit Website
 
-An independent company and product website for JomBit, built with React, TypeScript and Vite. The main page explains receipt splitting, group expense tracking, simplified settlements, and the wider fiat wallet, crypto wallet and prepaid-card vision. It includes the company mission, FAQs, and iPhone/Android QR cards that open the deployed web app without installation.
+An independent company and product website for JomBit, built with React, TypeScript and Vite. The main page explains receipt splitting, group expense tracking, simplified settlements, and the wider vision: a MYR wallet, a view of the user’s own linked Luno crypto balances with staking through Luno, and a prepaid card. It includes the company mission, FAQs, and iPhone/Android QR cards that open the deployed web app without installation.
 
 ## Supabase accounts and cloud data
 
@@ -36,15 +36,15 @@ Existing saved foreign-currency balances are **not erased or automatically conve
 
 The interaction takes inspiration from [Touch ’n Go's explanation of its MYR-based wallet](https://support.tngdigital.com.my/hc/en-my/articles/46598983222041-If-I-do-not-close-my-TNG-eWallet-account-and-use-it-during-my-travels-can-I-change-the-currency), but JomBit has no affiliation or integration with it, does not use its rates and does not claim its fees or availability. This implementation remains a local simulation.
 
-## Crypto staking and planned Luno integration
+## Crypto: linked Luno account and staking
 
-Open **Wallet → Staking**. JomBit does not provide crypto buying or selling, including paper orders. The command layer rejects both actions, not just the UI.
+**JomBit is not a digital-asset exchange.** It never buys, sells or holds crypto, and crypto never leaves the user’s own Luno account. JomBit only shows the balances in the user’s linked Luno account and offers staking through Luno. Open **Wallet → Staking**: balances are shown as “Held in your Luno account”, and activity lists staking events only (staked, rewards, unstaked). The command layer rejects buying and selling, not just the UI.
 
-The prototype supports **demo staking and unstaking of existing ETH and SOL holdings**. BTC is view-only. Review an amount before confirming; units move between unstaked and staked balances with no MYR movement. Duplicate confirmations and excessive amounts are rejected against current balances. No rewards accrue and no provider fees or waiting periods are simulated. Instant demo unstaking does not imply instant provider withdrawals.
+The prototype uses sample Luno balances and supports **demo staking and unstaking of ETH and SOL**. BTC is view-only. Review an amount before confirming; units move between unstaked and staked balances with no MYR movement. Duplicate confirmations and excessive amounts are rejected against current balances. New demo actions earn no rewards; the seeded activity includes two clearly labelled illustrative reward entries. No provider fees or waiting periods are simulated. Instant demo unstaking does not imply instant provider withdrawals.
 
-**Luno integration is planned, not connected. No partnership is confirmed.** There is no account-linking flow, API credential collection, provider request, custody or real staking. Provider approval, technical access, supported assets, fees, variable rewards and unstaking conditions need confirmation before implementation. The informational link opens [Luno’s staking guide](https://guide.luno.com/hc/en-gb/articles/11035626257437-How-do-I-stake-my-crypto-with-Luno). ETH/SOL are the prototype subset, not an exhaustive provider asset list. No APR or returns are promised.
+**Luno integration is planned, not connected. No partnership is confirmed.** The “Linked Luno account” is a demo label: there is no real account-linking flow, API credential collection, provider request, custody or real staking. Provider approval, technical access, supported assets, fees, variable rewards and unstaking conditions need confirmation before implementation. The informational link opens [Luno’s staking guide](https://guide.luno.com/hc/en-gb/articles/11035626257437-How-do-I-stake-my-crypto-with-Luno). ETH/SOL are the prototype subset, not an exhaustive provider asset list. No APR or returns are promised.
 
-Balances, acquisition dates, average costs and earlier buy/sell history are preserved, not reset or reclassified as Luno transactions. Missing acquisition data stays unknown. Old card-source preferences remain in storage for compatibility but are no longer actionable: the card concept is fiat-only.
+Earlier prototypes recorded simulated crypto purchases and sales. These records, and purchase dates/average costs, are removed when saved demo data loads (browser or cloud); balances and staking history are kept and shown as held in the linked Luno account. MYR wallet history only shows MYR money movements, never crypto. Old card-source preferences remain in storage for compatibility but are no longer actionable: the card concept is fiat-only.
 
 CoinGecko reference prices remain read-only valuation data, separate from Luno and staking rewards. They refresh through local middleware or the cached Vercel endpoint. The directly opened standalone HTML defaults to clearly labelled demo prices. Prices can be unavailable without preventing a demo stake, because staking moves units, not cash.
 
@@ -75,7 +75,7 @@ Both QR cards and their Open JomBit links use `webAppUrl` in `src/website/conten
 
 Product tabs, mobile navigation and FAQ accordions work. “Try the demo” opens the phone-framed app. Other calls to action navigate to sections of this informational page; they do not execute financial operations.
 
-The website uses bundled, self-hosted Manrope typography, a shared app component in the hero, and a BTC/ETH/SOL position preview with purchase dates, average costs and paper profit/loss. The preview shares its display component with the app but uses only static sample data: it does not access saved wallets or request live prices. Font data is embedded in the standalone HTML, so no font connection is needed. See [the design notes](design/website-refresh.md) for scope and validation.
+The website uses bundled, self-hosted Manrope typography, a shared app component in the hero, and an ETH/SOL preview of sample balances held in a linked Luno account (staked, not staked, rewards received). The preview shares its display component with the app but uses only static sample data: it does not access saved wallets or request live prices. Font data is embedded in the standalone HTML, so no font connection is needed. See [the design notes](design/website-refresh.md) for scope and validation.
 
 After building on Windows, `powershell -ExecutionPolicy Bypass -File scripts/export-deliverables.ps1` refreshes the standalone HTML files and source/static-site ZIPs in `../outputs/jombit-independent`. The source export uses an explicit allowlist and rejects private `.env` files, dependencies and Git history; `.env.example` is safe to include. Edit the source project, not the generated HTML.
 
@@ -106,4 +106,4 @@ This version has no ChatGPT sign-in, OpenAI SDK, Sites runtime, analytics, or re
 
 Create a group and mock members, choose **Take a photo**, **Choose a photo**, or **Enter manually**, review the receipt, assign people, and save. The group ledger recalculates shares and simplified debts. Demo payment QRs use `jombit-demo://pay` payloads. Fiat, currency exchange, transfers, crypto and card controls update persistent demo state. **Profile → Reset Demo** restores the sample data.
 
-Approved photo scans use Gemini once configured; sample walkthrough data remains confined to the marketing website. Payment processing, FX, crypto staking and card issuance remain simulated. Crypto buying and selling are not offered. Crypto reference prices can be live or explicitly labelled demo values. No real funds or crypto move. Demo settlement QRs are not valid payment-network QRs. Run `npm test` for receipt/calculation tests, fiat/crypto ledger tests, market API tests, and server-rendered website/wallet-screen checks. Browser/device interaction testing is separate.
+Approved photo scans use Gemini once configured; sample walkthrough data remains confined to the marketing website. Payment processing, FX, crypto staking and card issuance remain simulated. JomBit never buys, sells or holds crypto. Crypto reference prices can be live or explicitly labelled demo values. No real funds or crypto move. Demo settlement QRs are not valid payment-network QRs. Run `npm test` for receipt/calculation tests, fiat/crypto ledger tests, market API tests, and server-rendered website/wallet-screen checks. Browser/device interaction testing is separate.

@@ -70,10 +70,10 @@ export type WalletTransactionKind =
   | "topup"
   | "exchange"
   | "transfer"
-  | "crypto-buy"
-  | "crypto-sell"
+  // Crypto activity is staking only: JomBit never buys, sells or holds crypto (see AGENTS.md).
   | "stake"
   | "unstake"
+  | "staking-reward"
   | "card"
   | "settlement";
 
@@ -86,7 +86,7 @@ export interface WalletTransaction {
   currency?: Currency;
   date: string;
   direction: "in" | "out" | "neutral";
-  crypto?: CryptoOrderDetails;
+  crypto?: CryptoActivityDetails;
   fiat?: FiatConversionDetails;
 }
 
@@ -110,24 +110,18 @@ export interface CryptoQuote {
   updatedAt: string | null;
   source: CryptoPriceSource;
 }
-export interface CryptoOrderDetails {
+// A staking event in the user's linked Luno account. No price, cash or fee: nothing is bought or sold.
+export interface CryptoActivityDetails {
   asset: CryptoAsset;
   quantity: number;
-  priceMyr: number | null;
-  priceSource: CryptoPriceSource | null;
-  priceUpdatedAt: string | null;
-  feeCents: number;
-  realizedPnlCents?: number | null;
   seeded?: boolean;
 }
 
+// Balances held in the user's own linked Luno account (demo values). JomBit never holds crypto.
 export interface CryptoHolding {
   asset: CryptoAsset;
   available: number;
   staked: number;
-  costBasisCents?: number | null;
-  firstBoughtAt?: string | null;
-  lastBoughtAt?: string | null;
 }
 
 export interface JomBitCard {

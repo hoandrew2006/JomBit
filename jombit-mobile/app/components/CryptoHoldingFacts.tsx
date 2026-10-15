@@ -1,5 +1,5 @@
 import { formatMoney } from "../../lib/calculations";
-import { holdingMetrics } from "../../lib/crypto-ledger";
+import { holdingMetrics, STAKING_ASSETS } from "../../lib/crypto-ledger";
 import type { CryptoAsset, CryptoHolding } from "../../lib/models";
 
 interface Props {
@@ -8,24 +8,24 @@ interface Props {
   referencePrice?: number;
   priceLabel: string;
   balancesVisible?: boolean;
+  rewardsReceived?: number;
 }
 
-/** The same position details in the app and the read-only website preview. */
-export function CryptoHoldingFacts({ asset, holding, referencePrice, priceLabel, balancesVisible = true }: Props) {
+/** Balances held in the user's linked Luno account, shown the same way in the app and the website preview.
+ *  JomBit never buys or sells crypto, so there is no purchase price, cost or profit/loss here. */
+export function CryptoHoldingFacts({ asset, holding, referencePrice, priceLabel, balancesVisible = true, rewardsReceived = 0 }: Props) {
   const metrics = holdingMetrics(holding, referencePrice);
   const hide = (value: string) => balancesVisible ? value : "••••••";
   const price = (value: number | null | undefined) => value == null ? "Unavailable" : formatMoney(Math.round(value * 100));
   const quantity = (value: number) => `${value.toLocaleString("en-MY", { maximumFractionDigits: 8 })} ${asset}`;
-  const date = (value: string | null | undefined) => !value || !Number.isFinite(Date.parse(value)) ? "Unknown" : new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kuala_Lumpur" }).format(new Date(value));
+  const stakeable = STAKING_ASSETS.includes(asset);
   return <>
-    <div className="crypto-price-pair"><div><span>{priceLabel}</span><strong>{price(referencePrice)}</strong></div><div><span>Average purchase price</span><strong>{hide(metrics.averagePrice === null ? "Unknown" : price(metrics.averagePrice))}</strong></div></div>
+    <div className="crypto-price-pair"><div><span>{priceLabel}</span><strong>{price(referencePrice)}</strong></div><div><span>Estimated value in Luno</span><strong>{hide(metrics.value === null ? "Unavailable" : formatMoney(metrics.value))}</strong></div></div>
     <dl className="crypto-position-grid">
-      <div><dt>Unstaked balance</dt><dd>{hide(quantity(holding.available))}</dd></div>
-      <div><dt>Staked</dt><dd>{hide(quantity(holding.staked))}</dd></div>
-      <div><dt>Current holding value</dt><dd>{hide(metrics.value === null ? "Unavailable" : formatMoney(metrics.value))}</dd></div>
-      <div><dt>Unrealized profit / loss</dt><dd className={metrics.pnl !== null && metrics.pnl < 0 ? "crypto-negative" : "crypto-positive"}>{hide(metrics.pnl === null ? "Unknown" : `${metrics.pnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(metrics.pnl))}`)}</dd></div>
-      <div><dt>First purchase</dt><dd>{hide(date(holding.firstBoughtAt))}</dd></div>
-      <div><dt>Latest purchase</dt><dd>{hide(date(holding.lastBoughtAt))}</dd></div>
+      <div><dt>Held in your Luno account</dt><dd>{hide(quantity(metrics.total))}</dd></div>
+      <div><dt>Staked via Luno</dt><dd>{hide(stakeable ? quantity(holding.staked) : "Not stakeable here")}</dd></div>
+      <div><dt>Not staked</dt><dd>{hide(quantity(holding.available))}</dd></div>
+      <div><dt>Staking rewards received</dt><dd>{hide(stakeable ? quantity(rewardsReceived) : "—")}</dd></div>
     </dl>
   </>;
 }

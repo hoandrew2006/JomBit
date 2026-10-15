@@ -31,11 +31,15 @@ test("Marketing page renders with valid section and accessibility targets", asyn
     assert.match(html, /Play walkthrough/);
     assert.match(html, /THE JOMBIT CRYPTO VISION/);
     assert.match(html, /No real crypto is held/);
-    assert.match(html, /No buying or selling in JomBit/);
+    assert.match(html, /JomBit never buys, sells or holds it/);
+    assert.match(html, /Your crypto never leaves Luno/);
+    assert.match(html, /JomBit is not a crypto exchange/);
+    // Business rule: nothing on the website implies buying, selling or trading crypto in JomBit.
+    assert.doesNotMatch(html, /\bBought\b|\bBuy (BTC|ETH|SOL|crypto)|\bSell (BTC|ETH|SOL|crypto)|Average (purchase|cost)|purchase price|First purchase|Latest purchase|profit \/ loss|Crypto Wallet|crypto wallets/i);
     assert.match(html, /Luno integration is planned/);
     assert.match(html, /no confirmed partnership or account connection is claimed/);
     assert.doesNotMatch(html, /Buy &amp; sell|Buy with fiat|Sell back to fiat|fiat or crypto as the payment source/);
-    for (const label of ["Average purchase price", "Reference price (demo)", "First purchase", "Latest purchase", "Unrealized profit / loss", "Static sample prices, not a live market feed."]) assert.ok(html.includes(label), label);
+    for (const label of ["Reference price (demo)", "Estimated value in Luno", "Held in your Luno account", "Staked via Luno", "Staking rewards received", "Static sample prices, not a live market feed."]) assert.ok(html.includes(label), label);
     assert.match(html, /Choose a sample crypto holding/);
     assert.match(html, /App component with sample receipt data/);
     assert.doesNotMatch(html, /m-asset-orbit|m-art-disc|<iframe/);
@@ -64,15 +68,16 @@ test("Shared position preview shows truthful sample values and protects hidden b
     for (const asset of ["BTC", "ETH", "SOL"]) {
       const props = { asset, holding: state.crypto[asset], referencePrice: DEMO_CRYPTO_PRICES_MYR[asset], priceLabel: "Reference price (demo)" };
       const html = renderToStaticMarkup(createElement(CryptoHoldingFacts, props));
-      assert.match(html, /First purchase/);
+      assert.match(html, /Held in your Luno account/);
+      assert.doesNotMatch(html, /purchase|profit|cost/i);
       assert.ok(html.includes(asset));
       assert.doesNotMatch(html, /NaN|Infinity|undefined|Unknown/);
       const hidden = renderToStaticMarkup(createElement(CryptoHoldingFacts, { ...props, balancesVisible: false }));
       assert.ok(hidden.includes("••••••"));
       assert.ok(!hidden.includes(` ${asset}</dd>`));
     }
-    const unknown = renderToStaticMarkup(createElement(CryptoHoldingFacts, { asset: "BTC", holding: { ...state.crypto.BTC, costBasisCents: null, firstBoughtAt: null }, priceLabel: "Reference price (demo)" }));
-    assert.match(unknown, /Unavailable/);
-    assert.match(unknown, /Unknown/);
+    const noPrice = renderToStaticMarkup(createElement(CryptoHoldingFacts, { asset: "BTC", holding: state.crypto.BTC, priceLabel: "Reference price (demo)" }));
+    assert.match(noPrice, /Unavailable/);
+    assert.match(noPrice, /Not stakeable here/);
   } finally { await server.close(); }
 });

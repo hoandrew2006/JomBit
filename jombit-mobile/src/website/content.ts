@@ -43,7 +43,7 @@ export const productTabs = [
 export const questions = [
   {
     question: "What is JomBit?",
-    answer: "JomBit is a group-expense and fintech app concept built around sharing money more fairly. Receipt splitting, a shared group ledger, and simplified settlements are the core experience. The wider vision brings together separate fiat and crypto wallets, regional transfers, and a prepaid card.",
+    answer: "JomBit is a group-expense and fintech app concept built around sharing money more fairly. Receipt splitting, a shared group ledger, and simplified settlements are the core experience. The wider vision brings together a MYR wallet, a view of your own linked Luno crypto balances with staking through Luno, regional transfers, and a prepaid card. JomBit is not a crypto exchange.",
   },
   {
     question: "How does JomBit split a bill fairly?",
@@ -63,11 +63,11 @@ export const questions = [
   },
   {
     question: "Are the payment, crypto and card services live?",
-    answer: "No. Payments, FX rates, crypto staking and card issuance are simulated. JomBit does not offer crypto buying or selling. Receipt calculations, local group balances and debt simplification work. Camera capture and Gemini receipt recognition work in the configured local app, but this website’s walkthrough uses sample data. No real money or crypto is transferred. Demo settlement QRs are not valid PayNet payment QRs.",
+    answer: "No. Payments, FX rates, crypto staking and card issuance are simulated. JomBit never buys, sells or holds crypto. Receipt calculations, local group balances and debt simplification work. Camera capture and Gemini receipt recognition work in the configured local app, but this website’s walkthrough uses sample data. No real money or crypto is transferred. Demo settlement QRs are not valid PayNet payment QRs.",
   },
   {
-    question: "What is the vision for JomBit Crypto Wallet?",
-    answer: "Staking existing eligible crypto, not buying or selling it. We plan a Luno integration, but no partnership or account connection is confirmed. Today you can simulate staking and unstaking ETH or SOL; BTC holdings remain view-only. Existing purchase dates, costs and activity are preserved as historical information. CoinGecko reference prices or demo prices are for valuation, not rewards. No real staking rewards accrue. The JomBit Card remains a separate fiat-funded concept.",
+    question: "What does JomBit do with crypto?",
+    answer: "JomBit is not a crypto exchange: it never buys, sells or holds crypto, and your crypto never leaves your own Luno account. The plan is to link your Luno account so JomBit can show your Luno balances and let you stake eligible assets through Luno. No partnership or account connection is confirmed yet. Today you can simulate staking and unstaking ETH or SOL with sample balances; BTC is view-only. CoinGecko reference prices or demo prices are for valuation, not rewards. No real staking rewards accrue. The JomBit Card remains a separate fiat-funded concept.",
   },
   {
     question: "Is JomBit connected to Luno, and are staking rewards guaranteed?",
