@@ -1,4 +1,4 @@
-import { calculateExpenseShares } from "./calculations";
+import { calculateExpenseShares } from "./calculations.ts";
 import type { AppState, Expense, ExpenseItem } from "./models";
 
 const item = (

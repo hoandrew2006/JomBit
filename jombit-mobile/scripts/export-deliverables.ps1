@@ -23,10 +23,10 @@ function New-JomBitArchive($archivePath, $sourceRoot, $sourceFiles) {
 }
 
 $jombitSourceFiles = @(
-  foreach ($directory in @('api', 'app', 'design', 'lib', 'public', 'scripts', 'server', 'src', 'tests')) {
+  foreach ($directory in @('api', 'app', 'design', 'lib', 'public', 'scripts', 'server', 'src', 'supabase', 'tests')) {
     Get-ChildItem -LiteralPath (Join-Path $jombitProject $directory) -Recurse -File -Force
   }
-  foreach ($file in @('.env.example', '.gitignore', 'GEMINI-SETUP.md', 'HOSTED-SCANNING.md', 'README.md', 'index.html', 'package.json', 'package-lock.json', 'postcss.config.mjs', 'tsconfig.json', 'vercel.json', 'vite.config.ts')) {
+  foreach ($file in @('.env.example', '.gitignore', 'GEMINI-SETUP.md', 'HOSTED-SCANNING.md', 'SUPABASE-SETUP.md', 'README.md', 'index.html', 'package.json', 'package-lock.json', 'postcss.config.mjs', 'tsconfig.json', 'vercel.json', 'vite.config.ts')) {
     Get-Item -LiteralPath (Join-Path $jombitProject $file) -Force
   }
 )
@@ -37,4 +37,5 @@ foreach ($file in @('JomBit.html', 'JomBit-app-demo.html')) {
   Copy-Item -LiteralPath (Join-Path $jombitDist $file) -Destination (Join-Path $jombitOutput $file)
 }
 Copy-Item -LiteralPath (Join-Path $jombitProject 'GEMINI-SETUP.md') -Destination (Join-Path $jombitOutput 'GEMINI-SETUP.md')
+Copy-Item -LiteralPath (Join-Path $jombitProject 'SUPABASE-SETUP.md') -Destination (Join-Path $jombitOutput 'SUPABASE-SETUP.md')
 Write-Output 'Refreshed standalone JomBit website, app demo, site archive and source archive. Private environment files excluded.'

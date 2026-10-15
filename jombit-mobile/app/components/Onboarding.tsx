@@ -7,7 +7,7 @@ import { useAppState } from "@/lib/state";
 import { BrandLogo } from "./ui";
 
 export function Onboarding() {
-  const { state, setState } = useAppState();
+  const { state, setState, backendMode } = useAppState();
   const [name, setName] = useState(state.user.name);
   const [currency, setCurrency] = useState<Currency>(state.user.defaultCurrency);
   const [qr, setQr] = useState<string | undefined>(state.user.duitNowQr);
@@ -61,7 +61,7 @@ export function Onboarding() {
             {qr ? <img src={qr} alt="Uploaded DuitNow QR preview" /> : <QrCode size={28} />}
             <span>
               <strong>{qr ? "DuitNow QR added" : "Add your DuitNow QR"}</strong>
-              <small>{qr ? "Stored on this device only" : "Friends can use it when they settle with you"}</small>
+              <small>{qr ? (backendMode === "cloud" ? "Saved privately with your JomBit data" : "Stored on this device only") : "Friends can use it when they settle with you"}</small>
             </span>
             {qr ? <Check size={20} /> : <Camera size={20} />}
           </label>

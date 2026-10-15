@@ -13,6 +13,8 @@ import { ProfileScreen } from "./ProfileScreen";
 import { SettlementScreen } from "./SettlementScreen";
 import { Brand } from "./ui";
 import { WalletScreen } from "./WalletScreen";
+import { AuthGate } from "./AuthGate";
+import type { User } from "@supabase/supabase-js";
 
 type Nav = "home" | "groups" | "wallet" | "profile";
 
@@ -24,7 +26,7 @@ interface SettlementRoute {
 }
 
 function JomBitExperience() {
-  const { state } = useAppState();
+  const { state, backendMode, syncStatus } = useAppState();
   const [nav, setNav] = useState<Nav>("home");
   const [selectedGroupId, setSelectedGroupId] = useState<string>();
   const [expenseOpen, setExpenseOpen] = useState(false);
@@ -62,7 +64,7 @@ function JomBitExperience() {
 
   return (
     <div className="app-shell">
-      <header className="topbar"><Brand compact /><span className="topbar-demo"><Sparkles size={13} /> Proof of concept · local demo</span></header>
+      <header className="topbar"><Brand compact /><span className="topbar-demo"><Sparkles size={13} /> Proof of concept · {backendMode === "cloud" ? (syncStatus === "saving" ? "saving" : "cloud synced") : "local demo"}</span></header>
       <main className="app-main">
         {nav === "home" && <HomeScreen onScan={() => openExpense()} onCreateGroup={() => { setNav("groups"); setSelectedGroupId(undefined); }} onOpenGroup={openGroup} onSettleGroup={openSuggestedSettlement} onWallet={() => setNav("wallet")} />}
         {nav === "groups" && <GroupsScreen selectedGroupId={selectedGroupId} onSelectGroup={setSelectedGroupId} onAddExpense={(groupId) => openExpense(groupId)} onEditExpense={(expense) => openExpense(expense.groupId, expense)} onSettle={(group, fromId, toId, amountCents) => setSettlement({ group, fromId, toId, amountCents })} />}
@@ -80,7 +82,11 @@ function JomBitExperience() {
   );
 }
 
+function AuthenticatedApp({ user }: { user?: User }) {
+  return <AppStateProvider cloudUser={user}><JomBitExperience /></AppStateProvider>;
+}
+
 export function JomBitApp() {
-  return <AppStateProvider><JomBitExperience /></AppStateProvider>;
+  return <AuthGate>{(user) => <AuthenticatedApp user={user} />}</AuthGate>;
 }
 
