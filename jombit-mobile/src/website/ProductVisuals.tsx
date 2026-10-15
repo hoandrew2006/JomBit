@@ -26,7 +26,7 @@ export function CurrencyVisual() {
 }
 
 export function CardVisual({ metal = false }: { metal?: boolean }) {
-  return <div className={`m-bank-card ${metal ? "m-bank-card-metal" : ""}`}><div><Brand compact onLight={!metal} /><span>PREPAID CONCEPT</span></div><div className="m-bank-chip"><i /><i /><i /></div><span className="m-bank-card-number">JOMBIT · EVERYDAY</span><div><span>GOOD TIMES, ON THE GO.</span><span>DEMO</span></div></div>;
+  return <div className={`m-bank-card ${metal ? "m-bank-card-metal" : ""}`}><div><Brand compact /><span>PREPAID CONCEPT</span></div><div className="m-bank-chip"><i /><i /><i /></div><span className="m-bank-card-number">JOMBIT · EVERYDAY</span><div><span>GOOD TIMES, ON THE GO.</span><span>DEMO</span></div></div>;
 }
 
 export function JourneyIcon({ type }: { type: "food" | "travel" | "home" }) {
