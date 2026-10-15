@@ -51,7 +51,10 @@ function AuthScreen() {
       : await supabase.auth.signUp({
           email: email.trim(),
           password,
-          options: { data: { display_name: name.trim() || "JomBit Member" } },
+          options: {
+            data: { display_name: name.trim() || "JomBit Member" },
+            emailRedirectTo: new URL("/?app=1", window.location.origin).href,
+          },
         });
     setBusy(false);
     if (result.error) return setError(result.error.message);

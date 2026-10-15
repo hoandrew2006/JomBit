@@ -38,6 +38,8 @@ In Supabase, open **Authentication → URL Configuration**:
 - Redirect URL: `https://jom-bit-6667.vercel.app/**`
 - For local work, also add `http://127.0.0.1:5173/**`
 
+JomBit sends new-account confirmation links back to `https://jom-bit-6667.vercel.app/?app=1`, so confirmed users land inside the app rather than on the marketing homepage. The wildcard redirect entry above permits that destination.
+
 Email/password authentication is enabled by default. During early testing, either keep email confirmation enabled and use a real inbox, or turn it off temporarily under Authentication provider settings.
 
 ## 5. Verify
