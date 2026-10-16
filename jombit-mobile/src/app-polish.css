@@ -196,11 +196,49 @@
 .app-view .toast { box-shadow: 0 18px 38px -16px rgba(12,234,236,.55), var(--app-shadow-2); }
 
 .app-view .auth-card {
+  position: relative;
+  overflow: hidden;
   border-color: var(--app-line-strong);
-  background: rgba(24,27,26,.95);
+  background: rgba(22,25,24,.96);
   box-shadow: var(--app-shadow-5);
 }
-.app-view .auth-tabs { background: #141716; box-shadow: inset 0 1px 3px rgba(0,0,0,.3); }
+.app-view .auth-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 180px;
+  pointer-events: none;
+  background: radial-gradient(circle at 16% 0%, rgba(12,234,236,.12), transparent 58%);
+}
+.app-view .auth-card > * { position: relative; }
+.app-view .auth-header { display: grid; gap: 32px; }
+.app-view .auth-header .brand { min-height: 42px; }
+.app-view .auth-header .brand-logo { height: 38px; }
+.app-view .auth-header .brand-wordmark { font-size: 27px; letter-spacing: -.045em; }
+.app-view .auth-heading { display: grid; gap: 10px; }
+.app-view .auth-heading h1 { margin: 0; max-width: 12ch; }
+.app-view .auth-heading p { margin: 0; max-width: 38ch; color: var(--app-muted); line-height: 1.55; text-wrap: pretty; }
+.app-view .auth-form { gap: 18px; margin-top: 34px; }
+.app-view .auth-form label { display: grid; gap: 8px; color: #c9cfcc; font-size: 13px; font-weight: 700; }
+.app-view .auth-input { min-height: 56px; padding-inline: 16px 10px; border-radius: 15px; }
+.app-view .auth-input > svg { color: #89908d; }
+.app-view .auth-input input { min-height: 52px; color: #f7f9f8; font-weight: 600; }
+.app-view .auth-input input::placeholder { color: #777f7b; font-weight: 500; }
+.app-view .auth-password-toggle { flex: 0 0 auto; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 12px; color: #99a19d; background: transparent; }
+.app-view .auth-password-toggle:active { color: var(--cyan); background: rgba(12,234,236,.08); }
+.app-view .auth-error,
+.app-view .auth-message { display: flex; align-items: flex-start; gap: 9px; padding: 13px 14px; }
+.app-view .auth-error svg,
+.app-view .auth-message svg { flex: 0 0 auto; margin-top: 1px; }
+.app-view .auth-submit { min-height: 54px; margin-top: 2px; border-radius: 16px; font-size: 15px; }
+.app-view .auth-submit:disabled { cursor: wait; opacity: .66; box-shadow: none; }
+.app-view .auth-mode-switch { margin: 20px 0 0; color: var(--app-muted); text-align: center; font-size: 13px; }
+.app-view .auth-mode-switch button { min-height: 44px; padding: 0 4px; border: 0; color: var(--cyan); background: transparent; font: inherit; font-weight: 800; }
+.app-view .auth-card > .fine-print { max-width: 46ch; margin: 4px auto 0; text-align: center; line-height: 1.5; }
+
+@media (hover: hover) and (pointer: fine) {
+  .app-view .auth-password-toggle:hover { color: white; background: rgba(255,255,255,.055); }
+}
 
 .app-view .wallet-hero,
 .app-view .group-total-card,
@@ -215,6 +253,13 @@
 }
 
 @media (max-width: 720px) {
+  .app-view .auth-shell { min-height: 100svh; align-items: start; padding: 0; }
+  .app-view .auth-card { width: 100%; min-height: 100svh; padding: max(28px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom)); border: 0; border-radius: 0; }
+  .app-view .auth-header { gap: 48px; }
+  .app-view .auth-header .brand-logo { height: 34px; }
+  .app-view .auth-header .brand-wordmark { font-size: 24px; }
+  .app-view .auth-heading h1 { font-size: clamp(38px, 12vw, 48px); line-height: 1; }
+  .app-view .auth-heading p { font-size: 14px; }
   .app-view .screen { padding-inline: 18px; }
   .app-view .page-header { margin-bottom: 22px; }
   .app-view .summary-grid { gap: 10px; }

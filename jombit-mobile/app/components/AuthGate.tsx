@@ -1,8 +1,8 @@
-import { LockKeyhole, Mail, UserRound } from "lucide-react";
+import { AlertCircle, CheckCircle2, Eye, EyeOff, LockKeyhole, Mail, UserRound } from "lucide-react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase, supabaseConfigured } from "@/lib/supabase";
-import { BrandLogo } from "./ui";
+import { Brand, BrandLogo } from "./ui";
 
 interface Props {
   children: (user?: User) => ReactNode;
@@ -38,6 +38,7 @@ function AuthScreen() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -57,34 +58,55 @@ function AuthScreen() {
           },
         });
     setBusy(false);
-    if (result.error) return setError(result.error.message);
+    if (result.error) return setError(authErrorMessage(result.error.message, mode));
     if (mode === "signup" && !result.data.session) {
       setMessage("Check your email to confirm your JomBit account, then sign in.");
       setMode("signin");
     }
   };
 
+  const switchMode = (nextMode: "signin" | "signup") => {
+    setMode(nextMode);
+    setError("");
+    setMessage("");
+  };
+
   return (
     <main className="auth-shell">
-      <section className="auth-card">
-        <BrandLogo />
-        <p className="eyebrow">YOUR SHARED MONEY, IN SYNC</p>
-        <h1>{mode === "signin" ? "Welcome back." : "Create your JomBit account."}</h1>
-        <p>Keep your groups, expenses and demo wallet available across your devices.</p>
-        <div className="auth-tabs" role="tablist" aria-label="Account action">
-          <button type="button" className={mode === "signin" ? "active" : ""} onClick={() => { setMode("signin"); setError(""); }}>Sign in</button>
-          <button type="button" className={mode === "signup" ? "active" : ""} onClick={() => { setMode("signup"); setError(""); }}>Create account</button>
-        </div>
-        <form className="auth-form" onSubmit={submit}>
+      <section className="auth-card" aria-labelledby="auth-title">
+        <header className="auth-header">
+          <Brand />
+          <div className="auth-heading">
+            <h1 id="auth-title">{mode === "signin" ? "Welcome back" : "Create your account"}</h1>
+            <p>Access your shared expenses on any device.</p>
+          </div>
+        </header>
+        <form className="auth-form" id="auth-panel" onSubmit={submit} aria-busy={busy}>
           {mode === "signup" && <label><span>Display name</span><span className="auth-input"><UserRound size={18} /><input value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" placeholder="How friends see you" /></span></label>}
           <label><span>Email</span><span className="auth-input"><Mail size={18} /><input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" /></span></label>
-          <label><span>Password</span><span className="auth-input"><LockKeyhole size={18} /><input type="password" required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "signin" ? "current-password" : "new-password"} placeholder="At least 8 characters" /></span></label>
-          {error && <p className="auth-error" role="alert">{error}</p>}
-          {message && <p className="auth-message" role="status">{message}</p>}
-          <button className="primary-button" type="submit" disabled={busy}>{busy ? "Please wait…" : mode === "signin" ? "Sign in to JomBit" : "Create account"}</button>
+          <label><span>Password</span><span className="auth-input"><LockKeyhole size={18} /><input type={showPassword ? "text" : "password"} required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "signin" ? "current-password" : "new-password"} placeholder="At least 8 characters" /><button className="auth-password-toggle" type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword((visible) => !visible)}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></span></label>
+          {error && <p className="auth-error" role="alert"><AlertCircle size={17} /><span>{error}</span></p>}
+          {message && <p className="auth-message" role="status"><CheckCircle2 size={17} /><span>{message}</span></p>}
+          <button className="primary-button auth-submit" type="submit" disabled={busy}>{busy ? "Please wait…" : mode === "signin" ? "Sign in to JomBit" : "Create account"}</button>
         </form>
-        <p className="fine-print">JomBit remains a proof of concept. Wallet, settlement, card and staking actions are simulated.</p>
+        <p className="auth-mode-switch">{mode === "signin" ? "New to JomBit?" : "Already have an account?"} <button type="button" onClick={() => switchMode(mode === "signin" ? "signup" : "signin")}>{mode === "signin" ? "Create account" : "Sign in"}</button></p>
+        <p className="fine-print">Prototype only. All financial actions are simulated.</p>
       </section>
     </main>
   );
+}
+
+function authErrorMessage(message: string, mode: "signin" | "signup") {
+  const normalized = message.toLowerCase();
+  if (normalized.includes("rate limit") || normalized.includes("email rate")) {
+    return "Too many confirmation emails were requested. Please wait before trying again.";
+  }
+  if (normalized.includes("invalid login credentials")) return "Email or password is incorrect.";
+  if (normalized.includes("email not confirmed")) return "Confirm your email before signing in.";
+  if (normalized.includes("already registered") || normalized.includes("already exists")) {
+    return "An account already exists for this email. Sign in instead.";
+  }
+  return mode === "signin"
+    ? "We couldn’t sign you in. Check your details and try again."
+    : "We couldn’t create your account. Please try again.";
 }
