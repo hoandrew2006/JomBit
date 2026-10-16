@@ -23,3 +23,11 @@ The intended result is a calmer hierarchy: the receipt action stays prominent, m
 The home screen was measured at 390px, 1440px and 1728px with Better Design's spacing inspection. After fixes, the review reported no critical or serious findings. Moderate findings are limited to legacy spacing values that form part of the current JomBit visual rhythm.
 
 The authentication screen was rendered and inspected at 390px, 1440px and 1728px. Its final automated spacing report could not be returned because the Better Design free-query quota was exhausted after capture.
+
+## Product-language pass
+
+- “Preview mode” is the single global status label; core receipt and group flows use direct product language.
+- Safety context stays close to wallet, settlement, staking and card actions where a test balance could otherwise be mistaken for real money.
+- Seed activity reads like normal account history. Technical words such as “demo”, “mock” and “simulated” are kept out of routine buttons and titles.
+- Roadmap copy appears only where a provider or feature is genuinely not connected, including Luno staking and card issuing.
+- Home activity contains real ledger entries only; the previous hard-coded wallet row was removed.

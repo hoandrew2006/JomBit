@@ -22,7 +22,7 @@
 }
 
 .app-view .app-shell { background: linear-gradient(180deg, rgba(255,255,255,.012), transparent 26rem); }
-.app-view .app-main { padding-bottom: 8px; }
+.app-view .app-main { padding-bottom: 18px; }
 
 .app-view .topbar {
   position: sticky;
@@ -40,6 +40,7 @@
   background: rgba(255,255,255,.028);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
 }
+.app-view .topbar-demo { font-weight: 700; letter-spacing: .01em; }
 
 .app-view .screen { animation: appPageIn .34s var(--app-ease) both; }
 @keyframes appPageIn { from { opacity: 0; transform: translateY(8px) scale(.995); } }
@@ -98,6 +99,36 @@
 .app-view .section-heading button { color: var(--app-muted); }
 .app-view .section-heading button { min-height: 44px; padding: 0 8px; border-radius: 10px; }
 .app-view .primary-button.compact { min-height: 44px; }
+.app-view .activity-empty {
+  margin: 0;
+  padding: 28px 20px;
+  color: var(--app-muted);
+  text-align: center;
+  font-size: 12px;
+}
+
+.app-view .onboarding-helper {
+  margin: -2px 0 0;
+  color: var(--app-muted);
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.app-view .product-disclosure {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  color: #9fa9a5 !important;
+  border: 1px solid var(--app-line);
+  border-radius: 13px;
+  background: rgba(255,255,255,.022);
+  font-size: 10px;
+  line-height: 1.55;
+}
+.app-view .product-disclosure svg { flex: 0 0 auto; margin-top: 1px; color: var(--cyan); }
 
 .app-view .quick-actions button,
 .app-view .wallet-actions button {
@@ -243,6 +274,13 @@
 .app-view .wallet-hero,
 .app-view .group-total-card,
 .app-view .jombit-card-visual { box-shadow: var(--app-shadow-2); }
+.app-view .wallet-screen > .segmented { position: sticky; top: 78px; z-index: 12; backdrop-filter: blur(14px); }
+.app-view .fiat-funding-note { border: 1px solid rgba(12,234,236,.11); background: rgba(12,234,236,.045); }
+.app-view .crypto-provider-note { box-shadow: var(--app-shadow-2); }
+.app-view .crypto-market-status,
+.app-view .crypto-position,
+.app-view .fiat-rate-card,
+.app-view .fiat-legacy { box-shadow: var(--app-shadow-1); }
 .app-view .activity-amount strong,
 .app-view .wallet-hero > strong,
 .app-view .group-total-card strong { font-variant-numeric: tabular-nums; }
@@ -324,6 +362,8 @@
   .app-view .danger-zone { align-items: flex-start; flex-direction: column; }
   .app-view .danger-zone button { width: 100%; }
   .app-view .bottom-nav { width: min(calc(100% - 22px), 660px); }
+  .app-view .wallet-screen > .segmented { top: 66px; }
+  .app-view .product-disclosure { margin-top: 14px; }
 }
 
 @media (max-width: 360px) {

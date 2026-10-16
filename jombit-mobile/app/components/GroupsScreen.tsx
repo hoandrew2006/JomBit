@@ -194,7 +194,7 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
           <div className="emoji-name-row"><label><span>Icon</span><input className="emoji-input" value={emoji} onChange={(event) => setEmoji(event.target.value.slice(0, 3))} /></label><label className="grow"><span>Group name</span><input value={groupName} onChange={(event) => setGroupName(event.target.value)} placeholder="e.g. Penang road trip" /></label></div>
           <label><span>Default currency</span><select value={currency} onChange={(event) => setCurrency(event.target.value as Currency)}><option value="MYR">MYR — Malaysian Ringgit</option><option value="SGD">SGD — Singapore Dollar</option><option value="THB">THB — Thai Baht</option><option value="IDR">IDR — Indonesian Rupiah</option></select></label>
           <label><span>Invite names <small>(comma separated)</small></span><textarea value={memberNames} onChange={(event) => setMemberNames(event.target.value)} placeholder="Maya, Daniel, Sarah" /></label>
-          <p className="inline-note">You will be added to the group automatically. Friends are mock members in this demo.</p>
+          <p className="inline-note">You’re added automatically. You can add more people from the group page later.</p>
           <button className="primary-button" disabled={!groupName.trim()} onClick={createGroup}>Create JomBit group</button>
         </div>
       </Modal>

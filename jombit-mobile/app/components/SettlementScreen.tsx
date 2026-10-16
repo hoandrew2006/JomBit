@@ -46,7 +46,7 @@ export function SettlementScreen({ group, fromId, toId, amountCents, onClose, on
         id: `tx-${Date.now()}`,
         kind: "settlement",
         title: `${from.name} settled with ${to.name}`,
-        subtitle: `${group.name} · Demo DuitNow settlement`,
+        subtitle: `${group.name} · Settlement preview`,
         amountCents,
         currency: group.currency,
         date: new Date().toISOString(),
@@ -66,7 +66,7 @@ export function SettlementScreen({ group, fromId, toId, amountCents, onClose, on
       <div className="settlement-screen settlement-success">
         <Brand />
         <div className="success-check"><Check size={44} /></div>
-        <p className="eyebrow">DEMO SETTLEMENT RECORDED</p>
+        <p className="eyebrow">SETTLEMENT RECORDED</p>
         <h1>{remaining === 0 ? "You’re all settled 🎉" : "Payment marked as paid."}</h1>
         <p>JomBit has updated the group ledger and simplified what remains. No real funds were moved.</p>
         <div className="payment-recap"><span>{from.name} <ArrowRight size={16} /> {to.name}</span><strong>{formatMoney(amountCents, group.currency)}</strong></div>
@@ -77,7 +77,7 @@ export function SettlementScreen({ group, fromId, toId, amountCents, onClose, on
 
   return (
     <div className="settlement-screen">
-      <header className="expense-flow-header"><button className="back-button" onClick={onClose}><ArrowLeft size={18} /> Back</button><Brand compact /><span className="demo-pill"><LockKeyhole size={13} /> Demo only</span></header>
+      <header className="expense-flow-header"><button className="back-button" onClick={onClose}><ArrowLeft size={18} /> Back</button><Brand compact /><span className="demo-pill"><LockKeyhole size={13} /> Preview mode</span></header>
       <section className="settlement-content">
         <p className="eyebrow">SETTLE UP</p>
         <h1>One payment. A much cleaner tab.</h1>
@@ -91,21 +91,21 @@ export function SettlementScreen({ group, fromId, toId, amountCents, onClose, on
         </div>
 
         {!recipientHasQr && (
-          <div className="warning-note"><QrCode size={20} /><span><strong>{to.name} hasn’t added a DuitNow QR</strong><small>You can still record this demo settlement below.</small></span></div>
+          <div className="warning-note"><QrCode size={20} /><span><strong>{to.name} hasn’t added a DuitNow QR</strong><small>You can still record the settlement in your group ledger.</small></span></div>
         )}
 
         {!generated ? (
           <button className="primary-button qr-generate" onClick={generate} disabled={loading || !recipientHasQr}>{loading ? <><span className="spinner" /> Preparing payment QR…</> : <><QrCode size={19} /> Generate Payment QR</>}</button>
         ) : (
           <div className="qr-panel">
-            <div className="qr-label"><ShieldCheck size={16} /> DEMO PAYMENT QR</div>
+            <div className="qr-label"><ShieldCheck size={16} /> PAYMENT QR PREVIEW</div>
             <div className="qr-code"><QRCodeSVG value={payload} size={202} bgColor="#ffffff" fgColor="#151515" level="M" marginSize={2} /></div>
             <strong>Scan to preview payment</strong>
             <small>{payload}</small>
           </div>
         )}
-        <p className="poc-warning">Proof-of-concept payment QR. This is not a valid PayNet QR and no real funds will be transferred.</p>
-        <button className="secondary-button full-width" onClick={markPaid} disabled={loading}>{loading ? <><span className="spinner dark" /> Recording…</> : "Mark as Paid — Demo"}</button>
+        <p className="product-disclosure"><ShieldCheck size={15} /> QR preview only. It is not a valid PayNet QR and cannot transfer funds.</p>
+        <button className="secondary-button full-width" onClick={markPaid} disabled={loading}>{loading ? <><span className="spinner dark" /> Recording…</> : "Mark as paid"}</button>
       </section>
     </div>
   );

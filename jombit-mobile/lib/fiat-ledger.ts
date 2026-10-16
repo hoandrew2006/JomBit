@@ -17,7 +17,7 @@ export type FiatCommand = { id: string } & (
 const RATE_SCALE = 1_000_000_000n;
 
 function checkedCents(value: number) {
-  if (!Number.isSafeInteger(value) || value < 0) throw new Error("The amount is invalid or exceeds the demo limit.");
+  if (!Number.isSafeInteger(value) || value < 0) throw new Error("The amount is invalid or exceeds the preview limit.");
   return value;
 }
 
@@ -60,7 +60,7 @@ export function legacyMyrCredit(foreignCents: number, currency: ForeignCurrency,
 const rateRecord = (rates: FxRateSnapshot) => ({ source: rates.source, ...(rates.updatedAt ? { rateUpdatedAt: rates.updatedAt } : {}) });
 
 export function executeFiatCommand(state: AppState, command: FiatCommand, now = Date.now()): AppState {
-  if (!command.id || state.walletTransactions.some((tx) => tx.id === command.id)) throw new Error("This demo transaction was already recorded.");
+  if (!command.id || state.walletTransactions.some((tx) => tx.id === command.id)) throw new Error("This transaction was already recorded.");
   const balances = { ...state.fiatBalances };
   checkedCents(balances.MYR);
   const date = new Date(now).toISOString();
@@ -73,7 +73,7 @@ export function executeFiatCommand(state: AppState, command: FiatCommand, now = 
     balances.MYR = checkedCents(balances.MYR + amountCents);
     // Ensure all supported foreign-currency previews remain representable.
     for (const currency of FOREIGN_CURRENCIES) myrBudgetInCurrency(balances.MYR, currency);
-    entries = [{ id: command.id, date, kind: "topup", title: "MYR deposit — Demo", subtitle: "Added to your MYR wallet · simulated bank deposit", amountCents, currency: "MYR", direction: "in" }];
+    entries = [{ id: command.id, date, kind: "topup", title: "MYR wallet deposit", subtitle: "Added to your preview balance", amountCents, currency: "MYR", direction: "in" }];
   } else if (command.action === "send") {
     const member = state.members[command.recipientId];
     if (!Object.hasOwn(state.members, command.recipientId) || !member || member.id !== command.recipientId || member.id === state.user.id) throw new Error("Choose another JomBit member.");
@@ -84,12 +84,12 @@ export function executeFiatCommand(state: AppState, command: FiatCommand, now = 
     balances.MYR -= debitCents;
     const recipientBalance = checkedCents(state.counterpartBalances[member.id]?.[command.currency] ?? 0);
     counterparts = { ...state.counterpartBalances, [member.id]: { ...state.counterpartBalances[member.id], [command.currency]: checkedCents(recipientBalance + receiveCents) } };
-    entries = [{ id: command.id, date, kind: "transfer", title: `Sent to ${member.name} — Demo`, subtitle: command.currency === "MYR" ? "JomBit-to-JomBit transfer · MYR wallet" : `MYR converted to ${command.currency} at payment · ${rates.source === "live" ? "live" : "demo"} rate`, amountCents: debitCents, currency: "MYR", direction: "out", fiat: { fromCurrency: "MYR", toCurrency: command.currency, fromCents: debitCents, toCents: receiveCents, rate: 1 / rates.inMyr[command.currency], feeCents: 0, ...rateRecord(rates) } }];
+    entries = [{ id: command.id, date, kind: "transfer", title: `Sent to ${member.name}`, subtitle: command.currency === "MYR" ? "JomBit-to-JomBit transfer · MYR wallet" : `MYR converted to ${command.currency} at payment · ${rates.source === "live" ? "live" : "fallback"} rate`, amountCents: debitCents, currency: "MYR", direction: "out", fiat: { fromCurrency: "MYR", toCurrency: command.currency, fromCents: debitCents, toCents: receiveCents, rate: 1 / rates.inMyr[command.currency], feeCents: 0, ...rateRecord(rates) } }];
   } else if (command.action === "consolidate") {
     const rates = checkedRates(command.rates ?? DEMO_FX_RATES);
     for (const currency of FOREIGN_CURRENCIES) {
       checkedCents(balances[currency]);
-      if (balances[currency] !== command.expectedForeign?.[currency]) throw new Error("The previous demo balances changed. Review the conversion again.");
+      if (balances[currency] !== command.expectedForeign?.[currency]) throw new Error("The earlier balances changed. Review the conversion again.");
     }
     const existing = FOREIGN_CURRENCIES.filter((currency) => balances[currency] > 0);
     if (!existing.length) throw new Error("There are no earlier foreign-currency balances to move.");
@@ -99,7 +99,7 @@ export function executeFiatCommand(state: AppState, command: FiatCommand, now = 
       if (creditCents === 0) throw new Error("An earlier balance is worth less than RM0.01. It has been kept unchanged.");
       balances.MYR = checkedCents(balances.MYR + creditCents);
       balances[currency] = 0;
-      return { id: index === 0 ? command.id : `${command.id}-${currency}`, date, kind: "exchange", title: `${currency} → MYR — Demo`, subtitle: "Earlier demo balance moved to your MYR wallet", amountCents: creditCents, currency: "MYR", direction: "in", fiat: { fromCurrency: currency, toCurrency: "MYR", fromCents: foreignCents, toCents: creditCents, rate: rates.inMyr[currency], feeCents: 0, ...rateRecord(rates) } };
+      return { id: index === 0 ? command.id : `${command.id}-${currency}`, date, kind: "exchange", title: `${currency} → MYR`, subtitle: "Earlier balance moved to your MYR wallet", amountCents: creditCents, currency: "MYR", direction: "in", fiat: { fromCurrency: currency, toCurrency: "MYR", fromCents: foreignCents, toCents: creditCents, rate: rates.inMyr[currency], feeCents: 0, ...rateRecord(rates) } };
     });
     for (const currency of FOREIGN_CURRENCIES) myrBudgetInCurrency(balances.MYR, currency);
   } else throw new Error("Unsupported fiat transaction.");

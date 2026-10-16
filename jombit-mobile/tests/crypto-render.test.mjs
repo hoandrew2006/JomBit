@@ -36,7 +36,7 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
     for (const location of [{ protocol: "file:", hostname: "" }, { protocol: "about:", hostname: "" }, { protocol: "http:", hostname: "static.example" }]) assert.equal(supportsLiveCryptoPrices(location), false, "Offline and insecure non-local hosts must default to labelled demo prices");
     const render = (visible = true) => renderToStaticMarkup(createElement(CryptoDesk, { balancesVisible: visible }));
     let html = render();
-    for (const content of ["STAKING OVERVIEW", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Execution price per coin", "Staking &amp; earlier activity", "Earlier demo record", "Staking simulation only", "Demo stake", "Unstake ETH", "Luno integration is planned, not connected", "BTC", "View-only"]) assert.ok(html.includes(content), content);
+    for (const content of ["STAKING OVERVIEW", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Execution price per coin", "Staking &amp; earlier activity", "Earlier record", "Staking preview only", "Stake ETH", "Unstake ETH", "Luno integration is planned, not connected", "BTC", "View-only"]) assert.ok(html.includes(content), content);
     assert.equal([...html.matchAll(/class="crypto-order"/g)].length, 5);
     assert.match(html, /aria-pressed="true"/);
     assert.doesNotMatch(html, />\s*(Buy|Sell) (BTC|ETH|SOL)|MYR to spend|Buy &amp; sell|MYR available to practise/);
@@ -63,7 +63,7 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
     html = render();
     assert.match(html, /Live prices unavailable/);
     assert.match(html, /The price feed is unavailable/);
-    const stakeButton = [...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)].find((match) => match[2].includes("Demo stake"));
+    const stakeButton = [...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)].find((match) => match[2].includes("Stake ETH"));
     assert.ok(stakeButton, "Staking control stays available without a price feed");
     assert.doesNotMatch(stakeButton[1], /disabled/);
     assert.doesNotMatch(html, /NaN|Infinity|\bundefined\b/);
