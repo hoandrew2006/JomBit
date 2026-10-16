@@ -252,6 +252,54 @@
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 18px 40px -28px rgba(12,234,236,.35);
 }
 
+.app-view .profile-screen { width: min(100%, 760px); margin-inline: auto; }
+.app-view .profile-screen > .page-header { margin-bottom: 18px; }
+.app-view .profile-screen > .page-header h1 { font-size: 34px; }
+.app-view .profile-identity {
+  min-height: 86px;
+  padding: 18px;
+  border-color: rgba(12,234,236,.13);
+  background: linear-gradient(145deg, rgba(12,234,236,.065), transparent 58%), var(--app-surface);
+}
+.app-view .profile-identity h2 { font-size: 20px; letter-spacing: -.025em; }
+.app-view .profile-identity p { overflow-wrap: anywhere; }
+.app-view .profile-identity > span { padding: 7px 9px; border-radius: 999px; color: #86e6aa; background: rgba(54,209,108,.08); }
+.app-view .profile-card { margin-top: 14px; padding: 22px; border-radius: 22px; }
+.app-view .profile-card .section-heading { margin-bottom: 16px; }
+.app-view .profile-card .section-heading p { max-width: 52ch; font-size: 12px; line-height: 1.5; }
+.app-view .profile-qr-upload {
+  min-height: 84px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.055);
+  background: var(--app-surface-raised);
+  transition: border-color .16s ease, background-color .16s ease, transform .16s var(--app-ease);
+}
+.app-view .profile-qr-upload > span:first-of-type,
+.app-view .profile-qr-upload img { width: 56px; height: 56px; }
+.app-view .profile-qr-upload > svg:last-child { color: #828986; }
+.app-view .about-jombit {
+  margin-top: 14px;
+  padding: 22px;
+  color: white;
+  border: 1px solid var(--app-line);
+  border-radius: 22px;
+  background: radial-gradient(circle at 100% 0%, rgba(12,234,236,.1), transparent 38%), var(--app-surface-soft);
+  box-shadow: var(--app-shadow-1);
+}
+.app-view .about-jombit-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.app-view .about-jombit-heading > span { padding: 6px 9px; border-radius: 999px; color: var(--cyan); background: rgba(12,234,236,.08); font-size: 10px; font-weight: 800; }
+.app-view .about-jombit h2 { margin: 24px 0 8px; font-size: 23px; color: white; }
+.app-view .about-jombit > p { max-width: 62ch; margin: 0; color: var(--app-muted); font-size: 12px; line-height: 1.6; }
+.app-view .about-jombit-facts { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 8px !important; margin-top: 18px !important; }
+.app-view .about-jombit-facts span { min-height: 48px; padding: 10px 11px !important; border-radius: 13px !important; color: #c9cfcc; background: rgba(255,255,255,.035) !important; font-size: 10px !important; }
+.app-view .about-jombit-facts svg { flex: 0 0 auto; color: var(--cyan); }
+.app-view .danger-zone { margin-top: 14px; min-height: 78px; padding: 16px 18px; border-color: rgba(255,113,106,.16); background: rgba(255,113,106,.025); }
+.app-view .danger-zone button { min-height: 44px; padding-inline: 16px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .app-view .profile-qr-upload:hover { transform: translateY(-1px); border-color: rgba(12,234,236,.18); background: #252a28; }
+}
+
 @media (max-width: 720px) {
   .app-view .auth-shell { min-height: 100svh; align-items: start; padding: 0; }
   .app-view .auth-card { width: 100%; min-height: 100svh; padding: max(28px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom)); border: 0; border-radius: 0; }
@@ -270,6 +318,11 @@
   .app-view .horizontal-groups { display: grid; grid-template-columns: 1fr; overflow: visible; padding-bottom: 0; }
   .app-view .horizontal-groups .group-preview { min-width: 0; }
   .app-view .activity-row { min-height: 72px; }
+  .app-view .profile-card { padding: 18px; }
+  .app-view .about-jombit { padding: 20px 18px; }
+  .app-view .about-jombit-facts { grid-template-columns: 1fr; }
+  .app-view .danger-zone { align-items: flex-start; flex-direction: column; }
+  .app-view .danger-zone button { width: 100%; }
   .app-view .bottom-nav { width: min(calc(100% - 22px), 660px); }
 }
 
