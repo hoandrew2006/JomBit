@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowDownLeft,
   ArrowRight,
   ArrowUpRight,
   Camera,
@@ -26,6 +25,8 @@ interface Props {
 
 export function HomeScreen({ onScan, onCreateGroup, onOpenGroup, onSettleGroup, onWallet }: Props) {
   const { state } = useAppState();
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   const groupStats = state.groups.map((group) => {
     const expenses = state.expenses.filter((expense) => expense.groupId === group.id);
     const balances = groupBalances(group, state.expenses, state.settlements);
@@ -51,7 +52,7 @@ export function HomeScreen({ onScan, onCreateGroup, onOpenGroup, onSettleGroup, 
     <div className="screen home-screen">
       <PageHeader
         eyebrow="Your shared money, simplified"
-        title={`Good afternoon, ${state.user.name.split(" ")[0]}`}
+        title={`${greeting}, ${state.user.name.split(" ")[0]}`}
         action={<Avatar name={state.user.name} size="lg" />}
       />
 
@@ -126,11 +127,7 @@ export function HomeScreen({ onScan, onCreateGroup, onOpenGroup, onSettleGroup, 
               </button>
             );
           })}
-          <button className="activity-row" onClick={onWallet}>
-            <span className="activity-icon wallet-icon"><ArrowDownLeft size={18} /></span>
-            <span><strong>Demo wallet top up</strong><small>JomBit Wallet, simulated</small></span>
-            <span className="activity-amount positive"><strong>+{formatMoney(50000)}</strong><small>No real funds moved</small></span>
-          </button>
+          {!recentExpenses.length && <p className="activity-empty">Your latest shared expenses will appear here.</p>}
         </div>
       </section>
     </div>

@@ -28,7 +28,7 @@ test("Fiat screen presents one MYR wallet, equivalent values, privacy and preser
     assert.deepEqual([fixture.state.fiatBalances.SGD, fixture.state.fiatBalances.THB, fixture.state.fiatBalances.IDR], [0, 0, 0]);
     const render = (balancesVisible = true) => renderToStaticMarkup(createElement(FiatWallet, { balancesVisible }));
     let html = render();
-    for (const text of ["Your MYR wallet", "Deposit MYR", "Send from MYR", "Top up in MYR only", "not separate balances", "static demo rate", "Send in SGD", "RM1,842.50"]) assert.ok(html.includes(text), text);
+    for (const text of ["Your MYR wallet", "Deposit MYR", "Send from MYR", "Top up in MYR", "not separate balances", "fallback rate", "Send in SGD", "RM1,842.50"]) assert.ok(html.includes(text), text);
     // Flags are inline SVG images (not emoji or letter badges) beside the country name and currency code.
     assert.equal((html.match(/<svg class="country-flag"/g) ?? []).length, 3);
     for (const [country, code] of [["Singapore", "SGD"], ["Thailand", "THB"], ["Indonesia", "IDR"]]) assert.match(html, new RegExp(`<strong>${country}</strong><small>${code} · estimated equivalent`));
@@ -39,18 +39,18 @@ test("Fiat screen presents one MYR wallet, equivalent values, privacy and preser
     assert.doesNotMatch(render(false), /RM1,842\.50/);
     fixture.state.fiatBalances.SGD = 18450;
     html = render();
-    assert.match(html, /Balances from the previous demo/);
-    assert.match(html, /not included in your MYR balance/);
+    assert.match(html, /Earlier currency balances/);
+    assert.match(html, /remain separate from the estimates above/);
     assert.match(html, /Review move to MYR/);
     assert.equal(fixture.state.fiatBalances.SGD, 18450, "Rendering must not migrate money automatically");
-    assert.match(html, /Live rates unavailable\. Showing static demo rates\./);
+    assert.match(html, /Live rates are unavailable\. Fallback rates are shown\./);
     const { fx } = await server.ssrLoadModule("virtual:jombit-fx-rates");
     fx.value = { status: "live", rates: { inMyr: { MYR: 1, SGD: 1 / 0.3047, THB: 1 / 7.71, IDR: 1 / 3801.5 }, source: "live", updatedAt: "2026-10-10T00:02:31.000Z" } };
     html = render();
     assert.match(html, /Rates updated 10 Oct 2026, 08:02 am MYT/);
-    assert.match(html, /Rates By Exchange Rate API/);
-    assert.match(html, /1 MYR ≈ 0\.3047 SGD · live rate/);
-    assert.doesNotMatch(html, /static demo rate/);
+    assert.match(html, /Rates by Exchange Rate API/);
+    assert.match(html, /1 MYR ≈ 0\.3047 SGD · live reference rate/);
+    assert.doesNotMatch(html, /fallback rate/);
     fx.value = { status: "fallback", rates: fx.value.rates };
     fixture.state.fiatBalances.MYR = 0;
     html = render();

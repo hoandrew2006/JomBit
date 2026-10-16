@@ -42,14 +42,14 @@ function parseAmount(value: string, decimals: number) {
 // Staking-only simulation. Moves existing units, never cash, and preserves acquisition history.
 export function executeCryptoCommand(state: AppState, command: CryptoCommand, now = Date.now()): AppState {
   if (!["stake", "unstake"].includes(command.action)) throw new Error("JomBit does not support buying or selling crypto.");
-  if (!command.id || state.walletTransactions.some((tx) => tx.id === command.id)) throw new Error("This demo activity was already recorded.");
-  if (!STAKING_ASSETS.includes(command.asset)) throw new Error("This asset is view-only. Demo staking supports ETH and SOL.");
+  if (!command.id || state.walletTransactions.some((tx) => tx.id === command.id)) throw new Error("This staking activity was already recorded.");
+  if (!STAKING_ASSETS.includes(command.asset)) throw new Error("This asset is view-only. Staking supports ETH and SOL in this preview.");
   const { action, asset } = command;
   const holding = state.crypto[asset];
   if (!holding || !Number.isFinite(holding.available) || !Number.isFinite(holding.staked) || holding.available < 0 || holding.staked < 0) throw new Error("This holding needs to be checked before staking.");
   let available = units(holding.available);
   let staked = units(holding.staked);
-  if (!Number.isSafeInteger(available + staked)) throw new Error("Holding quantity exceeds the demo limit.");
+  if (!Number.isSafeInteger(available + staked)) throw new Error("Holding quantity exceeds the preview limit.");
   const moved = units(parseAmount(command.amount, 8));
   if (moved < 1) throw new Error("Enter at least 0.00000001 units.");
   if (action === "stake") {
@@ -61,8 +61,8 @@ export function executeCryptoCommand(state: AppState, command: CryptoCommand, no
   }
   const transaction: WalletTransaction = {
     id: command.id, date: new Date(now).toISOString(), kind: action,
-    title: `${action === "stake" ? "Staked" : "Unstaked"} ${asset} - Demo`,
-    subtitle: "Local staking simulation. Not sent to Luno.", direction: "neutral",
+    title: `${action === "stake" ? "Staked" : "Unstaked"} ${asset}`,
+    subtitle: "Staking preview · not sent to Luno", direction: "neutral",
     crypto: { asset, quantity: quantity(moved), priceMyr: null, priceSource: null, priceUpdatedAt: null, feeCents: 0 },
   };
   return { ...state, crypto: { ...state.crypto, [asset]: { ...holding, available: quantity(available), staked: quantity(staked) } }, walletTransactions: [transaction, ...state.walletTransactions] };

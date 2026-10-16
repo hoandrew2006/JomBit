@@ -90,7 +90,7 @@ function AuthScreen() {
           <button className="primary-button auth-submit" type="submit" disabled={busy}>{busy ? "Please wait…" : mode === "signin" ? "Sign in to JomBit" : "Create account"}</button>
         </form>
         <p className="auth-mode-switch">{mode === "signin" ? "New to JomBit?" : "Already have an account?"} <button type="button" onClick={() => switchMode(mode === "signin" ? "signup" : "signin")}>{mode === "signin" ? "Create account" : "Sign in"}</button></p>
-        <p className="fine-print">Prototype only. All financial actions are simulated.</p>
+        <p className="fine-print">Preview mode uses test balances for wallet, settlement, staking and card features.</p>
       </section>
     </main>
   );

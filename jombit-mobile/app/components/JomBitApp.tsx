@@ -64,7 +64,7 @@ function JomBitExperience() {
 
   return (
     <div className="app-shell" data-bd-group="app-shell">
-      <header className="topbar" data-bd-align-group="app-column"><Brand compact /><span className="topbar-demo"><Sparkles size={13} /> Proof of concept · {backendMode === "cloud" ? (syncStatus === "saving" ? "saving" : "cloud synced") : "local demo"}</span></header>
+      <header className="topbar" data-bd-align-group="app-column"><Brand compact /><span className="topbar-demo"><Sparkles size={13} /> Preview mode · {backendMode === "cloud" ? (syncStatus === "saving" ? "saving" : "synced") : "on this device"}</span></header>
       <main className="app-main" data-bd-align-group="app-column">
         {nav === "home" && <HomeScreen onScan={() => openExpense()} onCreateGroup={() => { setNav("groups"); setSelectedGroupId(undefined); }} onOpenGroup={openGroup} onSettleGroup={openSuggestedSettlement} onWallet={() => setNav("wallet")} />}
         {nav === "groups" && <GroupsScreen selectedGroupId={selectedGroupId} onSelectGroup={setSelectedGroupId} onAddExpense={(groupId) => openExpense(groupId)} onEditExpense={(expense) => openExpense(expense.groupId, expense)} onSettle={(group, fromId, toId, amountCents) => setSettlement({ group, fromId, toId, amountCents })} />}

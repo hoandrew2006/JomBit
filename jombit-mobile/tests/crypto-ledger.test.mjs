@@ -36,7 +36,7 @@ test("Stake atomically records a dated local activity without changing cash, cos
   assert.equal(tx.crypto.quantity, 0.2);
   assert.equal(tx.crypto.priceMyr, null);
   assert.equal(tx.crypto.feeCents, 0);
-  assert.match(tx.subtitle, /Not sent to Luno/);
+  assert.match(tx.subtitle, /not sent to Luno/i);
 });
 
 test("Buying and selling are rejected at the command boundary, even with a valid-looking quote", () => {

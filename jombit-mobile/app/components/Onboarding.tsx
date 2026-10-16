@@ -32,7 +32,7 @@ export function Onboarding() {
     <main className="onboarding-shell">
       <section className="onboarding-card">
         <div className="onboarding-top">
-          <span className="demo-pill"><Sparkles size={14} /> Proof of concept</span>
+          <span className="demo-pill"><Sparkles size={14} /> Preview mode</span>
         </div>
         <div className="onboarding-logo"><BrandLogo /></div>
         <div className="onboarding-copy">
@@ -66,9 +66,9 @@ export function Onboarding() {
             {qr ? <Check size={20} /> : <Camera size={20} />}
           </label>
 
-          <button className="primary-button" onClick={finish}>Start using JomBit</button>
-          <button className="text-button" onClick={finish}>Explore with demo data</button>
-          <p className="fine-print">JomBit is a local proof of concept. No real funds, banking or crypto transactions occur.</p>
+          <button className="primary-button" onClick={finish}>Continue to JomBit</button>
+          <p className="onboarding-helper">Sample groups are included so you can explore receipt splitting right away.</p>
+          <p className="fine-print">Preview mode uses test balances. No banking, card or crypto transaction is submitted.</p>
         </div>
       </section>
       <aside className="onboarding-visual" aria-hidden="true">
