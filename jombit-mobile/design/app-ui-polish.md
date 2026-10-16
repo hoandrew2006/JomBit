@@ -9,6 +9,8 @@ The intended result is a calmer hierarchy: the receipt action stays prominent, m
 ## Interaction decisions
 
 - Interactive controls keep a minimum 44px touch target where space is tight.
+- Authentication uses one dominant submit action with a quieter account-mode switch, so sign-in and sign-up do not compete visually.
+- Passwords can be revealed with a labelled icon control, and authentication errors use plain, actionable copy with a non-colour icon cue.
 - Hover treatments run only on devices that support a precise pointer; touch feedback uses the pressed state.
 - The active bottom-navigation item exposes `aria-current="page"`.
 - Opening a modal locks background scrolling and restores it on close.
@@ -18,3 +20,5 @@ The intended result is a calmer hierarchy: the receipt action stays prominent, m
 ## Review evidence
 
 The home screen was measured at 390px, 1440px and 1728px with Better Design's spacing inspection. After fixes, the review reported no critical or serious findings. Moderate findings are limited to legacy spacing values that form part of the current JomBit visual rhythm.
+
+The authentication screen was rendered and inspected at 390px, 1440px and 1728px. Its final automated spacing report could not be returned because the Better Design free-query quota was exhausted after capture.
