@@ -67,6 +67,17 @@
 .crypto-stake-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; margin-top: 10px; }
 .crypto-stake-actions button { display: inline-flex; gap: 5px; align-items: center; border: 0; background: none; color: #b5e0d4; padding: 0; font-size: 11px; }
 .crypto-stake-actions small { flex-basis: 100%; color: #a9b4b0; font-size: 10px; line-height: 1.6; }
+.crypto-wallet-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 20px; }
+.crypto-wallet-actions button { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.crypto-wallet-actions > button:only-child { grid-column: 1 / -1; }
+.crypto-receive-form { text-align: left; }
+.crypto-receive-qr { width: fit-content; margin: 0 auto; padding: 13px; border-radius: 16px; background: #fff; line-height: 0; }
+.crypto-receive-address { display: grid; gap: 8px; padding: 14px; border: 1px solid #ffffff12; border-radius: 14px; background: #1d2423; }
+.crypto-receive-address > span { color: #aebdb9; font-size: 10px; font-weight: 700; }
+.crypto-receive-address code { color: #d7e5e1; font-size: 10px; line-height: 1.6; overflow-wrap: anywhere; }
+.crypto-receive-address button { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.crypto-receive-warning { display: flex; align-items: flex-start; gap: 9px; margin: 0; padding: 12px 13px; border: 1px solid #775f31; border-radius: 12px; background: #302718; color: #f0dca9; font-size: 11px; line-height: 1.6; }
+.crypto-receive-warning svg { flex-shrink: 0; margin-top: 1px; }
 .crypto-orders .segmented { margin-bottom: 14px; }
 .crypto-order { border-bottom: 1px solid var(--line); }
 .crypto-order > summary { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto 12px; align-items: center; gap: 8px; padding: 17px 0; cursor: pointer; list-style: none; }

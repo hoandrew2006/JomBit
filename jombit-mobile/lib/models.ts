@@ -72,6 +72,7 @@ export type WalletTransactionKind =
   | "transfer"
   | "crypto-buy"
   | "crypto-sell"
+  | "crypto-receive"
   | "stake"
   | "unstake"
   | "card"
