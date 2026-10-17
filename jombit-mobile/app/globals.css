@@ -289,7 +289,9 @@ select { color-scheme: dark; }
 .review-main { display: grid; gap: 15px; }
 .form-card, .items-card, .receipt-totals-card, .live-split-card { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 19px; }
 .receipt-meta-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 13px; }
-.editable-item { display: flex; align-items: flex-end; gap: 9px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.editable-item { display: grid; grid-template-columns: 25px minmax(0, 1fr) 70px 120px 44px; align-items: end; gap: 9px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.editable-item > label { min-width: 0; }
+.editable-item .grow { width: 100%; }
 .editable-item input { min-height: 42px; }
 .item-index { align-self: center; width: 25px; height: 25px; display: grid; place-items: center; background: #333; border-radius: 8px; font-size: 10px; color: #aaa; }
 .qty-field { width: 70px; }
