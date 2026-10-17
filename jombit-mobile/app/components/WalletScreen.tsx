@@ -64,7 +64,7 @@ export function WalletScreen() {
   return (
     <div className="screen wallet-screen">
       <PageHeader eyebrow="JOMBIT WALLET" title="Your money, your way" action={<button className="icon-button balance-toggle" onClick={() => setBalancesVisible((value) => !value)} aria-label={balancesVisible ? "Hide balances" : "Show balances"}>{balancesVisible ? <Eye size={19} /> : <EyeOff size={19} />}</button>} />
-      <Segmented value={tab} onChange={setTab} options={[{ value: "fiat", label: "Fiat" }, { value: "crypto", label: "Staking" }, { value: "card", label: "JomBit Card" }]} />
+      <Segmented value={tab} onChange={setTab} options={[{ value: "fiat", label: "Fiat" }, { value: "crypto", label: "Crypto" }, { value: "card", label: "JomBit Card" }]} />
 
       {tab === "fiat" && <FiatWallet balancesVisible={balancesVisible} />}
 

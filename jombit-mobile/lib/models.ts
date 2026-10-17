@@ -1,5 +1,5 @@
 export type Currency = "MYR" | "SGD" | "THB" | "IDR";
-export type CryptoAsset = "BTC" | "ETH" | "SOL";
+export type CryptoAsset = "BTC" | "ETH" | "SOL" | "ADA" | "ATOM" | "AVAX" | "DOT" | "NEAR";
 
 export interface UserProfile {
   id: "me";

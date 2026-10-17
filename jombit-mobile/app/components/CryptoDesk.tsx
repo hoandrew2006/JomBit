@@ -16,6 +16,7 @@ const quantity = (value: number) => value.toLocaleString("en-MY", { minimumFract
 const price = (value: number | null | undefined) => value == null ? "Unavailable" : formatMoney(Math.round(value * 100));
 const signedMoney = (cents: number) => `${cents >= 0 ? "+" : "−"}${formatMoney(Math.abs(cents))}`;
 const percent = (value: number | null | undefined) => value == null ? "—" : `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
+const assetMark: Record<CryptoAsset, string> = { BTC: "₿", ETH: "Ξ", SOL: "S", ADA: "A", ATOM: "C", AVAX: "A", DOT: "●", NEAR: "N" };
 function dateLabel(value: string | null | undefined, short = false) {
   if (!value || !Number.isFinite(Date.parse(value))) return "Unknown";
   return new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric", ...(short ? {} : { hour: "2-digit", minute: "2-digit" }), timeZone: "Asia/Kuala_Lumpur" }).format(new Date(value)) + (short ? "" : " MYT");
@@ -51,6 +52,8 @@ export function CryptoDesk({ balancesVisible }: { balancesVisible: boolean }) {
   const canStake = STAKING_ASSETS.includes(asset);
   const stakedValues = STAKING_ASSETS.map((code) => holdingMetrics({ ...state.crypto[code], available: 0 }, market.quotes?.[code]?.priceMyr).value);
   const stakedValue = stakedValues.every((value) => value !== null) ? stakedValues.reduce<number>((sum, value) => sum + value!, 0) : null;
+  const availableValues = CRYPTO_ASSETS.map((code) => holdingMetrics({ ...state.crypto[code], staked: 0 }, market.quotes?.[code]?.priceMyr).value);
+  const availableValue = availableValues.every((value) => value !== null) ? availableValues.reduce<number>((sum, value) => sum + value!, 0) : null;
   const records = state.walletTransactions.filter((tx) => ["crypto-buy", "crypto-sell", "stake", "unstake"].includes(tx.kind))
     .filter((tx) => filter === "all" || (filter === "legacy" ? tx.kind === "crypto-buy" || tx.kind === "crypto-sell" : tx.kind === "stake" || tx.kind === "unstake"))
     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
@@ -81,7 +84,7 @@ export function CryptoDesk({ balancesVisible }: { balancesVisible: boolean }) {
   };
 
   return <div className="crypto-desk">
-    <section className="crypto-provider-note" aria-label="Luno integration status"><span className="crypto-paper-badge">ON THE ROADMAP</span><h2>Staking existing crypto, made clearer.</h2><p>JomBit is exploring a future Luno integration for eligible staking assets. Buying and selling are not part of this experience.</p><a href={LUNO_STAKING_GUIDE} target="_blank" rel="noreferrer">How staking works at Luno <ArrowUpRight size={15} /></a><small>{LUNO_INTEGRATION_NOTE} This preview does not connect an account or accrue rewards.</small></section>
+    <section className="crypto-provider-note" aria-label="Luno integration status"><span className="crypto-paper-badge">CRYPTO WALLET · PREVIEW</span><h2>Hold your crypto. Choose what to stake.</h2><p>Track your available and staked balances in one place. JomBit is exploring a future Luno integration for eligible staking assets; buying and selling are not offered here.</p><a href={LUNO_STAKING_GUIDE} target="_blank" rel="noreferrer">How staking works at Luno <ArrowUpRight size={15} /></a><small>{LUNO_INTEGRATION_NOTE} This preview does not connect an account or accrue rewards.</small></section>
     <section className="crypto-market-status" aria-label="Market price source">
       <div><span className={`crypto-source-dot ${market.mode === "live" && market.fresh ? "is-live" : ""}`} /><strong>{market.mode === "demo" ? "Sample prices" : market.fresh ? "Live reference prices" : market.loading && !market.quotes ? "Loading market prices…" : market.quotes ? "Last known prices · stale" : "Live prices unavailable"}</strong><button type="button" className="crypto-refresh" aria-label="Refresh market prices" onClick={market.refresh} disabled={market.loading || market.mode === "demo"}><RefreshCw size={16} className={market.loading ? "is-spinning" : ""} /></button></div>
       <Segmented value={market.mode} onChange={(value) => { close(); market.setMode(value); }} options={[{ value: "live", label: "Live prices" }, { value: "demo", label: "Sample prices" }]} />
@@ -90,14 +93,15 @@ export function CryptoDesk({ balancesVisible }: { balancesVisible: boolean }) {
     </section>
 
     <section className="crypto-portfolio-card">
-      <span><Wallet size={17} /> STAKING OVERVIEW</span><strong>{hide(portfolioValue === null ? "Unavailable" : formatMoney(portfolioValue))}</strong>
+      <span><Wallet size={17} /> CRYPTO PORTFOLIO</span><strong>{hide(portfolioValue === null ? "Unavailable" : formatMoney(portfolioValue))}</strong>
       <div className={portfolioPnl !== null && portfolioPnl < 0 ? "crypto-negative" : "crypto-positive"}>{hide(portfolioPnl === null ? "Profit / loss unavailable" : `${signedMoney(portfolioPnl)}${portfolioCost ? ` (${percent(portfolioPnl / portfolioCost * 100)})` : ""}`)}<small>Unrealized · {market.mode === "demo" ? "sample valuation" : market.fresh ? "live reference valuation" : "valuation may be outdated"}</small></div>
-      <footer><span>Remaining purchase cost<b>{hide(portfolioCost === null ? "History incomplete" : formatMoney(portfolioCost))}</b></span><span>Staked value estimate<b>{hide(stakedValue === null ? "Unavailable" : formatMoney(stakedValue))}</b></span></footer>
+      <footer><span>Available to stake<b>{hide(availableValue === null ? "Unavailable" : formatMoney(availableValue))}</b></span><span>Currently staked<b>{hide(stakedValue === null ? "Unavailable" : formatMoney(stakedValue))}</b></span><span>Recorded purchase cost<b>{hide(portfolioCost === null ? "History incomplete" : formatMoney(portfolioCost))}</b></span></footer>
     </section>
 
-    <section className="section-block"><div className="section-heading"><h2>Your crypto holdings</h2><span>MYR price · 24h change</span></div><div className="crypto-market-list">{CRYPTO_ASSETS.map((code) => {
+    <section className="section-block"><div className="section-heading"><h2>Your crypto</h2><span>Available · staked · price</span></div><div className="crypto-market-list">{CRYPTO_ASSETS.map((code) => {
       const coinQuote = market.quotes?.[code];
-      return <button type="button" key={code} aria-pressed={asset === code} onClick={() => setAsset(code)}><span className={`asset-icon asset-${code.toLowerCase()}`}>{code === "BTC" ? "₿" : code === "ETH" ? "E" : "S"}</span><span><strong>{CRYPTO_NAMES[code]}</strong><small>{code} · {hide(`${quantity(state.crypto[code].available + state.crypto[code].staked)} held`)}{code === "BTC" ? " · View-only" : ""}</small></span><span><strong>{price(coinQuote?.priceMyr)}</strong><small className={coinQuote?.change24h != null && coinQuote.change24h < 0 ? "crypto-negative" : "crypto-positive"}>{market.mode === "demo" ? "Sample price" : percent(coinQuote?.change24h)}</small></span></button>;
+      const holding = state.crypto[code];
+      return <button type="button" key={code} aria-pressed={asset === code} onClick={() => setAsset(code)}><span className={`asset-icon asset-${code.toLowerCase()}`}>{assetMark[code]}</span><span><strong>{CRYPTO_NAMES[code]} <em>{code}</em></strong><small className="crypto-balance-split"><b>{hide(`${quantity(holding.available)} available`)}</b><i aria-hidden="true" /><b>{hide(`${quantity(holding.staked)} staked`)}</b>{code === "BTC" && <mark>Hold only</mark>}</small></span><span><strong>{price(coinQuote?.priceMyr)}</strong><small className={coinQuote?.change24h != null && coinQuote.change24h < 0 ? "crypto-negative" : "crypto-positive"}>{market.mode === "demo" ? "Sample price" : percent(coinQuote?.change24h)}</small></span></button>;
     })}</div></section>
 
     <section className="crypto-position" aria-label={`${asset} holding details`}><div className="crypto-position-heading"><div><span>YOUR POSITION</span><h2>{CRYPTO_NAMES[asset]} <small>{asset}</small></h2></div><span className="crypto-paper-badge">PREVIEW</span></div>
@@ -105,7 +109,7 @@ export function CryptoDesk({ balancesVisible }: { balancesVisible: boolean }) {
       <p className="crypto-history-note">Latest staking activity: {hide(latestStaking ? dateLabel(latestStaking.date) : "None recorded")}.</p>
       {metrics.cost === null && <p className="crypto-history-note">This holding predates detailed purchase tracking. Its original price and date are unknown; new staking activity will be recorded. No history has been invented.</p>}
       {canStake ? <div className="crypto-stake-actions"><button type="button" onClick={() => open("stake")} disabled={holding.available <= 0}><Flame size={15} /> Stake {asset}</button><button type="button" onClick={() => open("unstake")} disabled={holding.staked <= 0}>Unstake {asset}</button><small>Preview action only. Provider fees, rewards and unstaking delays are not applied.</small></div> : <p className="crypto-history-note">BTC is view-only and cannot be staked here. Existing balances are preserved.</p>}
-      <p className="crypto-history-note">Average-cost basis includes available + staked holdings. Purchase dates and costs are historical records, not a buying service. Value changes are not staking rewards.</p>
+      <p className="crypto-history-note">Your total holding is available + staked. Purchase dates and costs are historical records, not a buying service. Value changes are not staking rewards.</p>
     </section>
 
     <section className="section-block crypto-orders"><div className="section-heading"><h2>Staking &amp; earlier activity</h2><span>Dates shown in MYT</span></div><Segmented value={filter} onChange={(value) => { setFilter(value); setShown(10); }} options={[{ value: "all", label: "All" }, { value: "stake", label: "Staking" }, { value: "legacy", label: "Earlier records" }]} />
