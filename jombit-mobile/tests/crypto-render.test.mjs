@@ -20,7 +20,7 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
       name: "isolated-crypto-render-fixtures",
       resolveId(id) { if (id.startsWith("virtual:jombit-crypto-")) return `\0${id}`; },
       load(id) {
-        if (id === "\0virtual:jombit-crypto-state") return `import { createSeedState } from '/lib/seed.ts'; export const fixture = { state: createSeedState() }; export function useAppState() { return { state: fixture.state, stakeCrypto() { throw new Error('Rendering must not execute orders'); } }; }`;
+        if (id === "\0virtual:jombit-crypto-state") return `import { createSeedState } from '/lib/seed.ts'; export const fixture = { state: createSeedState() }; export function useAppState() { return { state: fixture.state, stakeCrypto() { throw new Error('Rendering must not execute orders'); }, receiveCrypto() { throw new Error('Rendering must not execute transfers'); } }; }`;
         if (id === "\0virtual:jombit-crypto-market") return `import { DEMO_CRYPTO_PRICES_MYR } from '/lib/mock-services.ts'; export const market = { mode: 'demo', fresh: true, loading: false, error: '', now: Date.now(), quotes: Object.fromEntries(Object.entries(DEMO_CRYPTO_PRICES_MYR).map(([asset, priceMyr]) => [asset, { asset, priceMyr, source: 'demo', updatedAt: null, change24h: null }])), setMode() {}, refresh() {} }; export function useCryptoMarket() { return market; }`;
       },
     }],
@@ -36,7 +36,7 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
     for (const location of [{ protocol: "file:", hostname: "" }, { protocol: "about:", hostname: "" }, { protocol: "http:", hostname: "static.example" }]) assert.equal(supportsLiveCryptoPrices(location), false, "Offline and insecure non-local hosts must default to labelled demo prices");
     const render = (visible = true) => renderToStaticMarkup(createElement(CryptoDesk, { balancesVisible: visible }));
     let html = render();
-    for (const content of ["CRYPTO PORTFOLIO", "Available to stake", "Currently staked", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Execution price per coin", "Staking &amp; earlier activity", "Earlier record", "Staking preview only", "Stake ETH", "Unstake ETH", "Luno integration is planned, not connected", "BTC", "Hold only", "Cardano", "Cosmos", "Avalanche", "Polkadot", "NEAR Protocol"]) assert.ok(html.includes(content), content);
+    for (const content of ["CRYPTO PORTFOLIO", "Available to stake", "Currently staked", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Price per coin", "Crypto activity", "Earlier record", "Crypto wallet preview only", "Receive ETH", "Stake ETH", "Unstake ETH", "Holding value", "Luno integration is planned, not connected", "BTC", "Hold only", "Cardano", "Cosmos", "Avalanche", "Polkadot", "NEAR Protocol"]) assert.ok(html.includes(content), content);
     assert.equal([...html.matchAll(/class="crypto-order"/g)].length, 5);
     assert.match(html, /aria-pressed="true"/);
     assert.doesNotMatch(html, />\s*(Buy|Sell) (BTC|ETH|SOL)|MYR to spend|Buy &amp; sell|MYR available to practise/);
@@ -44,7 +44,7 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
     const hidden = render(false);
     assert.match(hidden, /••••••/);
     assert.doesNotMatch(hidden, /0\.00182 BTC/);
-    assert.match(hidden, /RM428,500\.00/, "Public market prices stay visible");
+    assert.match(hidden, /RM14,250\.00/, "The selected asset's public unit price stays visible");
 
     fixture.state.crypto.ETH.costBasisCents = null;
     fixture.state.crypto.ETH.firstBoughtAt = null;
@@ -74,7 +74,8 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
     html = render();
     assert.match(html, /Live reference prices/);
     assert.match(html, /Data provided by CoinGecko/);
-    assert.match(html, /-1\.50%/);
+    assert.doesNotMatch(html, /-1\.50%/, "Asset rows show holding value instead of repeating the 24-hour market change");
+    assert.match(html, /Live reference price[\s\S]*RM100\.00/, "The selected asset still shows its unit price");
     assert.match(html, /Provider updated/);
     assert.match(html, /refreshed every 60s/);
   } finally { await server.close(); }

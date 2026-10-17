@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { executeCryptoCommand, holdingMetrics, normalizeCryptoHistory, validQuote } from "../lib/crypto-ledger.ts";
+import { executeCryptoCommand, executeCryptoReceive, holdingMetrics, normalizeCryptoHistory, validQuote } from "../lib/crypto-ledger.ts";
 
 const NOW = Date.parse("2026-10-05T08:00:00.000Z");
 const OLD = "2026-09-20T01:00:00.000Z";
@@ -76,6 +76,30 @@ test("Every documented staking asset moves between available and staked balances
     assert.ok(Math.abs(result.crypto[asset].available - (original.crypto[asset].available - 0.1)) < 1e-8);
     assert.ok(Math.abs(result.crypto[asset].staked - (original.crypto[asset].staked + 0.1)) < 1e-8);
   }
+});
+
+test("Receiving crypto adds only to the available balance and records an incoming transfer", () => {
+  const original = state(), before = structuredClone(original);
+  const result = executeCryptoReceive(original, { id: "receive-btc", asset: "BTC", amount: "0.00012" }, NOW);
+  assert.deepEqual(original, before);
+  assert.equal(result.crypto.BTC.available, 0.00212);
+  assert.equal(result.crypto.BTC.staked, 0);
+  assert.equal(result.crypto.BTC.costBasisCents, null, "A transfer must not invent acquisition cost");
+  assert.equal(result.fiatBalances, original.fiatBalances);
+  assert.equal(result.walletTransactions[0].kind, "crypto-receive");
+  assert.equal(result.walletTransactions[0].direction, "in");
+  assert.equal(result.walletTransactions[0].amountCents, undefined);
+  assert.equal(result.walletTransactions[0].crypto.quantity, 0.00012);
+  assert.match(result.walletTransactions[0].subtitle, /no blockchain transfer/i);
+});
+
+test("Incoming crypto rejects duplicate, invalid and unsafe transfers", () => {
+  const received = executeCryptoReceive(state(), { id: "receive-eth", asset: "ETH", amount: "0.1" }, NOW);
+  assert.throws(() => executeCryptoReceive(received, { id: "receive-eth", asset: "ETH", amount: "0.1" }, NOW), /already recorded/);
+  for (const amount of ["", "0", "-1", ".2", "0.000000001", "NaN"]) {
+    assert.throws(() => executeCryptoReceive(state(), { id: `bad-${amount}`, asset: "ETH", amount }, NOW));
+  }
+  assert.throws(() => executeCryptoReceive(state(), { id: "bad-asset", asset: "INVALID", amount: "1" }, NOW), /supported crypto asset/);
 });
 
 test("Legacy wallets gain zeroed holdings for newly supported assets", () => {

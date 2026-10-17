@@ -38,7 +38,9 @@ The interaction takes inspiration from [Touch ’n Go's explanation of its MYR-b
 
 ## Crypto staking and planned Luno integration
 
-Open **Wallet → Crypto**. JomBit presents a simulated crypto wallet for holding and staking; it does not provide crypto buying or selling, including paper orders. The command layer rejects both actions, not just the UI.
+Open **Wallet → Crypto**. JomBit presents a simulated crypto wallet for holding, receiving and staking; it does not provide crypto buying or selling, including paper orders. Each asset row shows the MYR reference value of the complete holding, while its live unit price remains in the selected asset details. The command layer rejects buying and selling, not just the UI.
+
+The receive flow uses a deliberately non-payable JomBit preview address and QR. Recording a test transfer adds units to the available balance and preserves a dated incoming activity record, but it never watches a blockchain, creates a custody account or moves real crypto. Because an external transfer does not supply purchase data, its acquisition cost remains unknown rather than being invented.
 
 The prototype supports **demo staking and unstaking of existing ADA, ATOM, AVAX, DOT, ETH, NEAR and SOL holdings**. BTC can be held but is not stakeable. Each asset clearly separates the amount available to stake from the amount already staked. Review an amount before confirming; units move between those balances with no MYR movement. Duplicate confirmations and excessive amounts are rejected against current balances. No rewards accrue and no provider fees or waiting periods are simulated. Instant demo unstaking does not imply instant provider withdrawals.
 

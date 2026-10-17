@@ -23,6 +23,12 @@ export interface CryptoCommand {
   amount: string;
 }
 
+export interface CryptoReceiveCommand {
+  id: string;
+  asset: CryptoAsset;
+  amount: string;
+}
+
 const units = (quantity: number) => Math.round(quantity * CRYPTO_PRECISION);
 const quantity = (atomic: number) => atomic / CRYPTO_PRECISION;
 export function validQuote(quote: CryptoQuote | undefined, now: number) {
@@ -75,6 +81,40 @@ export function executeCryptoCommand(state: AppState, command: CryptoCommand, no
     crypto: { asset, quantity: quantity(moved), priceMyr: null, priceSource: null, priceUpdatedAt: null, feeCents: 0 },
   };
   return { ...state, crypto: { ...state.crypto, [asset]: { ...holding, available: quantity(available), staked: quantity(staked) } }, walletTransactions: [transaction, ...state.walletTransactions] };
+}
+
+// Simulates an incoming wallet transfer. No blockchain or custody provider is contacted.
+export function executeCryptoReceive(state: AppState, command: CryptoReceiveCommand, now = Date.now()): AppState {
+  if (!command.id || state.walletTransactions.some((tx) => tx.id === command.id)) throw new Error("This incoming transfer was already recorded.");
+  if (!CRYPTO_ASSETS.includes(command.asset)) throw new Error("Choose a supported crypto asset.");
+  const holding = state.crypto[command.asset];
+  if (!holding || !Number.isFinite(holding.available) || !Number.isFinite(holding.staked) || holding.available < 0 || holding.staked < 0) throw new Error("This holding needs to be checked before receiving crypto.");
+  const available = units(holding.available);
+  const received = units(parseAmount(command.amount, 8));
+  if (received < 1) throw new Error("Enter at least 0.00000001 units.");
+  if (!Number.isSafeInteger(available + received)) throw new Error("Holding quantity exceeds the preview limit.");
+  const transaction: WalletTransaction = {
+    id: command.id,
+    date: new Date(now).toISOString(),
+    kind: "crypto-receive",
+    title: `Received ${command.asset}`,
+    subtitle: "Wallet transfer preview · no blockchain transfer",
+    direction: "in",
+    crypto: { asset: command.asset, quantity: quantity(received), priceMyr: null, priceSource: null, priceUpdatedAt: null, feeCents: 0 },
+  };
+  return {
+    ...state,
+    crypto: {
+      ...state.crypto,
+      [command.asset]: {
+        ...holding,
+        available: quantity(available + received),
+        // A transfer does not provide acquisition cost information.
+        costBasisCents: null,
+      },
+    },
+    walletTransactions: [transaction, ...state.walletTransactions],
+  };
 }
 
 export function normalizeCryptoHistory(state: AppState): AppState {
