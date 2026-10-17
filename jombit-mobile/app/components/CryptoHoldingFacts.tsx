@@ -20,9 +20,9 @@ export function CryptoHoldingFacts({ asset, holding, referencePrice, priceLabel,
   return <>
     <div className="crypto-price-pair"><div><span>{priceLabel}</span><strong>{price(referencePrice)}</strong></div><div><span>Average purchase price</span><strong>{hide(metrics.averagePrice === null ? "Unknown" : price(metrics.averagePrice))}</strong></div></div>
     <dl className="crypto-position-grid">
-      <div><dt>Unstaked balance</dt><dd>{hide(quantity(holding.available))}</dd></div>
-      <div><dt>Staked</dt><dd>{hide(quantity(holding.staked))}</dd></div>
-      <div><dt>Current holding value</dt><dd>{hide(metrics.value === null ? "Unavailable" : formatMoney(metrics.value))}</dd></div>
+      <div className="crypto-available-fact"><dt>Available to stake</dt><dd>{hide(quantity(holding.available))}</dd></div>
+      <div className="crypto-staked-fact"><dt>Currently staked</dt><dd>{hide(quantity(holding.staked))}</dd></div>
+      <div><dt>Total holding value</dt><dd>{hide(metrics.value === null ? "Unavailable" : formatMoney(metrics.value))}</dd></div>
       <div><dt>Unrealized profit / loss</dt><dd className={metrics.pnl !== null && metrics.pnl < 0 ? "crypto-negative" : "crypto-positive"}>{hide(metrics.pnl === null ? "Unknown" : `${metrics.pnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(metrics.pnl))}`)}</dd></div>
       <div><dt>First purchase</dt><dd>{hide(date(holding.firstBoughtAt))}</dd></div>
       <div><dt>Latest purchase</dt><dd>{hide(date(holding.lastBoughtAt))}</dd></div>

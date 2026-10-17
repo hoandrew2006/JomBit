@@ -38,11 +38,11 @@ The interaction takes inspiration from [Touch ’n Go's explanation of its MYR-b
 
 ## Crypto staking and planned Luno integration
 
-Open **Wallet → Staking**. JomBit does not provide crypto buying or selling, including paper orders. The command layer rejects both actions, not just the UI.
+Open **Wallet → Crypto**. JomBit presents a simulated crypto wallet for holding and staking; it does not provide crypto buying or selling, including paper orders. The command layer rejects both actions, not just the UI.
 
-The prototype supports **demo staking and unstaking of existing ETH and SOL holdings**. BTC is view-only. Review an amount before confirming; units move between unstaked and staked balances with no MYR movement. Duplicate confirmations and excessive amounts are rejected against current balances. No rewards accrue and no provider fees or waiting periods are simulated. Instant demo unstaking does not imply instant provider withdrawals.
+The prototype supports **demo staking and unstaking of existing ADA, ATOM, AVAX, DOT, ETH, NEAR and SOL holdings**. BTC can be held but is not stakeable. Each asset clearly separates the amount available to stake from the amount already staked. Review an amount before confirming; units move between those balances with no MYR movement. Duplicate confirmations and excessive amounts are rejected against current balances. No rewards accrue and no provider fees or waiting periods are simulated. Instant demo unstaking does not imply instant provider withdrawals.
 
-**Luno integration is planned, not connected. No partnership is confirmed.** There is no account-linking flow, API credential collection, provider request, custody or real staking. Provider approval, technical access, supported assets, fees, variable rewards and unstaking conditions need confirmation before implementation. The informational link opens [Luno’s staking guide](https://guide.luno.com/hc/en-gb/articles/11035626257437-How-do-I-stake-my-crypto-with-Luno). ETH/SOL are the prototype subset, not an exhaustive provider asset list. No APR or returns are promised.
+**Luno integration is planned, not connected. No partnership is confirmed.** There is no account-linking flow, API credential collection, provider request, custody or real staking. Provider approval, technical access, supported assets, fees, variable rewards and unstaking conditions need confirmation before implementation. The informational link opens [Luno’s staking guide](https://guide.luno.com/hc/en-gb/articles/11035626257437-How-do-I-stake-my-crypto-with-Luno). Asset availability can vary by region and provider. No APR or returns are promised.
 
 Balances, acquisition dates, average costs and earlier buy/sell history are preserved, not reset or reclassified as Luno transactions. Missing acquisition data stays unknown. Old card-source preferences remain in storage for compatibility but are no longer actionable: the card concept is fiat-only.
 
@@ -75,7 +75,7 @@ Both QR cards and their Open JomBit links use `webAppUrl` in `src/website/conten
 
 Product tabs, mobile navigation and FAQ accordions work. “Try the demo” opens the phone-framed app. Other calls to action navigate to sections of this informational page; they do not execute financial operations.
 
-The website uses bundled, self-hosted Manrope typography, a shared app component in the hero, and a BTC/ETH/SOL position preview with purchase dates, average costs and paper profit/loss. The preview shares its display component with the app but uses only static sample data: it does not access saved wallets or request live prices. Font data is embedded in the standalone HTML, so no font connection is needed. See [the design notes](design/website-refresh.md) for scope and validation.
+The website uses bundled, self-hosted Manrope typography, a shared app component in the hero, and a crypto-wallet preview that distinguishes available and staked balances. The preview shares its display component with the app but uses only static sample data: it does not access saved wallets or request live prices. Font data is embedded in the standalone HTML, so no font connection is needed. See [the design notes](design/website-refresh.md) for scope and validation.
 
 After building on Windows, `powershell -ExecutionPolicy Bypass -File scripts/export-deliverables.ps1` refreshes the standalone HTML files and source/static-site ZIPs in `../outputs/jombit-independent`. The source export uses an explicit allowlist and rejects private `.env` files, dependencies and Git history; `.env.example` is safe to include. Edit the source project, not the generated HTML.
 

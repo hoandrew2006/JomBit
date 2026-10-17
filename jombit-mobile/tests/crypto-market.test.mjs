@@ -5,7 +5,7 @@ import { once } from "node:events";
 import { createCryptoMarketApi, parseMarketQuotes, MARKET_URL } from "../server/crypto-market.mjs";
 
 const NOW = Date.parse("2026-10-05T08:00:00Z");
-const feed = (now = NOW) => Object.fromEntries([["bitcoin", 400000], ["ethereum", 10000], ["solana", 600]].map(([coin, myr]) => [coin, { myr, myr_24h_change: -1.75, last_updated_at: now / 1000 - 10 }]));
+const feed = (now = NOW) => Object.fromEntries([["bitcoin", 400000], ["ethereum", 10000], ["solana", 600], ["cardano", 3.5], ["cosmos", 20], ["avalanche-2", 90], ["polkadot", 15], ["near", 9]].map(([coin, myr]) => [coin, { myr, myr_24h_change: -1.75, last_updated_at: now / 1000 - 10 }]));
 async function withApi(t, options = {}) {
   const api = createCryptoMarketApi({ fetchImpl: async () => Response.json(feed()), now: () => NOW, ...options });
   const server = createServer((req, res) => { void api(req, res, () => { res.writeHead(404); res.end("Other route"); }); });
@@ -30,7 +30,7 @@ test("Market proxy requests only fixed public MYR prices and returns timestamps 
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("cache-control"), "no-store");
   const body = await response.json();
-  assert.deepEqual(Object.keys(body.quotes), ["BTC", "ETH", "SOL"]);
+  assert.deepEqual(Object.keys(body.quotes), ["BTC", "ETH", "SOL", "ADA", "ATOM", "AVAX", "DOT", "NEAR"]);
   assert.deepEqual(body.quotes.BTC, { asset: "BTC", priceMyr: 400000, change24h: -1.75, updatedAt: new Date(NOW - 10000).toISOString(), source: "coingecko" });
   assert.equal(body.refreshAfterSeconds, 60);
   assert.equal(calls, 1);
@@ -45,7 +45,7 @@ test("Market response validates every price and timestamp; missing 24h change is
     const data = feed(); data.bitcoin.last_updated_at = last_updated_at;
     assert.throws(() => parseMarketQuotes(data, NOW), /incomplete or outdated/);
   }
-  const missing = feed(); delete missing.solana;
+  const missing = feed(); delete missing.near;
   assert.throws(() => parseMarketQuotes(missing, NOW), /incomplete or outdated/);
   const change = feed(); change.solana.myr_24h_change = null;
   assert.equal(parseMarketQuotes(change, NOW).SOL.change24h, null);

@@ -36,7 +36,7 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
     for (const location of [{ protocol: "file:", hostname: "" }, { protocol: "about:", hostname: "" }, { protocol: "http:", hostname: "static.example" }]) assert.equal(supportsLiveCryptoPrices(location), false, "Offline and insecure non-local hosts must default to labelled demo prices");
     const render = (visible = true) => renderToStaticMarkup(createElement(CryptoDesk, { balancesVisible: visible }));
     let html = render();
-    for (const content of ["STAKING OVERVIEW", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Execution price per coin", "Staking &amp; earlier activity", "Earlier record", "Staking preview only", "Stake ETH", "Unstake ETH", "Luno integration is planned, not connected", "BTC", "View-only"]) assert.ok(html.includes(content), content);
+    for (const content of ["CRYPTO PORTFOLIO", "Available to stake", "Currently staked", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Execution price per coin", "Staking &amp; earlier activity", "Earlier record", "Staking preview only", "Stake ETH", "Unstake ETH", "Luno integration is planned, not connected", "BTC", "Hold only", "Cardano", "Cosmos", "Avalanche", "Polkadot", "NEAR Protocol"]) assert.ok(html.includes(content), content);
     assert.equal([...html.matchAll(/class="crypto-order"/g)].length, 5);
     assert.match(html, /aria-pressed="true"/);
     assert.doesNotMatch(html, />\s*(Buy|Sell) (BTC|ETH|SOL)|MYR to spend|Buy &amp; sell|MYR available to practise/);
@@ -68,7 +68,7 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
     assert.doesNotMatch(stakeButton[1], /disabled/);
     assert.doesNotMatch(html, /NaN|Infinity|\bundefined\b/);
 
-    market.quotes = Object.fromEntries(["BTC", "ETH", "SOL"].map((asset) => [asset, { asset, priceMyr: 100, source: "coingecko", updatedAt: new Date().toISOString(), change24h: -1.5 }]));
+    market.quotes = Object.fromEntries(["BTC", "ETH", "SOL", "ADA", "ATOM", "AVAX", "DOT", "NEAR"].map((asset) => [asset, { asset, priceMyr: 100, source: "coingecko", updatedAt: new Date().toISOString(), change24h: -1.5 }]));
     assert.match(render(), /Last known prices · stale/);
     market.fresh = true; market.error = "";
     html = render();

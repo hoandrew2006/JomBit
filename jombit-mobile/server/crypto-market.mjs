@@ -1,5 +1,5 @@
-export const MARKET_URL = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=myr&include_24hr_change=true&include_last_updated_at=true";
-const COINS = { BTC: "bitcoin", ETH: "ethereum", SOL: "solana" };
+export const MARKET_URL = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,cardano,cosmos,avalanche-2,polkadot,near&vs_currencies=myr&include_24hr_change=true&include_last_updated_at=true";
+const COINS = { BTC: "bitcoin", ETH: "ethereum", SOL: "solana", ADA: "cardano", ATOM: "cosmos", AVAX: "avalanche-2", DOT: "polkadot", NEAR: "near" };
 const MAX_AGE = 180000;
 
 export function parseMarketQuotes(data, now = Date.now()) {

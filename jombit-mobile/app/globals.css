@@ -388,7 +388,7 @@ select { color-scheme: dark; }
 .asset-list strong, .asset-list small { display: block; }
 .asset-list small { color: var(--muted); font-size: 9px; margin-top: 4px; }
 .asset-icon { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; }
-.asset-btc { background: #f7931a; }.asset-eth { background: #6876e5; }.asset-sol { background: linear-gradient(135deg, #9945ff, #14f195); color: #111; }
+.asset-btc { background: #f7931a; }.asset-eth { background: #6876e5; }.asset-sol { background: linear-gradient(135deg, #9945ff, #14f195); color: #111; }.asset-ada { background: #256ad4; }.asset-atom { background: #5047a8; }.asset-avax { background: #e84142; }.asset-dot { background: #e6007a; }.asset-near { background: #e7f5ef; color: #111; }
 .staking-banner { margin-top: 16px; display: flex; align-items: center; gap: 13px; padding: 18px; color: white; background: linear-gradient(90deg, #4b2721, #25211f); border: 1px solid rgba(255,171,0,.16); border-radius: 17px; }
 .staking-banner svg { color: var(--yellow); }
 .staking-banner div { flex: 1; }

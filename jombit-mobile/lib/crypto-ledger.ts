@@ -1,9 +1,18 @@
 import type { AppState, CryptoAsset, CryptoHolding, CryptoQuote, WalletTransaction } from "./models";
 
-export const CRYPTO_ASSETS: CryptoAsset[] = ["BTC", "ETH", "SOL"];
-// Limited prototype coverage, not a claim to cover all Luno-supported assets.
-export const STAKING_ASSETS: CryptoAsset[] = ["ETH", "SOL"];
-export const CRYPTO_NAMES: Record<CryptoAsset, string> = { BTC: "Bitcoin", ETH: "Ethereum", SOL: "Solana" };
+export const CRYPTO_ASSETS: CryptoAsset[] = ["BTC", "ETH", "SOL", "ADA", "ATOM", "AVAX", "DOT", "NEAR"];
+// Luno's documented Malaysia staking set as checked on 17 October 2026.
+export const STAKING_ASSETS: CryptoAsset[] = ["ETH", "SOL", "ADA", "ATOM", "AVAX", "DOT", "NEAR"];
+export const CRYPTO_NAMES: Record<CryptoAsset, string> = {
+  BTC: "Bitcoin",
+  ETH: "Ethereum",
+  SOL: "Solana",
+  ADA: "Cardano",
+  ATOM: "Cosmos",
+  AVAX: "Avalanche",
+  DOT: "Polkadot",
+  NEAR: "NEAR Protocol",
+};
 export const CRYPTO_PRECISION = 1e8;
 export const LIVE_QUOTE_MAX_AGE = 180_000;
 export type CryptoAction = "stake" | "unstake";
@@ -43,7 +52,7 @@ function parseAmount(value: string, decimals: number) {
 export function executeCryptoCommand(state: AppState, command: CryptoCommand, now = Date.now()): AppState {
   if (!["stake", "unstake"].includes(command.action)) throw new Error("JomBit does not support buying or selling crypto.");
   if (!command.id || state.walletTransactions.some((tx) => tx.id === command.id)) throw new Error("This staking activity was already recorded.");
-  if (!STAKING_ASSETS.includes(command.asset)) throw new Error("This asset is view-only. Staking supports ETH and SOL in this preview.");
+  if (!STAKING_ASSETS.includes(command.asset)) throw new Error("This asset is available to hold, but not to stake in this preview.");
   const { action, asset } = command;
   const holding = state.crypto[asset];
   if (!holding || !Number.isFinite(holding.available) || !Number.isFinite(holding.staked) || holding.available < 0 || holding.staked < 0) throw new Error("This holding needs to be checked before staking.");
@@ -69,11 +78,10 @@ export function executeCryptoCommand(state: AppState, command: CryptoCommand, no
 }
 
 export function normalizeCryptoHistory(state: AppState): AppState {
-  // Preserve old balances and transactions. Missing history is not evidence of a purchase.
-  const crypto = { ...state.crypto };
+  // Preserve old balances and transactions while adding newly supported assets safely.
+  const crypto = { ...state.crypto } as AppState["crypto"];
   for (const asset of CRYPTO_ASSETS) {
-    const holding = crypto[asset];
-    if (!holding) continue;
+    const holding = crypto[asset] ?? { asset, available: 0, staked: 0, costBasisCents: 0, firstBoughtAt: null, lastBoughtAt: null };
     crypto[asset] = { ...holding, costBasisCents: holding.costBasisCents ?? ((holding.available + holding.staked) === 0 ? 0 : null), firstBoughtAt: holding.firstBoughtAt ?? null, lastBoughtAt: holding.lastBoughtAt ?? null };
   }
   return { ...state, crypto };

@@ -119,6 +119,11 @@ export function createSeedState(): AppState {
       BTC: { asset: "BTC", available: 0.00182, staked: 0, costBasisCents: 72800, firstBoughtAt: "2026-09-24T03:00:00.000Z", lastBoughtAt: "2026-09-24T03:00:00.000Z" },
       ETH: { asset: "ETH", available: 0.042, staked: 0.018, costBasisCents: 72000, firstBoughtAt: "2026-09-26T04:00:00.000Z", lastBoughtAt: "2026-09-26T04:00:00.000Z" },
       SOL: { asset: "SOL", available: 1.4, staked: 2.2, costBasisCents: 234000, firstBoughtAt: "2026-09-25T05:00:00.000Z", lastBoughtAt: "2026-09-25T05:00:00.000Z" },
+      ADA: { asset: "ADA", available: 320, staked: 180, costBasisCents: 165000, firstBoughtAt: "2026-09-18T04:00:00.000Z", lastBoughtAt: "2026-09-28T04:00:00.000Z" },
+      ATOM: { asset: "ATOM", available: 12, staked: 8, costBasisCents: 41000, firstBoughtAt: "2026-09-19T04:00:00.000Z", lastBoughtAt: "2026-09-19T04:00:00.000Z" },
+      AVAX: { asset: "AVAX", available: 5.5, staked: 2, costBasisCents: 69000, firstBoughtAt: "2026-09-21T04:00:00.000Z", lastBoughtAt: "2026-09-21T04:00:00.000Z" },
+      DOT: { asset: "DOT", available: 24, staked: 16, costBasisCents: 62000, firstBoughtAt: "2026-09-22T04:00:00.000Z", lastBoughtAt: "2026-09-29T04:00:00.000Z" },
+      NEAR: { asset: "NEAR", available: 60, staked: 40, costBasisCents: 84000, firstBoughtAt: "2026-09-23T04:00:00.000Z", lastBoughtAt: "2026-09-23T04:00:00.000Z" },
     },
     walletTransactions: [
       {

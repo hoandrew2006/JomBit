@@ -81,8 +81,8 @@
 .m-crypto-scene { min-height: 485px; }
 .m-crypto-options button { border-radius: 10px; }
 .m-portfolio-preview { padding: 22px 0; }
-.m-coin-picker { display: inline-flex; padding: 4px; gap: 4px; border-radius: 10px; background: #14131a; }
-.m-coin-picker button { min-height: 40px; min-width: 64px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #c7bbd3; cursor: pointer; font-size: 12px; font-weight: 700; transition: background .2s, transform .2s; }
+.m-coin-picker { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; padding: 4px; gap: 4px; border-radius: 10px; background: #14131a; }
+.m-coin-picker button { min-height: 40px; min-width: 56px; flex: 1 0 56px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #c7bbd3; cursor: pointer; font-size: 12px; font-weight: 700; transition: background .2s, transform .2s; }
 .m-coin-picker button:hover { background: #302739; }
 .m-coin-picker button[aria-pressed=true] { background: #d2b7f2; color: #261736; }
 .m-position-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 21px; }

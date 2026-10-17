@@ -10,6 +10,11 @@ const state = () => ({
     BTC: { asset: "BTC", available: 0.002, staked: 0, costBasisCents: 80000, firstBoughtAt: OLD, lastBoughtAt: OLD },
     ETH: { asset: "ETH", available: 0.6, staked: 0.4, costBasisCents: 800000, firstBoughtAt: OLD, lastBoughtAt: OLD },
     SOL: { asset: "SOL", available: 1.4, staked: 2.2, costBasisCents: 234000, firstBoughtAt: OLD, lastBoughtAt: OLD },
+    ADA: { asset: "ADA", available: 300, staked: 200, costBasisCents: 160000, firstBoughtAt: OLD, lastBoughtAt: OLD },
+    ATOM: { asset: "ATOM", available: 12, staked: 8, costBasisCents: 40000, firstBoughtAt: OLD, lastBoughtAt: OLD },
+    AVAX: { asset: "AVAX", available: 5, staked: 2, costBasisCents: 65000, firstBoughtAt: OLD, lastBoughtAt: OLD },
+    DOT: { asset: "DOT", available: 24, staked: 16, costBasisCents: 60000, firstBoughtAt: OLD, lastBoughtAt: OLD },
+    NEAR: { asset: "NEAR", available: 60, staked: 40, costBasisCents: 80000, firstBoughtAt: OLD, lastBoughtAt: OLD },
   },
   walletTransactions: [{ id: "old-buy", kind: "crypto-buy", title: "Earlier purchase", date: OLD, amountCents: 800000, direction: "out" }],
   groups: [{ id: "preserve-group" }], expenses: [], settlements: [],
@@ -58,9 +63,27 @@ test("Unstaking conserves all units and historical acquisition details without q
   assert.equal(result.crypto.ETH.firstBoughtAt, OLD);
 });
 
-test("BTC stays view-only and unsupported assets cannot stake or unstake", () => {
-  for (const asset of ["BTC", "ADA", "INVALID"]) for (const action of ["stake", "unstake"]) {
-    assert.throws(() => executeCryptoCommand(state(), command({ asset, action }), NOW), /view-only/);
+test("BTC stays hold-only and unsupported assets cannot stake or unstake", () => {
+  for (const asset of ["BTC", "INVALID"]) for (const action of ["stake", "unstake"]) {
+    assert.throws(() => executeCryptoCommand(state(), command({ asset, action }), NOW), /not to stake/);
+  }
+});
+
+test("Every documented staking asset moves between available and staked balances", () => {
+  for (const asset of ["ETH", "SOL", "ADA", "ATOM", "AVAX", "DOT", "NEAR"]) {
+    const original = state();
+    const result = executeCryptoCommand(original, command({ id: `stake-${asset}`, asset, amount: "0.1" }), NOW);
+    assert.ok(Math.abs(result.crypto[asset].available - (original.crypto[asset].available - 0.1)) < 1e-8);
+    assert.ok(Math.abs(result.crypto[asset].staked - (original.crypto[asset].staked + 0.1)) < 1e-8);
+  }
+});
+
+test("Legacy wallets gain zeroed holdings for newly supported assets", () => {
+  const original = state();
+  for (const asset of ["ADA", "ATOM", "AVAX", "DOT", "NEAR"]) delete original.crypto[asset];
+  const normalized = normalizeCryptoHistory(original);
+  for (const asset of ["ADA", "ATOM", "AVAX", "DOT", "NEAR"]) {
+    assert.deepEqual(normalized.crypto[asset], { asset, available: 0, staked: 0, costBasisCents: 0, firstBoughtAt: null, lastBoughtAt: null });
   }
 });
 

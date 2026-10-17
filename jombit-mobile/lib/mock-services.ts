@@ -11,6 +11,11 @@ export const DEMO_CRYPTO_PRICES_MYR: Record<CryptoAsset, number> = {
   BTC: 428_500,
   ETH: 14_250,
   SOL: 715,
+  ADA: 3.58,
+  ATOM: 19.4,
+  AVAX: 92.5,
+  DOT: 14.8,
+  NEAR: 8.9,
 };
 
 export function convertCurrencyCents(

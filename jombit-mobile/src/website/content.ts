@@ -67,7 +67,7 @@ export const questions = [
   },
   {
     question: "What is the vision for JomBit Crypto Wallet?",
-    answer: "Staking existing eligible crypto, not buying or selling it. We plan a Luno integration, but no partnership or account connection is confirmed. Today you can simulate staking and unstaking ETH or SOL; BTC holdings remain view-only. Existing purchase dates, costs and activity are preserved as historical information. CoinGecko reference prices or demo prices are for valuation, not rewards. No real staking rewards accrue. The JomBit Card remains a separate fiat-funded concept.",
+    answer: "A clear crypto wallet for holding and staking, not buying or selling. We plan a Luno integration, but no partnership or account connection is confirmed. Today you can simulate holding BTC and staking or unstaking ADA, ATOM, AVAX, DOT, ETH, NEAR and SOL. Available and staked balances remain visibly separate, while purchase dates, costs and activity are preserved as historical information. CoinGecko reference prices or demo prices are for valuation, not rewards. No real staking rewards accrue. The JomBit Card remains a separate fiat-funded concept.",
   },
   {
     question: "Is JomBit connected to Luno, and are staking rewards guaranteed?",
