@@ -1,7 +1,7 @@
 .crypto-desk { margin-top: 20px; font-variant-numeric: tabular-nums; }
 .crypto-desk button, .crypto-order-form button { min-height: 44px; }
 .crypto-desk button:disabled, .crypto-order-form button:disabled { opacity: .42; cursor: not-allowed; transform: none; }
-.crypto-desk :is(button, a, summary):focus-visible, .crypto-order-form :is(button, input):focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
+.crypto-desk :is(button, a, summary):focus-visible, .crypto-order-form button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
 .crypto-market-status { margin-bottom: 18px; }
 .crypto-market-status > div:first-child { display: flex; align-items: center; gap: 8px; min-height: 44px; }
 .crypto-market-status > div > strong { font-size: 13px; }

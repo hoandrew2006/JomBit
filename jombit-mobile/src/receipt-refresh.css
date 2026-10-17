@@ -23,7 +23,7 @@
 .receipt-privacy { font-size: 11px; color: #b4c7bb; line-height: 1.75; }
 .receipt-privacy summary { cursor: pointer; padding-block: 6px; }
 .receipt-privacy p { margin: 7px 0; }.receipt-privacy a { color: var(--cyan); }
-.receipt-photo-ready :is(input, summary, button):focus-visible, .receipt-manual-button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
+.receipt-photo-ready :is(summary, button):focus-visible, .receipt-manual-button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
 @media (max-width: 480px) {
   .expense-flow .upload-stage { padding-top: 28px; }
   .receipt-capture-panel { padding: 20px; border-radius: 20px; }
