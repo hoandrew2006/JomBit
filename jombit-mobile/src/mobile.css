@@ -5,7 +5,7 @@
 .storage-notice { background: #302a16; color: #e5d398; padding: 10px 14px; font-size: 11px; line-height: 1.5; }
 .app-view button, .app-view a { touch-action: manipulation; }
 .app-view input, .app-view select, .app-view textarea { min-width: 0; font-size: 16px; }
-.app-view :focus-visible { outline: 2px solid #0ceaec; outline-offset: 3px; }
+.app-view :is(button, a, summary, [role="button"]):focus-visible { outline: 2px solid #0ceaec; outline-offset: 3px; }
 .app-view .topbar { height: 54px; }
 .app-view .screen { padding-top: 23px; }
 .app-view .page-header { margin-bottom: 20px; gap: 12px; }

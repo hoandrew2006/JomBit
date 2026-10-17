@@ -196,6 +196,14 @@
   box-shadow: 0 0 0 3px rgba(12,234,236,.085), inset 0 1px 0 rgba(255,255,255,.035);
 }
 
+/* Compound fields own their focus treatment; their nested input must not draw a second ring. */
+.app-view .money-input input:focus,
+.app-view .auth-input input:focus {
+  border-color: transparent;
+  outline: 0;
+  box-shadow: none;
+}
+
 .app-view .segmented {
   border-color: var(--app-line);
   background: #151817;
