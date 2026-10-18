@@ -1,5 +1,6 @@
 import { calculateExpenseShares } from "./calculations.ts";
 import type { AppState, Expense, ExpenseItem } from "./models";
+import { demoActivity, PHUKET_GROUP } from "./seed-activity.ts";
 
 const item = (
   id: string,
@@ -26,7 +27,8 @@ const makeExpense = (
   ),
 });
 
-export function createSeedState(): AppState {
+export function createSeedState(now: Date = new Date()): AppState {
+  const activity = demoActivity(now);
   const mamakItems = [
     item("seed-i1", "Nasi Goreng Kampung", 2, 1650, ["me", "maya"]),
     item("seed-i2", "Maggi Goreng Special", 1, 1480, ["daniel"]),
@@ -72,6 +74,7 @@ export function createSeedState(): AppState {
         currency: "MYR",
         memberIds: ["me", "aiman", "jules"],
       },
+      PHUKET_GROUP,
     ],
     expenses: [
       makeExpense({
@@ -107,8 +110,9 @@ export function createSeedState(): AppState {
         taxCents: 1890,
         serviceCents: 2700,
       }),
+      ...activity.expenses,
     ],
-    settlements: [],
+    settlements: activity.settlements,
     fiatBalances: { MYR: 184250, SGD: 0, THB: 0, IDR: 0 },
     counterpartBalances: {
       maya: { MYR: 25600 },
@@ -146,6 +150,7 @@ export function createSeedState(): AppState {
         date: "2026-09-29T10:15:00.000Z",
         direction: "out",
       },
+      ...activity.walletTransactions,
     ],
     card: {
       virtualActive: false,

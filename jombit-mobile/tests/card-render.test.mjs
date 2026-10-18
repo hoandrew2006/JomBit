@@ -24,7 +24,7 @@ test("Card screen offers MYR and available crypto sources without implying payme
   try {
     const { WalletScreen } = await server.ssrLoadModule("/app/components/WalletScreen.tsx");
     const html = renderToStaticMarkup(createElement(WalletScreen, { initialTab: "card" }));
-    for (const text of ["JomBit Card", "SOL CRYPTO SOURCE", "Choose payment source", "MYR wallet", "Crypto wallet", "Crypto asset", "SOL · 1.4 available", "Staked crypto is never used", "does not convert crypto or process card payments"]) assert.ok(html.includes(text), text);
+    for (const text of ["Card</button>", "Insights</button>", "SOL CRYPTO SOURCE", "Choose payment source", "MYR wallet", "Crypto wallet", "Crypto asset", "SOL · 1.4 available", "Staked crypto is never used", "does not convert crypto or process card payments"]) assert.ok(html.includes(text), text);
     assert.match(html, /aria-pressed="true"[^>]*><strong>Crypto wallet/);
     assert.doesNotMatch(html, /Fiat only|fiat-only|buy crypto|sell crypto/i);
   } finally { await server.close(); }
