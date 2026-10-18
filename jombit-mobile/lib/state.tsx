@@ -12,7 +12,7 @@ import {
 } from "react";
 import { createSeedState } from "./seed";
 import type { AppState } from "./models";
-import { executeCryptoCommand, executeCryptoReceive, normalizeCryptoHistory, type CryptoCommand, type CryptoReceiveCommand } from "./crypto-ledger";
+import { executeCryptoCommand, executeCryptoReceive, executeCryptoTransfer, normalizeCryptoHistory, type CryptoCommand, type CryptoReceiveCommand, type CryptoTransferCommand } from "./crypto-ledger";
 import { executeFiatCommand, type FiatCommand } from "./fiat-ledger";
 import { LOGO_LARGE } from "./brand";
 import type { User } from "@supabase/supabase-js";
@@ -27,6 +27,7 @@ interface AppStateValue {
   reset: () => void;
   stakeCrypto: (command: CryptoCommand) => void;
   receiveCrypto: (command: CryptoReceiveCommand) => void;
+  transferCrypto: (command: CryptoTransferCommand) => void;
   transactFiat: (command: FiatCommand) => void;
   backendMode: "local" | "cloud";
   syncStatus: "local" | "loading" | "saved" | "saving" | "error";
@@ -69,6 +70,9 @@ export function AppStateProvider({ children, cloudUser }: { children: ReactNode;
   }, [setState]);
   const receiveCrypto = useCallback((command: CryptoReceiveCommand) => {
     setState(executeCryptoReceive(currentState.current, command));
+  }, [setState]);
+  const transferCrypto = useCallback((command: CryptoTransferCommand) => {
+    setState(executeCryptoTransfer(currentState.current, command));
   }, [setState]);
   const transactFiat = useCallback((command: FiatCommand) => {
     setState(executeFiatCommand(currentState.current, command));
@@ -179,6 +183,7 @@ export function AppStateProvider({ children, cloudUser }: { children: ReactNode;
       setState,
       stakeCrypto,
       receiveCrypto,
+      transferCrypto,
       transactFiat,
       reset: () => setState(createSeedState()),
       backendMode: cloudUser ? "cloud" : "local",
@@ -186,7 +191,7 @@ export function AppStateProvider({ children, cloudUser }: { children: ReactNode;
       userEmail: cloudUser?.email,
       signOut: async () => { await getSupabase()?.auth.signOut(); },
     }),
-    [cloudUser, state, setState, stakeCrypto, receiveCrypto, syncStatus, transactFiat],
+    [cloudUser, state, setState, stakeCrypto, receiveCrypto, transferCrypto, syncStatus, transactFiat],
   );
 
   return (

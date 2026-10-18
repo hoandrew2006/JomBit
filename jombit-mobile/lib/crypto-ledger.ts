@@ -29,6 +29,31 @@ export interface CryptoReceiveCommand {
   amount: string;
 }
 
+export interface CryptoTransferCommand extends CryptoReceiveCommand {
+  recipient: string;
+}
+
+// Local ledger simulation only; never broadcasts a blockchain transaction.
+export function executeCryptoTransfer(state: AppState, command: CryptoTransferCommand, now = Date.now()): AppState {
+  if (!command.id || state.walletTransactions.some((tx) => tx.id === command.id)) throw new Error("This transfer was already recorded.");
+  if (!CRYPTO_ASSETS.includes(command.asset)) throw new Error("Choose a supported crypto asset.");
+  const recipient = command.recipient.trim();
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9 ._-]{1,79}$/.test(recipient)) throw new Error("Enter a recipient label using 2–80 letters, numbers, spaces or . _ -.");
+  const holding = state.crypto[command.asset];
+  if (!holding || !Number.isFinite(holding.available) || !Number.isFinite(holding.staked) || holding.available < 0 || holding.staked < 0) throw new Error("This holding needs to be checked before transferring.");
+  const available = units(holding.available), total = available + units(holding.staked);
+  if (!Number.isSafeInteger(total)) throw new Error("Holding quantity exceeds the preview limit.");
+  const sent = units(parseAmount(command.amount, 8));
+  if (sent > available) throw new Error("Not enough available crypto. Unstake first to use your staked balance.");
+  const cost = holdingMetrics(holding).cost;
+  const transaction: WalletTransaction = {
+    id: command.id, date: new Date(now).toISOString(), kind: "crypto-transfer", direction: "out",
+    title: `Transferred ${command.asset}`, subtitle: "Transfer preview · no blockchain transfer",
+    crypto: { asset: command.asset, quantity: quantity(sent), recipient, priceMyr: null, priceSource: null, priceUpdatedAt: null, feeCents: 0 },
+  };
+  return { ...state, crypto: { ...state.crypto, [command.asset]: { ...holding, available: quantity(available - sent), costBasisCents: cost === null ? null : Math.round(cost * ((total - sent) / total)) } }, walletTransactions: [transaction, ...state.walletTransactions] };
+}
+
 const units = (quantity: number) => Math.round(quantity * CRYPTO_PRECISION);
 const quantity = (atomic: number) => atomic / CRYPTO_PRECISION;
 export function validQuote(quote: CryptoQuote | undefined, now: number) {

@@ -73,6 +73,7 @@ export type WalletTransactionKind =
   | "crypto-buy"
   | "crypto-sell"
   | "crypto-receive"
+  | "crypto-transfer"
   | "stake"
   | "unstake"
   | "card"
@@ -112,6 +113,7 @@ export interface CryptoQuote {
   source: CryptoPriceSource;
 }
 export interface CryptoOrderDetails {
+  recipient?: string;
   asset: CryptoAsset;
   quantity: number;
   priceMyr: number | null;

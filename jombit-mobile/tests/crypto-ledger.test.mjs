@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { executeCryptoCommand, executeCryptoReceive, holdingMetrics, normalizeCryptoHistory, validQuote } from "../lib/crypto-ledger.ts";
+import { executeCryptoCommand, executeCryptoReceive, executeCryptoTransfer, holdingMetrics, normalizeCryptoHistory, validQuote } from "../lib/crypto-ledger.ts";
 
 const NOW = Date.parse("2026-10-05T08:00:00.000Z");
 const OLD = "2026-09-20T01:00:00.000Z";
@@ -20,6 +20,33 @@ const state = () => ({
   groups: [{ id: "preserve-group" }], expenses: [], settlements: [],
 });
 const command = (options = {}) => ({ id: "test-stake", asset: "ETH", action: "stake", amount: "0.2", ...options });
+
+test("Transfer spends only available units, allocates cost and preserves cash and staking", () => {
+  const original = state(), before = structuredClone(original);
+  const cmd = { id: "outgoing", asset: "ETH", amount: "0.2", recipient: "Travel wallet" };
+  const result = executeCryptoTransfer(original, cmd, NOW);
+  assert.deepEqual(original, before);
+  assert.equal(result.crypto.ETH.available, 0.4);
+  assert.equal(result.crypto.ETH.staked, 0.4);
+  assert.equal(result.crypto.ETH.costBasisCents, 640000);
+  assert.equal(result.fiatBalances, original.fiatBalances);
+  assert.equal(result.walletTransactions[0].kind, "crypto-transfer");
+  assert.equal(result.walletTransactions[0].crypto.recipient, "Travel wallet");
+  assert.equal(result.walletTransactions[0].direction, "out");
+  assert.throws(() => executeCryptoTransfer(result, cmd), /already recorded/);
+  assert.throws(() => executeCryptoTransfer(result, { ...cmd, id: "next", amount: "0.5" }), /Not enough available/);
+});
+
+test("Transfer rejects invalid input and supports the smallest unit without inventing costs", () => {
+  const cmd = { id: "transfer", asset: "BTC", amount: "0.00000001", recipient: "Other wallet" };
+  const original = state(); original.crypto.BTC.costBasisCents = null;
+  const result = executeCryptoTransfer(original, cmd);
+  assert.equal(result.crypto.BTC.available, 0.00199999);
+  assert.equal(result.crypto.BTC.costBasisCents, null);
+  for (const amount of ["0", "-1", "NaN", "1e-2", "0.000000001", "99999999999999"]) assert.throws(() => executeCryptoTransfer(original, { ...cmd, amount }));
+  for (const recipient of ["", "a", "x".repeat(81), "https://wallet.example"]) assert.throws(() => executeCryptoTransfer(original, { ...cmd, recipient }));
+  assert.throws(() => executeCryptoTransfer(original, { ...cmd, asset: "INVALID" }));
+});
 
 test("Stake atomically records a dated local activity without changing cash, costs or earlier history", () => {
   const original = state(), before = structuredClone(original);
