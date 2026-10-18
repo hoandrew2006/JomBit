@@ -27,6 +27,16 @@ test("Fiat screen presents one MYR wallet, equivalent values, privacy and preser
     const { fixture } = await server.ssrLoadModule("virtual:jombit-fiat-state");
     assert.deepEqual([fixture.state.fiatBalances.SGD, fixture.state.fiatBalances.THB, fixture.state.fiatBalances.IDR], [0, 0, 0]);
     const render = (balancesVisible = true) => renderToStaticMarkup(createElement(FiatWallet, { balancesVisible }));
+    fixture.state.walletTransactions.unshift({
+      id: "legacy-crypto-purchase",
+      kind: "crypto-buy",
+      title: "Bought ETH",
+      subtitle: "Earlier crypto purchase",
+      amountCents: 72000,
+      currency: "MYR",
+      date: "2026-10-02T00:00:00.000Z",
+      direction: "out",
+    });
     let html = render();
     for (const text of ["Your MYR wallet", "Deposit MYR", "Send from MYR", "Top up in MYR", "not separate balances", "fallback rate", "Send in SGD", "RM1,842.50"]) assert.ok(html.includes(text), text);
     // Flags are inline SVG images (not emoji or letter badges) beside the country name and currency code.
@@ -34,6 +44,8 @@ test("Fiat screen presents one MYR wallet, equivalent values, privacy and preser
     for (const [country, code] of [["Singapore", "SGD"], ["Thailand", "THB"], ["Indonesia", "IDR"]]) assert.match(html, new RegExp(`<strong>${country}</strong><small>${code} · estimated equivalent`));
     assert.doesNotMatch(html, />(SG|TH|ID)<|🇸🇬|🇹🇭|🇮🇩/);
     assert.doesNotMatch(html, /Balances from the previous demo|Currency balances|Approximate wallet value|NaN|Infinity|\bundefined\b|\bWEY\b/);
+    assert.doesNotMatch(html, /Bought ETH|Earlier crypto purchase/);
+    assert.match(html, /MYR wallet deposit/);
     assert.match(html, /aria-pressed="true"/);
     assert.match(render(false), /••••••/);
     assert.doesNotMatch(render(false), /RM1,842\.50/);
