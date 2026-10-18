@@ -37,6 +37,9 @@ test("Fiat screen presents one MYR wallet, equivalent values, privacy and preser
       date: "2026-10-02T00:00:00.000Z",
       direction: "out",
     });
+    // Keep the original starter records at the top of the list; generated Insights activity is tested separately.
+    const generated = fixture.state.walletTransactions.filter((tx) => tx.id.startsWith("seed-"));
+    fixture.state.walletTransactions = fixture.state.walletTransactions.filter((tx) => !tx.id.startsWith("seed-"));
     let html = render();
     for (const text of ["Your MYR wallet", "Deposit MYR", "Send from MYR", "Top up in MYR", "not separate balances", "fallback rate", "Send in SGD", "RM1,842.50"]) assert.ok(html.includes(text), text);
     // Flags are inline SVG images (not emoji or letter badges) beside the country name and currency code.
@@ -47,6 +50,10 @@ test("Fiat screen presents one MYR wallet, equivalent values, privacy and preser
     assert.doesNotMatch(html, /Bought ETH|Earlier crypto purchase/);
     assert.match(html, /MYR wallet deposit/);
     assert.match(html, /aria-pressed="true"/);
+    fixture.state.walletTransactions.push(...generated);
+    html = render();
+    assert.doesNotMatch(html, /Sample staking reward/, "Crypto reward records never appear in the MYR wallet history");
+    assert.match(html, /MYR wallet payment · preview|JomBit Card · preview/);
     assert.match(render(false), /••••••/);
     assert.doesNotMatch(render(false), /RM1,842\.50/);
     fixture.state.fiatBalances.SGD = 18450;

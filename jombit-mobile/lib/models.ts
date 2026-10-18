@@ -1,6 +1,9 @@
 export type Currency = "MYR" | "SGD" | "THB" | "IDR";
 export type CryptoAsset = "BTC" | "ETH" | "SOL" | "ADA" | "ATOM" | "AVAX" | "DOT" | "NEAR";
 
+// Spending categories used by Insights. Optional on records so older saved state still loads.
+export type SpendCategory = "food" | "groceries" | "transport" | "shopping" | "entertainment" | "travel" | "bills" | "others";
+
 export interface UserProfile {
   id: "me";
   name: string;
@@ -46,6 +49,9 @@ export interface Expense {
   serviceCents: number;
   shares: Record<string, MemberShare>;
   receiptPreview?: string;
+  category?: SpendCategory;
+  // MYR value of one unit of `currency` on the expense day; older records fall back to demo rates.
+  myrRate?: number;
 }
 
 export interface Settlement {
@@ -77,7 +83,10 @@ export type WalletTransactionKind =
   | "stake"
   | "unstake"
   | "card"
-  | "settlement";
+  | "settlement"
+  | "payment"
+  | "received"
+  | "staking-reward";
 
 export interface WalletTransaction {
   id: string;
@@ -90,6 +99,8 @@ export interface WalletTransaction {
   direction: "in" | "out" | "neutral";
   crypto?: CryptoOrderDetails;
   fiat?: FiatConversionDetails;
+  category?: SpendCategory;
+  myrRate?: number;
 }
 
 export interface FiatConversionDetails {

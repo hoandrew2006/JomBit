@@ -34,6 +34,7 @@ JomBit/
 │   │   ├── models.ts       All data types (AppState, Expense, Group, WalletTransaction…)
 │   │   ├── calculations.ts Item splitting, tax/service allocation, balances, debt simplification
 │   │   ├── fiat-ledger.ts  MYR wallet commands (deposit, send, convert legacy balances)
+│   │   ├── insights.ts     Spend / money-in rules, categories and period charts for Wallet → Insights
 │   │   ├── crypto-ledger.ts Stake/unstake commands (buy/sell is deliberately rejected)
 │   │   ├── state.tsx       React context; saves state to browser localStorage
 │   │   ├── seed.ts         Sample demo data
@@ -106,6 +107,31 @@ Known issue: `package-lock.json` is currently out of sync with `package.json`, s
 The old root app: `npm install && npm run dev` / `npm test` at the repo root.
 
 **Before opening a PR, `npm test` and `npm run build` must both pass in `jombit-mobile/`.** If you changed the root app, run its `npm test` and `npm run lint` too. There is no CI yet, so you must run these yourself.
+
+## Business rules
+
+### Insights (Wallet → Insights): what counts
+
+These rules live in `jombit-mobile/lib/insights.ts` and are covered by `tests/insights.test.mjs`. Keep them when you change spending, wallet or ledger code.
+
+- **Spend** = the user's own **share** of group expenses (`expense.shares.me`, whoever paid) + the user's own payments (wallet `payment` records and card spend). Never count the full bill the user paid upfront for the group.
+- **Settle-up payments** (`settlement`) are never spend or money in, because they repay shares that are already counted.
+- **Money in** = staking rewards + money received from others (`received`) that isn't a settle-up repayment.
+- **Not money in:** top-ups (`topup`), moves between the user's own balances (`exchange`), crypto received or staked, and crypto price changes.
+- **Ordinary transfers to friends** (`transfer`, e.g. "Sent to Maya") are not spend.
+- **Staking rewards** in the demo are clearly labelled *sample* records. They never change balances, and demo staking still accrues nothing. Do not describe them as real returns.
+- **Amounts are always MYR.** Foreign-currency items are converted at the rate stored on the transaction day (`myrRate`; new expenses store the rate on the day they're saved). Older records without one fall back to the static demo rates.
+- **Categories:** Food & Drink, Groceries, Transport, Shopping, Entertainment, Travel, Bills, Others.
+  - A category is suggested from the merchant (`suggestCategory`).
+  - Users pick one when adding an expense and can change it later in Insights.
+  - A stored choice always beats the suggestion. Records without a category still load and get the suggestion.
+- **Filters:** All / Personal / Group.
+  - Group expenses keep their normal category and show a small "Group" badge in transaction lists.
+  - Personal = wallet records.
+- **Periods** use Malaysia time (UTC+8). Weeks run Monday–Sunday.
+  - Charts never show future days.
+  - Users can't step past the current period.
+  - Records dated after today are ignored.
 
 ## Rules for every agent (Claude Code, Codex, others)
 

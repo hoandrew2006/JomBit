@@ -19,8 +19,9 @@ import { useAppState } from "@/lib/state";
 import { Modal, PageHeader, Segmented, Toast } from "./ui";
 import { CryptoDesk } from "./CryptoDesk";
 import { FiatWallet } from "./FiatWallet";
+import { InsightsScreen } from "./InsightsScreen";
 
-type WalletTab = "fiat" | "crypto" | "card";
+type WalletTab = "fiat" | "crypto" | "card" | "insights";
 
 
 function createTransaction(transaction: Omit<WalletTransaction, "id" | "date">): WalletTransaction {
@@ -74,11 +75,13 @@ export function WalletScreen({ initialTab = "fiat" }: { initialTab?: WalletTab }
   return (
     <div className="screen wallet-screen">
       <PageHeader eyebrow="JOMBIT WALLET" title="Your money, your way" action={<button className="icon-button balance-toggle" onClick={() => setBalancesVisible((value) => !value)} aria-label={balancesVisible ? "Hide balances" : "Show balances"}>{balancesVisible ? <Eye size={19} /> : <EyeOff size={19} />}</button>} />
-      <Segmented value={tab} onChange={setTab} options={[{ value: "fiat", label: "Fiat" }, { value: "crypto", label: "Crypto" }, { value: "card", label: "JomBit Card" }]} />
+      <Segmented value={tab} onChange={setTab} options={[{ value: "fiat", label: "Fiat" }, { value: "crypto", label: "Crypto" }, { value: "card", label: "Card" }, { value: "insights", label: "Insights" }]} />
 
       {tab === "fiat" && <FiatWallet balancesVisible={balancesVisible} />}
 
       {tab === "crypto" && <CryptoDesk balancesVisible={balancesVisible} />}
+
+      {tab === "insights" && <InsightsScreen balancesVisible={balancesVisible} />}
 
       {tab === "card" && (
         <>

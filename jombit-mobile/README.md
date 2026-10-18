@@ -36,13 +36,31 @@ Existing saved foreign-currency balances are **not erased or automatically conve
 
 The interaction takes inspiration from [Touch ’n Go's explanation of its MYR-based wallet](https://support.tngdigital.com.my/hc/en-my/articles/46598983222041-If-I-do-not-close-my-TNG-eWallet-account-and-use-it-during-my-travels-can-I-change-the-currency), but JomBit has no affiliation or integration with it, does not use its rates and does not claim its fees or availability. This implementation remains a local simulation.
 
+## Insights: spending and money in
+
+Open **Wallet → Insights**. Pick **This week / This month / This year** and step back through earlier periods with the arrows. You can't move into the future, and future days are never charted.
+
+- **Tiles:** Money in, Spend, Staking rewards and Top category, each with a small daily bar chart. Tap a tile for the **Summary**.
+- **Summary:** a Money in / Spend toggle, a bar chart (daily for a week, weekly for a month, monthly for a year) with a tap/hover tooltip, and a category list. Tap a category to see its transactions and change their category.
+- **Filters:** All / Personal / Group. Group shares show a "Group" badge.
+
+What counts is defined in `lib/insights.ts` and AGENTS.md → *Business rules*:
+
+- Spend is only your own share of group bills plus your own wallet and card payments.
+- Settle-ups, top-ups, transfers and crypto price changes are left out.
+- Everything is shown in MYR, using the rate stored on the transaction day.
+
+New expenses get a suggested category from the merchant, which you can change while adding the expense or later.
+
+The demo data generates about three months of fictional activity relative to today. If your browser already has saved demo data, use **Profile → Reset data** to see it. The staking rewards in that data are clearly labelled **sample records**: they do not change any balance, and demo staking still earns nothing.
+
 ## Crypto staking and planned Luno integration
 
 Open **Wallet → Crypto**. JomBit presents a simulated crypto wallet for holding, receiving and staking; it does not provide crypto buying or selling, including paper orders. Each asset row shows the MYR reference value of the complete holding, while its live unit price remains in the selected asset details. The command layer rejects buying and selling, not just the UI.
 
 The receive flow uses a deliberately non-payable JomBit preview address and QR. Recording a test transfer adds units to the available balance and preserves a dated incoming activity record, but it never watches a blockchain, creates a custody account or moves real crypto. Because an external transfer does not supply purchase data, its acquisition cost remains unknown rather than being invented.
 
-The prototype supports **demo staking and unstaking of existing ADA, ATOM, AVAX, DOT, ETH, NEAR and SOL holdings**. BTC can be held but is not stakeable. Each asset clearly separates the amount available to stake from the amount already staked. Review an amount before confirming; units move between those balances with no MYR movement. Duplicate confirmations and excessive amounts are rejected against current balances. No rewards accrue and no provider fees or waiting periods are simulated. Instant demo unstaking does not imply instant provider withdrawals.
+The prototype supports **demo staking and unstaking of existing ADA, ATOM, AVAX, DOT, ETH, NEAR and SOL holdings**. BTC can be held but is not stakeable. Each asset clearly separates the amount available to stake from the amount already staked. Review an amount before confirming; units move between those balances with no MYR movement. Duplicate confirmations and excessive amounts are rejected against current balances. Staking actions accrue no rewards and no provider fees or waiting periods are simulated. Instant demo unstaking does not imply instant provider withdrawals.
 
 **Luno integration is planned, not connected. No partnership is confirmed.** There is no account-linking flow, API credential collection, provider request, custody or real staking. Provider approval, technical access, supported assets, fees, variable rewards and unstaking conditions need confirmation before implementation. The informational link opens [Luno’s staking guide](https://guide.luno.com/hc/en-gb/articles/11035626257437-How-do-I-stake-my-crypto-with-Luno). Asset availability can vary by region and provider. No APR or returns are promised.
 

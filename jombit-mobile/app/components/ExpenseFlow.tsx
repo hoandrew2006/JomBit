@@ -15,7 +15,9 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { calculateExpenseShares, expenseSubtotal, expenseTotal, formatMoney } from "@/lib/calculations";
-import type { Expense, ExpenseItem, MemberShare } from "@/lib/models";
+import type { Expense, ExpenseItem, MemberShare, SpendCategory } from "@/lib/models";
+import { CATEGORY_LABELS, SPEND_CATEGORIES, isSpendCategory, suggestCategory } from "@/lib/insights";
+import { useFxRates } from "@/lib/fx-rates";
 import { useAppState } from "@/lib/state";
 import { Avatar, Brand } from "./ui";
 import { ReceiptCamera } from "./ReceiptCamera";
@@ -46,6 +48,9 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
   const [items, setItems] = useState<ExpenseItem[]>(editingExpense?.items ?? []);
   const [taxCents, setTaxCents] = useState(editingExpense?.taxCents ?? 0);
   const [serviceCents, setServiceCents] = useState(editingExpense?.serviceCents ?? 0);
+  // Suggested from the merchant until the user picks a category themselves.
+  const [chosenCategory, setChosenCategory] = useState<SpendCategory | undefined>(isSpendCategory(editingExpense?.category) ? editingExpense.category : undefined);
+  const fx = useFxRates();
   const [expandedShare, setExpandedShare] = useState<string>();
   const [error, setError] = useState("");
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -79,6 +84,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
   const total = expenseTotal(items, taxCents, serviceCents);
   const assignedTotal = Object.values(shares).reduce((sum, share) => sum + share.totalCents, 0);
   const hasUnassigned = items.some((item) => !item.allocation.memberIds.length);
+  const category = chosenCategory ?? suggestCategory(merchant);
 
   const cancelScan = () => { workId.current++; scanController.current?.abort(); setPreparing(false); setPhase("upload"); setError(""); };
 
@@ -104,7 +110,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
     try {
       const result = await scanReceipt(photo, AbortSignal.any([controller.signal, AbortSignal.timeout(70000)]));
       if (id !== workId.current) return;
-      setMerchant(result.merchant); setDate(result.date); setItems(result.items);
+      setMerchant(result.merchant); setDate(result.date); setItems(result.items); setChosenCategory(undefined);
       setTaxCents(result.taxCents); setServiceCents(result.serviceCents);
       setWarnings(result.warnings); setReceiptCurrency(result.currency); setPrintedTotalCents(result.totalCents); setPhase("edit");
     } catch (issue) {
@@ -116,7 +122,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
 
   const beginManual = () => {
     workId.current++; scanController.current?.abort();
-    setSource("manual"); setWarnings([]); setError(""); setMerchant(""); setDate(new Date().toISOString().slice(0, 10));
+    setSource("manual"); setWarnings([]); setError(""); setMerchant(""); setChosenCategory(undefined); setDate(new Date().toISOString().slice(0, 10));
     setItems([{ id: `item-${Date.now()}`, name: "", quantity: 1, unitCents: 0, allocation: { memberIds: [] } }]);
     setTaxCents(0); setServiceCents(0); setPrintedTotalCents(null); setPhase("edit");
   };
@@ -170,6 +176,9 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
       serviceCents,
       shares,
       receiptPreview: retainPhoto ? preview : undefined,
+      category,
+      // Keep the original day's rate when editing; new expenses use today's rate.
+      myrRate: editingExpense?.myrRate ?? fx.rates.inMyr[group.currency],
     };
     setState((current) => ({
       ...current,
@@ -250,6 +259,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
                 <label><span>Merchant</span><input value={merchant} onChange={(event) => setMerchant(event.target.value)} /></label>
                 <label><span>Date</span><input type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label>
                 <label><span>Group</span><select value={group.id} onChange={(event) => setSelectedGroup(event.target.value)}>{state.groups.map((item) => <option key={item.id} value={item.id}>{item.emoji} {item.name}</option>)}</select></label>
+                <label><span>Category{chosenCategory ? "" : " · suggested"}</span><select value={category} onChange={(event) => setChosenCategory(event.target.value as SpendCategory)}>{SPEND_CATEGORIES.map((value) => <option key={value} value={value}>{CATEGORY_LABELS[value]}</option>)}</select></label>
                 <label><span>Paid by</span><select value={payerId} onChange={(event) => setPayerId(event.target.value)}>{members.map((member) => <option key={member.id} value={member.id}>{member.name}{member.id === "me" ? " (You)" : ""}</option>)}</select></label>
               </div>
               <div className="items-card">
