@@ -44,7 +44,9 @@ export function FiatWallet({ balancesVisible }: { balancesVisible: boolean }) {
   const hide = (value: string) => balancesVisible ? value : "••••••";
   const legacy = FOREIGN_CURRENCIES.filter((code) => state.fiatBalances[code] > 0);
   const legacyTotal = legacy.reduce((sum, code) => sum + legacyMyrCredit(state.fiatBalances[code], code, rates), 0);
-  const history = state.walletTransactions.filter((tx) => tx.amountCents !== undefined).sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+  const history = state.walletTransactions
+    .filter((tx) => tx.amountCents !== undefined && tx.kind !== "crypto-buy" && tx.kind !== "crypto-sell")
+    .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
   let debit: number | null = null;
   try { if (action === "send") debit = myrDebitForPayment(parseFiatAmount(amount), currency, rates); } catch { /* Incomplete input is validated on review. */ }
 
