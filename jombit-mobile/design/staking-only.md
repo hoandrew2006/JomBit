@@ -16,8 +16,9 @@ No existing wallet is reset, relabelled as Luno data or migrated into a provider
 - Market quotes affect reference valuations only, never staking rewards.
 - No APR is displayed or rewards accrued. Immediate local unstaking is not a
   representation of provider processing times.
-- JomBit Card is fiat-only; a stored older crypto-source preference is preserved
-  in data but no longer offered or used in the card presentation.
+- JomBit Card can save the MYR wallet or one available crypto asset as its
+  preview payment source. Staked holdings are excluded. This preference does
+  not convert, reserve or spend crypto and does not represent card processing.
 - Luno is a planned integration, not a confirmed partnership or active service.
 - No Luno API, account-linking, credentials or fund transfers are implemented.
 

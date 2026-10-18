@@ -420,6 +420,18 @@ select { color-scheme: dark; }
 .card-controls > div > span { display: flex; align-items: center; gap: 10px; }
 .card-controls select { width: 95px; min-height: 38px; }
 .card-controls strong, .card-controls small { display: block; }.card-controls small { color: var(--muted); font-size: 9px; margin-top: 3px; }
+.card-source-panel { margin-top: 16px; }
+.card-source-panel .section-heading > div p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.card-source-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.card-source-options button { min-height: 74px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); color: var(--text); text-align: left; }
+.card-source-options button[aria-pressed="true"] { border-color: var(--cyan); background: rgba(12,234,236,.1); box-shadow: inset 0 0 0 1px rgba(12,234,236,.18); }
+.card-source-options strong, .card-source-options small { display: block; }
+.card-source-options small { color: var(--muted); margin-top: 4px; }
+.card-asset-select { display: grid; gap: 7px; margin-top: 14px; }
+.card-asset-select > span { font-weight: 700; }
+.card-asset-select select { width: 100%; min-height: 48px; }
+.card-asset-select small, .card-source-note { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.card-source-note { margin: 14px 0 0; }
 .physical-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
 .physical-card-grid article { background: var(--panel); border: 1px solid var(--line); border-radius: 19px; padding: 18px; }
 .physical-card-grid article > span { display: block; height: 75px; border-radius: 13px; margin-bottom: 15px; }
@@ -477,7 +489,7 @@ select { color-scheme: dark; }
   .wallet-hero { min-height: 260px; padding: 23px; }.wallet-hero > strong { font-size: 40px; }
   .currency-grid { grid-template-columns: 1fr; }.currency-card { min-height: 87px; grid-template-columns: auto 1fr auto; }.currency-card > strong { grid-column: auto; font-size: 16px; }
   .asset-list button > span:nth-child(3) { max-width: 125px; }
-  .jombit-card-visual { min-height: 225px; border-radius: 22px; }.jombit-card-visual > strong { font-size: 13px; }.card-controls, .physical-card-grid { grid-template-columns: 1fr; }
+  .jombit-card-visual { min-height: 225px; border-radius: 22px; }.jombit-card-visual > strong { font-size: 13px; }.card-controls, .physical-card-grid, .card-source-options { grid-template-columns: 1fr; }
   .modal-sheet { padding-left: 18px; padding-right: 18px; }
   .toast { bottom: 98px; white-space: nowrap; }
 }
