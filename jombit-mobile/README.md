@@ -92,6 +92,18 @@ The build creates the static website in `dist`, plus self-contained `dist/JomBit
 
 ## Brand assets
 
+### Crypto transfers
+
+Choose a coin, select **Transfer**, enter a recipient label and amount, then review
+and confirm. This is a local ledger preview: it deducts available crypto only,
+leaves staked crypto and MYR unchanged, and records the recipient in activity.
+It does not send to an address or credit another account. No blockchain or custody
+provider is connected. Known acquisition cost is reduced proportionally; unknown
+cost stays unknown. Duplicate confirmations and insufficient balances are rejected.
+
+The holdings screen uses side-by-side list/details on desktop and stacked rows on
+phones. Receive and Transfer remain separate from staking actions.
+
 The JomBit logo, favicons and app icons are in `public/brand/` (see `lib/brand.ts`). Browser icons are linked from `index.html`; `public/manifest.webmanifest` lists the 192/512 app icons (also as maskable) with theme colour `#151515`. The standalone HTML export embeds every referenced brand image, so it still needs no network.
 
 ## Social preview

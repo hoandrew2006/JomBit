@@ -36,7 +36,7 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
     for (const location of [{ protocol: "file:", hostname: "" }, { protocol: "about:", hostname: "" }, { protocol: "http:", hostname: "static.example" }]) assert.equal(supportsLiveCryptoPrices(location), false, "Offline and insecure non-local hosts must default to labelled demo prices");
     const render = (visible = true) => renderToStaticMarkup(createElement(CryptoDesk, { balancesVisible: visible }));
     let html = render();
-    for (const content of ["CRYPTO PORTFOLIO", "Available to stake", "Currently staked", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Price per coin", "Crypto activity", "Earlier record", "Crypto wallet preview only", "Receive ETH", "Stake ETH", "Unstake ETH", "Holding value", "Luno integration is planned, not connected", "BTC", "Hold only", "Cardano", "Cosmos", "Avalanche", "Polkadot", "NEAR Protocol"]) assert.ok(html.includes(content), content);
+    for (const content of ["CRYPTO PORTFOLIO", "Available balance", "Currently staked", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Price per coin", "Crypto activity", "Earlier record", "Crypto wallet preview only", "Receive ETH", "Transfer ETH", "Stake ETH", "Unstake ETH", "Holding value", "Luno integration is planned, not connected", "BTC", "Hold only", "Cardano", "Cosmos", "Avalanche", "Polkadot", "NEAR Protocol"]) assert.ok(html.includes(content), content);
     assert.equal([...html.matchAll(/class="crypto-order"/g)].length, 5);
     assert.match(html, /aria-pressed="true"/);
     assert.doesNotMatch(html, />\s*(Buy|Sell) (BTC|ETH|SOL)|MYR to spend|Buy &amp; sell|MYR available to practise/);
@@ -52,7 +52,7 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
     fixture.state.walletTransactions.unshift({ id: "legacy", kind: "crypto-buy", title: "Old purchase", date: "2026-09-30T00:00:00Z", direction: "out", amountCents: 3000, currency: "MYR" });
     html = render();
     assert.match(html, /History incomplete/);
-    assert.match(html, /original price and date are unknown/);
+    assert.match(html, /Purchase cost is incomplete/);
     assert.match(html, /Legacy record/);
     assert.match(html, /execution price and quantity were not stored/);
 
