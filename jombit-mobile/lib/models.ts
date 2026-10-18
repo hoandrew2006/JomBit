@@ -138,6 +138,7 @@ export interface JomBitCard {
   physicalType?: "plastic" | "metal";
   frozen: boolean;
   paymentSource: "fiat" | "crypto";
+  paymentAsset?: CryptoAsset;
 }
 
 export interface AppState {

@@ -151,6 +151,7 @@ export function createSeedState(): AppState {
       virtualActive: false,
       frozen: false,
       paymentSource: "fiat",
+      paymentAsset: "ETH",
     },
   };
 }

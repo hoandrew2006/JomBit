@@ -2,6 +2,7 @@
 
 import {
   CreditCard,
+  Coins,
   Eye,
   EyeOff,
   Flame,
@@ -12,7 +13,8 @@ import {
 import { useState } from "react";
 import { mockDelay } from "@/lib/mock-services";
 import { formatMoney } from "@/lib/calculations";
-import type { WalletTransaction } from "@/lib/models";
+import type { CryptoAsset, WalletTransaction } from "@/lib/models";
+import { CRYPTO_ASSETS } from "@/lib/crypto-ledger";
 import { useAppState } from "@/lib/state";
 import { Modal, PageHeader, Segmented, Toast } from "./ui";
 import { CryptoDesk } from "./CryptoDesk";
@@ -25,14 +27,22 @@ function createTransaction(transaction: Omit<WalletTransaction, "id" | "date">):
   return { id: `tx-${Date.now()}`, date: new Date().toISOString(), ...transaction };
 }
 
-export function WalletScreen() {
+export function WalletScreen({ initialTab = "fiat" }: { initialTab?: WalletTab } = {}) {
   const { state, setState } = useAppState();
-  const [tab, setTab] = useState<WalletTab>("fiat");
+  const [tab, setTab] = useState<WalletTab>(initialTab);
   const [balancesVisible, setBalancesVisible] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
   const [cardOrder, setCardOrder] = useState<"plastic" | "metal">();
+  const cardAsset = state.card.paymentAsset ?? "ETH";
+  const availableCardAssets = CRYPTO_ASSETS.filter((asset) => state.crypto[asset].available > 0);
+
+  const updateCardSource = (paymentSource: "fiat" | "crypto", paymentAsset: CryptoAsset = cardAsset) => {
+    setState((current) => ({ ...current, card: { ...current.card, paymentSource, paymentAsset } }));
+    setToast(paymentSource === "fiat" ? "Card source changed to MYR wallet" : `Card source changed to ${paymentAsset}`);
+    window.setTimeout(() => setToast(""), 2600);
+  };
 
   const finish = (message: string) => {
     setError("");
@@ -76,10 +86,13 @@ export function WalletScreen() {
             <div className="card-top"><span className="card-brand"><i /> JomBit</span><span>VIRTUAL · PREVIEW</span></div>
             <div className="card-chip"><i /><i /><i /></div>
             <strong>{state.card.virtualActive ? "JOMBIT •••• 2048" : "SET UP YOUR VIRTUAL CARD"}</strong>
-            <div className="card-bottom"><span>{state.user.name.toUpperCase()}</span><span>FIAT SOURCE</span></div>
+            <div className="card-bottom"><span>{state.user.name.toUpperCase()}</span><span>{state.card.paymentSource === "crypto" ? `${cardAsset} CRYPTO SOURCE` : "MYR SOURCE"}</span></div>
             {state.card.frozen && <div className="frozen-overlay"><Snowflake size={26} /> Frozen</div>}
           </section>
-          {!state.card.virtualActive ? <section className="activate-card-panel"><CreditCard size={26} /><h2>Meet your virtual JomBit Card</h2><p>Explore how card controls and a fiat-only payment source could work.</p><button className="primary-button" onClick={activateVirtual}>Set up card preview</button></section> : <section className="card-controls"><button onClick={() => setState((current) => ({ ...current, card: { ...current.card, frozen: !current.card.frozen } }))}>{state.card.frozen ? <Flame size={18} /> : <Snowflake size={18} />}<span><strong>{state.card.frozen ? "Unfreeze card" : "Freeze card"}</strong><small>Applies to this preview</small></span></button><div><span><ShieldCheck size={18} /><span><strong>Payment source</strong><small>Staking holdings are never used for card spending</small></span></span><span>Fiat only</span></div></section>}
+          {!state.card.virtualActive ? <section className="activate-card-panel"><CreditCard size={26} /><h2>Meet your virtual JomBit Card</h2><p>Explore card controls with your MYR wallet or available crypto as the payment source.</p><button className="primary-button" onClick={activateVirtual}>Set up card preview</button></section> : <>
+            <section className="card-controls"><button onClick={() => setState((current) => ({ ...current, card: { ...current.card, frozen: !current.card.frozen } }))}>{state.card.frozen ? <Flame size={18} /> : <Snowflake size={18} />}<span><strong>{state.card.frozen ? "Unfreeze card" : "Freeze card"}</strong><small>Applies to this preview</small></span></button><div><span><ShieldCheck size={18} /><span><strong>Payment source</strong><small>{state.card.paymentSource === "crypto" ? `${cardAsset} available balance` : "Malaysian Ringgit balance"}</small></span></span><span>{state.card.paymentSource === "crypto" ? cardAsset : "MYR"}</span></div></section>
+            <section className="section-block card-source-panel" aria-labelledby="card-source-title"><div className="section-heading"><div><h2 id="card-source-title">Choose payment source</h2><p>Select which preview balance the card would use.</p></div><Coins size={20} /></div><div className="card-source-options"><button type="button" aria-pressed={state.card.paymentSource === "fiat"} onClick={() => updateCardSource("fiat")}><strong>MYR wallet</strong><small>{formatMoney(state.fiatBalances.MYR)} available</small></button><button type="button" aria-pressed={state.card.paymentSource === "crypto"} disabled={!availableCardAssets.length} onClick={() => updateCardSource("crypto", availableCardAssets.includes(cardAsset) ? cardAsset : availableCardAssets[0])}><strong>Crypto wallet</strong><small>{availableCardAssets.length ? "Use available crypto" : "No available crypto"}</small></button></div>{state.card.paymentSource === "crypto" && <label className="card-asset-select"><span>Crypto asset</span><select value={cardAsset} onChange={(event) => updateCardSource("crypto", event.target.value as CryptoAsset)}>{availableCardAssets.map((asset) => <option value={asset} key={asset}>{asset} · {state.crypto[asset].available.toLocaleString("en-MY", { maximumFractionDigits: 8 })} available</option>)}</select><small>Only available holdings can be selected. Staked crypto is never used.</small></label>}<p className="card-source-note">Source preference only. JomBit does not convert crypto or process card payments in this preview.</p></section>
+          </>}
           <section className="section-block"><div className="section-heading"><h2>Choose your finish</h2><span>Preview pricing</span></div><div className="physical-card-grid"><article><span className="plastic-swatch" /><h3>Plastic</h3><strong>RM12</strong><p>Lightweight, classic and designed for everyday spending.</p><button className="secondary-button" onClick={() => { setCardOrder("plastic"); setError(""); }}>{state.card.physicalType === "plastic" ? "Selected" : "Choose plastic"}</button></article><article className="metal-option"><span className="metal-swatch" /><h3>Metal</h3><strong>RM30</strong><p>A weightier card with a brushed graphite finish.</p><button className="primary-button" onClick={() => { setCardOrder("metal"); setError(""); }}>{state.card.physicalType === "metal" ? "Selected" : "Choose metal"}</button></article></div></section>
           <p className="product-disclosure"><ShieldCheck size={15} /> Card preview only. No card is issued and no payment network is connected.</p>
         </>
