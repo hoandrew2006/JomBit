@@ -10,7 +10,8 @@ No existing wallet is reset, relabelled as Luno data or migrated into a provider
 - The wallet holds BTC, ETH, SOL, ADA, ATOM, AVAX, DOT and NEAR.
 - BTC is hold-only. ETH, SOL, ADA, ATOM, AVAX, DOT and NEAR are available for preview staking, matching Luno's documented Malaysia set checked on 17 October 2026.
 - Wallet rows and position details keep available-to-stake and currently-staked quantities separate; their sum is the total holding.
-- Acquisition costs/dates and earlier trades remain historical records.
+- Acquisition costs and dates remain historical metadata. Older buy/sell records stay readable for saved-data compatibility but are hidden from the activity screen.
+- New accounts have no shared crypto activity; receive, transfer, stake and unstake actions build each account's own history.
 - Demo stake/unstake actions preserve unit totals, costs, cash and old history.
 - Market quotes affect reference valuations only, never staking rewards.
 - No APR is displayed or rewards accrued. Immediate local unstaking is not a

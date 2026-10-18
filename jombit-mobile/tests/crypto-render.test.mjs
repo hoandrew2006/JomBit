@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createServer } from "vite";
 import react from "@vitejs/plugin-react";
 
-test("Crypto screen renders history, price states, privacy and incomplete legacy holdings", async () => {
+test("Crypto screen shows only account-created wallet and staking history", async () => {
   const root = fileURLToPath(new URL("../", import.meta.url));
   const server = await createServer({
     configFile: false, envFile: false, root, cacheDir: "node_modules/.vite-test-crypto",
@@ -36,8 +36,8 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
     for (const location of [{ protocol: "file:", hostname: "" }, { protocol: "about:", hostname: "" }, { protocol: "http:", hostname: "static.example" }]) assert.equal(supportsLiveCryptoPrices(location), false, "Offline and insecure non-local hosts must default to labelled demo prices");
     const render = (visible = true) => renderToStaticMarkup(createElement(CryptoDesk, { balancesVisible: visible }));
     let html = render();
-    for (const content of ["CRYPTO PORTFOLIO", "Available balance", "Currently staked", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Price per coin", "Crypto activity", "Earlier record", "Crypto wallet preview only", "Receive ETH", "Transfer ETH", "Stake ETH", "Unstake ETH", "Holding value", "Luno integration is planned, not connected", "BTC", "Hold only", "Cardano", "Cosmos", "Avalanche", "Polkadot", "NEAR Protocol"]) assert.ok(html.includes(content), content);
-    assert.equal([...html.matchAll(/class="crypto-order"/g)].length, 5);
+    for (const content of ["CRYPTO PORTFOLIO", "Available balance", "Currently staked", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Crypto activity", "No crypto activity yet", "Crypto wallet preview only", "Receive ETH", "Transfer ETH", "Stake ETH", "Unstake ETH", "Holding value", "Luno integration is planned, not connected", "BTC", "Hold only", "Cardano", "Cosmos", "Avalanche", "Polkadot", "NEAR Protocol"]) assert.ok(html.includes(content), content);
+    assert.equal([...html.matchAll(/class="crypto-order"/g)].length, 0);
     assert.match(html, /aria-pressed="true"/);
     assert.doesNotMatch(html, />\s*(Buy|Sell) (BTC|ETH|SOL)|MYR to spend|Buy &amp; sell|MYR available to practise/);
     assert.doesNotMatch(html, /NaN|Infinity|\bundefined\b|\bWEY\b/);
@@ -49,12 +49,21 @@ test("Crypto screen renders history, price states, privacy and incomplete legacy
     fixture.state.crypto.ETH.costBasisCents = null;
     fixture.state.crypto.ETH.firstBoughtAt = null;
     fixture.state.crypto.ETH.lastBoughtAt = null;
-    fixture.state.walletTransactions.unshift({ id: "legacy", kind: "crypto-buy", title: "Old purchase", date: "2026-09-30T00:00:00Z", direction: "out", amountCents: 3000, currency: "MYR" });
+    fixture.state.walletTransactions.unshift(
+      { id: "legacy", kind: "crypto-buy", title: "Old purchase", date: "2026-09-30T00:00:00Z", direction: "out", amountCents: 3000, currency: "MYR" },
+      { id: "seeded", kind: "stake", title: "Shared starting activity", date: "2026-09-30T01:00:00Z", direction: "neutral", crypto: { asset: "ETH", quantity: 0.01, feeCents: 0, priceMyr: null, priceSource: null, priceUpdatedAt: null, seeded: true } },
+      { id: "received", kind: "crypto-receive", title: "Received ETH", date: "2026-10-01T01:00:00Z", direction: "in", crypto: { asset: "ETH", quantity: 0.02, feeCents: 0, priceMyr: null, priceSource: null, priceUpdatedAt: null } },
+      { id: "sent", kind: "crypto-transfer", title: "Transferred ETH", date: "2026-10-02T01:00:00Z", direction: "out", crypto: { asset: "ETH", quantity: 0.01, recipient: "Travel wallet", feeCents: 0, priceMyr: null, priceSource: null, priceUpdatedAt: null } },
+      { id: "staked", kind: "stake", title: "Staked ETH", date: "2026-10-03T01:00:00Z", direction: "neutral", crypto: { asset: "ETH", quantity: 0.01, feeCents: 0, priceMyr: null, priceSource: null, priceUpdatedAt: null } },
+    );
     html = render();
     assert.match(html, /History incomplete/);
     assert.match(html, /Purchase cost is incomplete/);
-    assert.match(html, /Legacy record/);
-    assert.match(html, /execution price and quantity were not stored/);
+    assert.equal([...html.matchAll(/class="crypto-order"/g)].length, 3);
+    assert.match(html, /Received ETH/);
+    assert.match(html, /Transferred ETH/);
+    assert.match(html, /Staked ETH/);
+    assert.doesNotMatch(html, /Old purchase|Shared starting activity|Earlier record/);
 
     market.mode = "live";
     market.fresh = false;
