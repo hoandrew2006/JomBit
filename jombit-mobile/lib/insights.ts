@@ -1,14 +1,17 @@
 import { DEMO_FX_IN_MYR } from "./mock-services.ts";
-import type { AppState, Currency, SpendCategory } from "./models";
+import type { AppState, CryptoAsset, Currency, SpendCategory } from "./models";
 
-// Insights business rules (see AGENTS.md → Business rules):
-// - Spend = my own share of group expenses + my own wallet/card payments. Never the full bill I paid upfront.
-// - Money in = sample staking rewards + money received from others that is not a settle-up.
-// - Excluded: settle-ups, top-ups, transfers between my own balances, transfers to friends, crypto price changes.
+// Insights business rules (see AGENTS.md → Business rules). All classification happens in insightEntries().
+// - Spend = my own share of group expenses + my own payments: wallet payments, card spend and crypto payments.
+//   A crypto payment counts once, as the MYR the recipient received, in its normal category; its conversion
+//   fee is a separate "Fees" entry. Never the full bill I paid upfront, settle-ups I paid, or bank withdrawals.
+// - Money in = top-ups + money received from others + repayments (settle-ups received) + staking rewards.
+//   The MYR converted from crypto to fund a crypto payment is part of that payment, not money in.
+// - Excluded: transfers to friends, conversions between my own balances, crypto receipts and price changes.
 // - Everything is shown in MYR, converted with the rate stored on the transaction day.
 
-export type IncomeCategory = "staking" | "received";
-export type InsightCategory = SpendCategory | IncomeCategory;
+export type IncomeCategory = "topup" | "received" | "repayment" | "staking";
+export type InsightCategory = SpendCategory | "fees" | IncomeCategory;
 export type InsightFlow = "in" | "out";
 export type InsightScope = "all" | "personal" | "group";
 export type PeriodKind = "week" | "month" | "year";
@@ -23,8 +26,11 @@ export const CATEGORY_LABELS: Record<InsightCategory, string> = {
   travel: "Travel",
   bills: "Bills",
   others: "Others",
+  fees: "Fees",
+  topup: "Top-ups",
+  received: "Received from others",
+  repayment: "Repayments",
   staking: "Staking rewards",
-  received: "Received from friends",
 };
 
 // Checked in order, so more specific words win (e.g. "Grab Food" is food, "Grab" alone is transport).
@@ -80,6 +86,8 @@ export interface InsightEntry {
   sortKey: string;
   myrCents: number;
   groupName?: string;
+  // Crypto payments: the coin and amount spent, shown as a "Paid with" badge.
+  paidWith?: { asset: CryptoAsset; quantity: number };
 }
 
 export function insightEntries(state: AppState): InsightEntry[] {
@@ -109,10 +117,20 @@ export function insightEntries(state: AppState): InsightEntry[] {
     const day = dayKey(tx.date);
     if (!day) continue;
     const base = { id: tx.id, source: "wallet" as const, scope: "personal" as const, title: tx.title, subtitle: tx.subtitle, day, sortKey: tx.date };
-    if ((tx.kind === "payment" || tx.kind === "card") && tx.direction === "out" && tx.amountCents && tx.amountCents > 0) {
-      entries.push({ ...base, flow: "out", category: isSpendCategory(tx.category) ? tx.category : suggestCategory(tx.title), myrCents: toMyrCents(tx.amountCents, tx.currency, tx.myrRate) });
-    } else if (tx.kind === "received" && tx.direction === "in" && tx.amountCents && tx.amountCents > 0) {
-      entries.push({ ...base, flow: "in", category: "received", myrCents: toMyrCents(tx.amountCents, tx.currency, tx.myrRate) });
+    const amount = tx.amountCents && tx.amountCents > 0 ? toMyrCents(tx.amountCents, tx.currency, tx.myrRate) : 0;
+    if ((tx.kind === "payment" || tx.kind === "card") && tx.direction === "out" && amount) {
+      entries.push({ ...base, flow: "out", category: isSpendCategory(tx.category) ? tx.category : suggestCategory(tx.title), myrCents: amount });
+    } else if (tx.kind === "crypto-payment" && tx.direction === "out" && amount && tx.crypto) {
+      // One spend entry for what the recipient received; the conversion fee is its own "Fees" entry.
+      entries.push({ ...base, flow: "out", category: isSpendCategory(tx.category) ? tx.category : suggestCategory(tx.title), sortKey: `${tx.date}~`, myrCents: amount, paidWith: { asset: tx.crypto.asset, quantity: tx.crypto.quantity } });
+      if (tx.crypto.feeCents > 0) entries.push({ ...base, id: `${tx.id}:fee`, title: `Conversion fee · ${tx.title}`, subtitle: `Paid with ${tx.crypto.asset}`, flow: "out", category: "fees", myrCents: tx.crypto.feeCents });
+    } else if (tx.kind === "topup" && tx.direction === "in" && amount) {
+      entries.push({ ...base, flow: "in", category: "topup", myrCents: amount });
+    } else if (tx.kind === "received" && tx.direction === "in" && amount) {
+      entries.push({ ...base, flow: "in", category: "received", myrCents: amount });
+    } else if (tx.kind === "settlement" && tx.direction === "in" && amount) {
+      // A friend repaying me. Settle-ups I pay are never spend: the shares behind them are already counted.
+      entries.push({ ...base, flow: "in", category: "repayment", myrCents: amount });
     } else if (tx.kind === "staking-reward" && tx.crypto?.priceMyr && tx.crypto.quantity > 0) {
       // Valued at the reference price recorded on the reward day, not today's price.
       entries.push({ ...base, flow: "in", category: "staking", myrCents: Math.round(tx.crypto.quantity * tx.crypto.priceMyr * 100) });
@@ -248,5 +266,5 @@ export function summarise(all: InsightEntry[], options: { range: PeriodRange; fl
 export function setEntryCategory(state: AppState, entry: Pick<InsightEntry, "id" | "source">, category: SpendCategory): AppState {
   if (!isSpendCategory(category)) throw new Error("Choose a valid category.");
   if (entry.source === "expense") return { ...state, expenses: state.expenses.map((expense) => expense.id === entry.id ? { ...expense, category } : expense) };
-  return { ...state, walletTransactions: state.walletTransactions.map((tx) => tx.id === entry.id && (tx.kind === "payment" || tx.kind === "card") ? { ...tx, category } : tx) };
+  return { ...state, walletTransactions: state.walletTransactions.map((tx) => tx.id === entry.id && (tx.kind === "payment" || tx.kind === "card" || tx.kind === "crypto-payment") ? { ...tx, category } : tx) };
 }

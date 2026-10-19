@@ -89,7 +89,10 @@ export type WalletTransactionKind =
   | "settlement"
   | "payment"
   | "received"
-  | "staking-reward";
+  | "staking-reward"
+  // Paid a merchant with crypto: amountCents is the MYR the recipient received; crypto holds the coin and fee.
+  | "crypto-payment"
+  | "withdrawal";
 
 export interface WalletTransaction {
   id: string;

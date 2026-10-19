@@ -44,15 +44,20 @@ Open **Wallet → Insights**. Pick **This week / This month / This year** and st
 - **Summary:** a Money in / Spend toggle, a bar chart (daily for a week, weekly for a month, monthly for a year) with a tap/hover tooltip, and a category list. Tap a category to see its transactions and change their category.
 - **Filters:** All / Personal / Group. Group shares show a "Group" badge.
 
-What counts is defined in `lib/insights.ts` and AGENTS.md → *Business rules*:
+What counts is defined in one place, `insightEntries()` in `lib/insights.ts`, and in AGENTS.md → *Business rules*:
 
-- Spend is only your own share of group bills plus your own wallet and card payments.
-- Settle-ups, top-ups, transfers and crypto price changes are left out.
+- **Spend** is your own share of group bills plus your own wallet, card and crypto payments.
+  - A crypto payment counts once, as the MYR the recipient received, in its normal category. It carries a "Paid with ETH" (etc.) badge and shows the crypto amount.
+  - Its conversion fee appears separately under **Fees**.
+  - Settle-ups you pay, bank withdrawals and transfers to friends are not spend.
+- **Money in** is everything entering your JomBit wallet: Top-ups, Received from others, Repayments (settle-ups paid to you) and Staking rewards. The Summary's Money in view breaks it down by these four sources.
+  - The MYR converted from crypto to fund a crypto payment is not money in.
+  - Crypto price changes are not money in.
 - Everything is shown in MYR, using the rate stored on the transaction day.
 
 New expenses get a suggested category from the merchant, which you can change while adding the expense or later.
 
-The demo data generates about three months of fictional activity relative to today. Use **Explore the demo** on the account screen to open the standardized sample workspace; **Profile → Reset data** restores that template. Resetting a signed-in account instead clears its product data while preserving its profile and sign-in. The staking rewards in the demo are clearly labelled **sample records**: they do not change any balance, and demo staking still earns nothing.
+The demo data generates about three months of fictional activity relative to today. It includes top-ups, repayments, sample staking rewards, a bank withdrawal and weekly crypto payments with conversion fees. Use **Explore the demo** on the account screen to open the standardized sample workspace; **Profile → Reset data** restores that template. Resetting a signed-in account instead clears its product data while preserving its profile and sign-in. The staking rewards in the demo are clearly labelled **sample records**: they do not change any balance, and demo staking still earns nothing.
 
 ## Crypto staking and planned Luno integration
 

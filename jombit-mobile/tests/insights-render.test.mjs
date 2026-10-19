@@ -33,6 +33,13 @@ test("Insights shows MYR tiles, sample-reward disclosure, Group badges and no fu
     const personal = fixture.state.walletTransactions;
     fixture.state.walletTransactions = personal.filter((tx) => tx.kind !== "payment");
     assert.match(render(), /class="insight-group-badge">Group<\/b>KL Food Crew · /, "group shares carry a Group badge and keep their category");
+    fixture.state.walletTransactions = personal.filter((tx) => tx.kind === "crypto-payment").slice(0, 2).map((tx) => ({ ...tx, date: new Date(NOW.getTime() - 3_600_000).toISOString() }));
+    fixture.state.expenses = [];
+    const crypto = render();
+    assert.match(crypto, /class="insight-paid-badge">Paid with [A-Z]+<\/b>/, "crypto payments carry a Paid-with badge");
+    assert.match(crypto, /Conversion fee · /, "the conversion fee is listed separately");
+    assert.match(crypto, / · \d[\d.,]* (ETH|SOL|BTC|ADA)</, "the crypto amount is shown in the details");
+    assert.doesNotMatch(render(false), /\d[\d.,]* (ETH|SOL|BTC|ADA)</, "crypto amounts hide with balances");
     fixture.state.walletTransactions = personal;
     assert.match(html, /aria-label="Next week" disabled=""/, "cannot move into the future");
     // Three mini charts with seven daily slots each; the last three days of the week stay empty.

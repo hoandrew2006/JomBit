@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ComponentType } from "react";
-import { ArrowDownLeft, ArrowLeft, Car, ChevronLeft, ChevronRight, Clapperboard, Coins, Plane, ReceiptText, Shapes, ShieldCheck, ShoppingBag, ShoppingBasket, Utensils } from "lucide-react";
+import { ArrowDownLeft, ArrowLeft, Car, ChevronLeft, ChevronRight, Clapperboard, Coins, HandCoins, Percent, Plane, ReceiptText, Shapes, ShieldCheck, ShoppingBag, ShoppingBasket, Utensils, Wallet } from "lucide-react";
 import { formatMoney } from "@/lib/calculations";
 import { CATEGORY_LABELS, SPEND_CATEGORIES, insightEntries, isSpendCategory, periodRange, setEntryCategory, summarise, type InsightBucket, type InsightCategory, type InsightEntry, type InsightFlow, type InsightScope, type PeriodKind, type PeriodRange } from "@/lib/insights";
 import type { SpendCategory } from "@/lib/models";
@@ -18,12 +18,16 @@ const ICONS: Record<InsightCategory, ComponentType<{ size?: number }>> = {
   travel: Plane,
   bills: ReceiptText,
   others: Shapes,
-  staking: Coins,
+  fees: Percent,
+  topup: Wallet,
   received: ArrowDownLeft,
+  repayment: HandCoins,
+  staking: Coins,
 };
 
 const PERIOD_NAMES: Record<PeriodKind, [string, string]> = { week: ["This week", "Last week"], month: ["This month", "Last month"], year: ["This year", "Last year"] };
 const SCOPES: { value: InsightScope; label: string }[] = [{ value: "all", label: "All" }, { value: "personal", label: "Personal" }, { value: "group", label: "Group" }];
+const cryptoAmount = (value: number) => value.toLocaleString("en-MY", { maximumFractionDigits: 8 });
 const dayLabel = (day: string) => new Intl.DateTimeFormat("en-MY", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`));
 const periodTitle = (range: PeriodRange) => range.offset === 0 ? PERIOD_NAMES[range.kind][0] : range.offset === -1 ? PERIOD_NAMES[range.kind][1] : range.label;
 
@@ -64,7 +68,7 @@ function PeriodStepper({ range, onStep }: { range: PeriodRange; onStep: (delta: 
 function EntryRow({ entry, hide, children }: { entry: InsightEntry; hide: (value: string) => string; children?: React.ReactNode }) {
   return <li className="insight-entry">
     <CategoryIcon category={entry.category} />
-    <span className="insight-entry-text"><strong>{entry.title}</strong><small>{entry.scope === "group" && <b className="insight-group-badge">Group</b>}{entry.groupName ? `${entry.groupName} · ` : ""}{dayLabel(entry.day)} · {CATEGORY_LABELS[entry.category]}</small>{children}</span>
+    <span className="insight-entry-text"><strong>{entry.title}</strong><small>{entry.scope === "group" && <b className="insight-group-badge">Group</b>}{entry.paidWith && <b className="insight-paid-badge">Paid with {entry.paidWith.asset}</b>}{entry.groupName ? `${entry.groupName} · ` : ""}{dayLabel(entry.day)} · {CATEGORY_LABELS[entry.category]}{entry.paidWith && ` · ${hide(`${cryptoAmount(entry.paidWith.quantity)} ${entry.paidWith.asset}`)}`}</small>{children}</span>
     <b className={entry.flow === "in" ? "is-in" : ""}>{hide(`${entry.flow === "in" ? "+" : "−"}${formatMoney(entry.myrCents)}`)}</b>
   </li>;
 }
@@ -113,7 +117,7 @@ export function InsightsScreen({ balancesVisible = true, now }: { balancesVisibl
         <ul>{summary.categories.map((row) => <li key={row.category}><button type="button" onClick={() => setOpenCategory(row.category)}>
           <CategoryIcon category={row.category} />
           <span><strong>{CATEGORY_LABELS[row.category]}</strong><small>{row.count} {row.count === 1 ? "transaction" : "transactions"}</small></span>
-          <span className="insight-category-amount"><strong className={summaryFlow === "in" ? "is-in" : ""}>{hide(`${summaryFlow === "in" ? "+" : ""}${formatMoney(row.cents)}`)}</strong><small>{row.percent}%</small></span>
+          <span className="insight-category-amount"><strong className={summaryFlow === "in" ? "is-in" : ""}>{hide(`${summaryFlow === "in" ? "+" : ""}${formatMoney(row.cents)}`)}</strong><small>{row.percent === 0 && row.cents > 0 ? "<1" : row.percent}%</small></span>
         </button></li>)}</ul>
       </section>
       {disclosure}

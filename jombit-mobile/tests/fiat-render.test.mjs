@@ -51,7 +51,9 @@ test("Fiat screen presents one MYR wallet, equivalent values, privacy and preser
     assert.match(html, /MYR wallet deposit/);
     assert.match(html, /aria-pressed="true"/);
     fixture.state.walletTransactions.push(...generated);
+    fixture.state.walletTransactions.unshift({ id: "paid-with-eth", kind: "crypto-payment", title: "Crypto café", subtitle: "Crypto payment preview", amountCents: 4500, currency: "MYR", date: new Date().toISOString(), direction: "out", crypto: { asset: "ETH", quantity: 0.0046, priceMyr: 9955, priceSource: "demo", priceUpdatedAt: null, feeCents: 90 } });
     html = render();
+    assert.doesNotMatch(html, /Crypto café/, "crypto payments are paid from crypto, never shown as MYR wallet debits");
     assert.doesNotMatch(html, /Sample staking reward/, "Crypto reward records never appear in the MYR wallet history");
     assert.match(html, /MYR wallet payment · preview|JomBit Card · preview/);
     assert.match(render(false), /••••••/);

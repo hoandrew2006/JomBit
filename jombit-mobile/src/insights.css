@@ -35,6 +35,9 @@
 .insight-cat-travel { background: #1f4446; color: #b5f5f5; }
 .insight-cat-bills { background: #4a4224; color: #f6e4a6; }
 .insight-cat-others { background: #34393a; color: #d5dbd9; }
+.insight-cat-fees { background: #4b2f2c; color: #ffc2b8; }
+.insight-cat-topup { background: #1c3a4a; color: #b3e6ff; }
+.insight-cat-repayment { background: #2f4224; color: #d3f5b0; }
 .insight-cat-staking { background: #1d4537; color: #b4f3dc; }
 .insight-cat-received { background: #134446; color: #a9fbfc; }
 
@@ -47,6 +50,7 @@
 .insight-entry > b { font-size: 13px; white-space: nowrap; }
 .insight-entry > b.is-in, .insight-category-amount .is-in { color: var(--cyan); }
 .insight-group-badge { display: inline-block; margin-right: 6px; padding: 1px 6px; border-radius: 999px; color: #0b2424; background: #8ff3e9; font-size: 9px; font-weight: 800; letter-spacing: .02em; }
+.insight-paid-badge { display: inline-block; margin-right: 6px; padding: 1px 6px; border-radius: 999px; color: #1d1530; background: #c9b6ff; font-size: 9px; font-weight: 800; letter-spacing: .02em; }
 .insight-empty { color: #9aa39f; font-size: 12px; line-height: 1.6; }
 
 .insight-summary-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
