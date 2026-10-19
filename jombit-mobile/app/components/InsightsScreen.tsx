@@ -68,7 +68,7 @@ function PeriodStepper({ range, onStep }: { range: PeriodRange; onStep: (delta: 
 function EntryRow({ entry, hide, children }: { entry: InsightEntry; hide: (value: string) => string; children?: React.ReactNode }) {
   return <li className="insight-entry">
     <CategoryIcon category={entry.category} />
-    <span className="insight-entry-text"><strong>{entry.title}</strong><small>{entry.scope === "group" && <b className="insight-group-badge">Group</b>}{entry.paidWith && <b className="insight-paid-badge">Paid with {entry.paidWith.asset}</b>}{entry.groupName ? `${entry.groupName} · ` : ""}{dayLabel(entry.day)} · {CATEGORY_LABELS[entry.category]}{entry.paidWith && ` · ${hide(`${cryptoAmount(entry.paidWith.quantity)} ${entry.paidWith.asset}`)}`}</small>{children}</span>
+    <span className="insight-entry-text"><strong>{entry.title}</strong><small>{entry.scope === "group" && <b className="insight-group-badge">Group</b>}{entry.paidWith && <b className="insight-paid-badge">Paid with {entry.paidWith.asset}</b>}{entry.deposited && <b className="insight-paid-badge">Deposited {entry.deposited.asset}</b>}{entry.groupName ? `${entry.groupName} · ` : ""}{dayLabel(entry.day)} · {CATEGORY_LABELS[entry.category]}{(entry.paidWith ?? entry.deposited) && ` · ${hide(`${cryptoAmount((entry.paidWith ?? entry.deposited)!.quantity)} ${(entry.paidWith ?? entry.deposited)!.asset}`)}`}</small>{children}</span>
     <b className={entry.flow === "in" ? "is-in" : ""}>{hide(`${entry.flow === "in" ? "+" : "−"}${formatMoney(entry.myrCents)}`)}</b>
   </li>;
 }

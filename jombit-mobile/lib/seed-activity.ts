@@ -142,6 +142,13 @@ export function demoActivity(now: Date) {
     const quantity = Number(((amountCents + feeCents) / 100 / priceMyr).toFixed(8));
     walletTransactions.push({ id: `seed-crypto-pay-${d}`, kind: "crypto-payment", title: merchant.title, subtitle: `Crypto payment preview · ${asset} converted to MYR for the merchant`, amountCents, currency: "MYR", date, direction: "out", category: merchant.category, crypto: { asset, quantity, priceMyr, priceSource: "demo", priceUpdatedAt: null, feeCents, recipient: merchant.title, seeded: true } });
   }
+  // Crypto deposited from an outside wallet: a top-up in Money in, valued at the price when it arrived.
+  for (const [daysAgo, asset, quantity] of [[8, "SOL", 0.35], [31, "ETH", 0.012], [58, "ADA", 90], [83, "SOL", 0.4]] as const) {
+    const date = at(daysAgo, 15, 45);
+    if (!date) continue;
+    const priceMyr = Math.round(DEMO_CRYPTO_PRICES_MYR[asset] * (0.94 + rand() * 0.12) * 100) / 100;
+    walletTransactions.push({ id: `seed-deposit-${daysAgo}`, kind: "crypto-receive", title: `Received ${asset}`, subtitle: "Deposit from an outside wallet · preview", date, direction: "in", crypto: { asset, quantity, priceMyr, priceSource: "demo", priceUpdatedAt: null, feeCents: 0, seeded: true } });
+  }
   const withdrawalDate = at(40, 10, 20);
   if (withdrawalDate) walletTransactions.push({ id: "seed-withdrawal-40", kind: "withdrawal", title: "Withdrawal to your bank", subtitle: "MYR wallet to bank account · preview", amountCents: 25000, currency: "MYR", date: withdrawalDate, direction: "out" });
   const transferDate = at(33, 21, 5);

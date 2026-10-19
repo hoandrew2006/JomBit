@@ -6,13 +6,13 @@ import type { AppState, CryptoAsset, WalletTransaction } from "./models";
 // - MYR in: top-ups, money received, repayments (settle-ups paid to the user).
 // - MYR out: wallet and card payments, transfers to friends, settle-ups the user paid, bank withdrawals.
 // - Crypto: a crypto payment spends the coin quantity (including its fee) from the available balance;
-//   a staking reward adds its quantity to the available balance.
+//   a staking reward or a crypto deposit adds its quantity to the available balance.
 const PRECISION = 100_000_000;
 const units = (value: number) => Math.round(value * PRECISION);
 
 export function balanceEffect(tx: WalletTransaction): { myrCents: number; crypto?: { asset: CryptoAsset; units: number } } {
   if (tx.kind === "crypto-payment" && tx.crypto && tx.crypto.quantity > 0) return { myrCents: 0, crypto: { asset: tx.crypto.asset, units: -units(tx.crypto.quantity) } };
-  if (tx.kind === "staking-reward" && tx.crypto && tx.crypto.quantity > 0) return { myrCents: 0, crypto: { asset: tx.crypto.asset, units: units(tx.crypto.quantity) } };
+  if ((tx.kind === "staking-reward" || (tx.kind === "crypto-receive" && tx.direction === "in")) && tx.crypto && tx.crypto.quantity > 0) return { myrCents: 0, crypto: { asset: tx.crypto.asset, units: units(tx.crypto.quantity) } };
   const cents = tx.amountCents ?? 0;
   if ((tx.currency ?? "MYR") !== "MYR" || !Number.isSafeInteger(cents) || cents <= 0) return { myrCents: 0 };
   if (tx.kind === "topup" || tx.kind === "received" || (tx.kind === "settlement" && tx.direction === "in")) return { myrCents: cents };
@@ -42,6 +42,8 @@ export function applyHistory(opening: Pick<AppState, "fiatBalances" | "crypto">,
     if (effect.crypto.units < 0 && Number.isSafeInteger(holding.costBasisCents) && before > 0) {
       holding.costBasisCents = Math.round(holding.costBasisCents! * (before + effect.crypto.units) / before);
     }
+    // A deposit adds its value at arrival to the recorded cost, like the live ledger; unpriced, the cost becomes unknown.
+    if (tx.kind === "crypto-receive") holding.costBasisCents = tx.crypto?.priceMyr != null && Number.isSafeInteger(holding.costBasisCents) ? holding.costBasisCents! + Math.round(tx.crypto.quantity * tx.crypto.priceMyr * 100) : null;
     available[asset] += effect.crypto.units;
     lowestUnits[asset] = Math.min(lowestUnits[asset], available[asset]);
     holding.available = available[asset] / PRECISION;

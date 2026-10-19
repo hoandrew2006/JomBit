@@ -127,7 +127,7 @@ These rules live in `jombit-mobile/lib/insights.ts` and are covered by `tests/in
   - withdrawals to the user's bank (`withdrawal`)
   - ordinary transfers to friends (`transfer`, e.g. "Sent to Maya")
 - **Money in** = all money entering the JomBit wallet, from four sources:
-  - **Top-ups** (`topup`)
+  - **Top-ups**: MYR deposits (`topup`) and **crypto deposited into the wallet** (`crypto-receive`). A crypto deposit is valued at the live price recorded when it arrived; older deposits without one fall back to the static demo price. It shows a "Deposited [coin]" badge and the coin amount.
   - **Received from others** (`received`)
   - **Repayments**: settle-ups received into the wallet (`settlement`, in). These count under the **Group** filter.
   - **Staking rewards** (`staking-reward`)
@@ -136,9 +136,10 @@ These rules live in `jombit-mobile/lib/insights.ts` and are covered by `tests/in
   - the MYR converted from crypto to fund a crypto payment (it's part of that payment, not new money)
   - crypto price changes
   - conversions between the user's own balances (`exchange`)
-  - crypto received or staked
+  - staking or unstaking, or crypto sent out to another wallet (`crypto-transfer`)
 - **Staking rewards** in the demo are clearly labelled *sample* records. They are added to the coin's available balance, but staking in the preview never creates new rewards. Do not describe them as real returns.
-- **Balances follow the history.** Demo balances are opening balances from about three months ago plus every top-up, payment, crypto payment, reward, repayment and withdrawal shown (`applyHistory()` in `lib/balance-effects.ts`). A crypto payment spends its coin quantity, fee included, from the available balance. Running balances must never go below zero.
+- **Balances follow the history.** Demo balances are opening balances from about three months ago plus every top-up (MYR or crypto deposit), payment, crypto payment, reward, repayment and withdrawal shown (`applyHistory()` in `lib/balance-effects.ts`). A crypto payment spends its coin quantity, fee included, from the available balance. Running balances must never go below zero.
+- **Crypto deposits** record the live reference price at arrival, and that MYR value is added to the coin's recorded cost. A deposit without a fresh live price records no price and makes the cost unknown, rather than inventing one.
 - **Crypto payments** are paid from crypto, so they never appear in the MYR wallet history. Describe them as converting crypto to MYR for the recipient, never as buying or selling crypto.
 - **Amounts are always MYR.** Foreign-currency items are converted at the rate stored on the transaction day (`myrRate`; new expenses store the rate on the day they're saved). Older records without one fall back to the static demo rates.
 - **Spending categories:** Food & Drink, Groceries, Transport, Shopping, Entertainment, Travel, Bills, Others, plus the automatic **Fees** category.
