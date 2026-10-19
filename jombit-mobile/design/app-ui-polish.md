@@ -18,6 +18,7 @@ The intended result is a calmer hierarchy: the receipt action stays prominent, m
 - Opening a modal locks background scrolling and restores it on close.
 - Motion remains short and is removed when the user prefers reduced motion.
 - On narrow screens, home-screen groups stack instead of leaving a card clipped beyond the viewport.
+- MYR sends collect the recipient's account-holder name, bank name and account number instead of selecting a sample JomBit contact. The review and saved activity retain only the final four account-number digits; the complete number is never written to app state.
 
 ## Review evidence
 
