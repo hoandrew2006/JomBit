@@ -8,7 +8,6 @@
 .crypto-source-dot { width: 7px; height: 7px; flex-shrink: 0; background: #efbd68; border-radius: 50%; }
 .crypto-source-dot.is-live { background: #63ecc1; box-shadow: 0 0 0 4px #63ecc110; }
 .crypto-refresh { margin-left: auto; width: 44px; border: 1px solid var(--line); border-radius: 12px; background: #222; color: #c6d5d4; display: grid; place-items: center; }
-.crypto-market-status .segmented { margin-top: 10px; }
 .crypto-market-status > p { margin: 10px 0 0; color: #a9b7b6; font-size: 11px; line-height: 1.65; }
 .crypto-market-status a { color: #c3d1d0; text-underline-offset: 3px; }
 .crypto-market-status > .crypto-feed-error { color: #ffd28f; padding: 10px 12px; background: #3a2e1c; border-radius: 10px; }
