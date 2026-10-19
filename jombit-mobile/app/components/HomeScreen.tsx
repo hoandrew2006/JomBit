@@ -12,7 +12,7 @@ import {
 import { groupBalances, formatMoney } from "@/lib/calculations";
 import { useAppState } from "@/lib/state";
 import type { Group } from "@/lib/models";
-import { Avatar, PageHeader } from "./ui";
+import { Avatar, EmptyState, PageHeader } from "./ui";
 import { GroupLedgerHero } from "./GroupLedgerHero";
 
 interface Props {
@@ -99,7 +99,7 @@ export function HomeScreen({ onScan, onCreateGroup, onOpenGroup, onSettleGroup, 
 
       <section className="section-block">
         <div className="section-heading"><h2>Your groups</h2><button onClick={onCreateGroup}>New <Plus size={16} /></button></div>
-        <div className="horizontal-groups">
+        {groupStats.length ? <div className="horizontal-groups">
           {groupStats.map(({ group, balances, spent }) => (
             <button className="group-preview" key={group.id} onClick={() => onOpenGroup(group)}>
               <span className="group-emoji">{group.emoji}</span>
@@ -110,7 +110,7 @@ export function HomeScreen({ onScan, onCreateGroup, onOpenGroup, onSettleGroup, 
               </span>
             </button>
           ))}
-        </div>
+        </div> : <EmptyState icon={<Users />} title="Start your first group" copy="Add the people you share expenses with, then scan or enter your first receipt." action={<button className="primary-button" onClick={onCreateGroup}><Plus size={17} /> Create a group</button>} />}
       </section>
 
       <section className="section-block activity-block">

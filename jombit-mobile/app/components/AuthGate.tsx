@@ -1,16 +1,17 @@
-import { AlertCircle, CheckCircle2, Eye, EyeOff, LockKeyhole, Mail, UserRound } from "lucide-react";
+import { AlertCircle, CheckCircle2, Eye, EyeOff, LockKeyhole, Mail, PlayCircle, UserRound } from "lucide-react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase, supabaseConfigured } from "@/lib/supabase";
 import { Brand, BrandLogo } from "./ui";
 
 interface Props {
-  children: (user?: User) => ReactNode;
+  children: (user?: User, demo?: { exit: () => void }) => ReactNode;
 }
 
 export function AuthGate({ children }: Props) {
   const supabase = getSupabase();
   const [user, setUser] = useState<User | null | undefined>(() => supabaseConfigured ? undefined : null);
+  const [demo, setDemo] = useState(false);
 
   useEffect(() => {
     if (!supabase) return;
@@ -25,13 +26,14 @@ export function AuthGate({ children }: Props) {
     };
   }, [supabase]);
 
+  if (demo) return children(undefined, { exit: () => setDemo(false) });
   if (!supabaseConfigured) return children(undefined);
   if (user === undefined) return <div className="app-loading"><BrandLogo />Connecting to JomBit…</div>;
-  if (!user) return <AuthScreen />;
+  if (!user) return <AuthScreen onDemo={() => setDemo(true)} />;
   return children(user);
 }
 
-function AuthScreen() {
+function AuthScreen({ onDemo }: { onDemo: () => void }) {
   const supabase = getSupabase()!;
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -90,7 +92,8 @@ function AuthScreen() {
           <button className="primary-button auth-submit" type="submit" disabled={busy}>{busy ? "Please wait…" : mode === "signin" ? "Sign in to JomBit" : "Create account"}</button>
         </form>
         <p className="auth-mode-switch">{mode === "signin" ? "New to JomBit?" : "Already have an account?"} <button type="button" onClick={() => switchMode(mode === "signin" ? "signup" : "signin")}>{mode === "signin" ? "Create account" : "Sign in"}</button></p>
-        <p className="fine-print">Preview mode uses test balances for wallet, settlement, staking and card features.</p>
+        <div className="auth-demo-entry"><span>or</span><button className="secondary-button" type="button" onClick={onDemo}><PlayCircle size={18} /> Explore the demo</button><p>Explore with sample data. No account needed.</p></div>
+        <p className="fine-print">Wallet and crypto features use test balances.</p>
       </section>
     </main>
   );

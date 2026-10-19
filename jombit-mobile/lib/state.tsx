@@ -16,7 +16,7 @@ import { executeCryptoCommand, executeCryptoReceive, executeCryptoTransfer, norm
 import { executeFiatCommand, type FiatCommand } from "./fiat-ledger";
 import { LOGO_LARGE } from "./brand";
 import type { User } from "@supabase/supabase-js";
-import { CLOUD_STATE_SCHEMA_VERSION, createCloudState, normalizeCloudState, type CloudStateRow } from "./cloud-state";
+import { CLOUD_STATE_SCHEMA_VERSION, createCloudState, createDemoState, createEmptyState, normalizeCloudState, type CloudStateRow } from "./cloud-state";
 import { getSupabase } from "./supabase";
 
 const STORAGE_KEY = "jombit-mobile-demo-state-v1";
@@ -29,7 +29,7 @@ interface AppStateValue {
   receiveCrypto: (command: CryptoReceiveCommand) => void;
   transferCrypto: (command: CryptoTransferCommand) => void;
   transactFiat: (command: FiatCommand) => void;
-  backendMode: "local" | "cloud";
+  backendMode: "local" | "cloud" | "demo";
   syncStatus: "local" | "loading" | "saved" | "saving" | "error";
   userEmail?: string;
   signOut: () => Promise<void>;
@@ -49,8 +49,8 @@ function getDeviceId() {
   }
 }
 
-export function AppStateProvider({ children, cloudUser }: { children: ReactNode; cloudUser?: User }) {
-  const [state, setReactState] = useState<AppState>(() => createSeedState());
+export function AppStateProvider({ children, cloudUser, demoMode = false, onExitDemo }: { children: ReactNode; cloudUser?: User; demoMode?: boolean; onExitDemo?: () => void }) {
+  const [state, setReactState] = useState<AppState>(() => demoMode ? createDemoState() : createSeedState());
   const currentState = useRef(state);
   const dirty = useRef(false);
   const deviceId = useRef(getDeviceId());
@@ -84,6 +84,13 @@ export function AppStateProvider({ children, cloudUser }: { children: ReactNode;
     let active = true;
     setHydrated(false);
     setStorageUnavailable(false);
+
+    if (demoMode) {
+      replaceState(createDemoState(), false);
+      setSyncStatus("local");
+      setHydrated(true);
+      return;
+    }
 
     if (cloudUser) {
       const supabase = getSupabase();
@@ -121,17 +128,17 @@ export function AppStateProvider({ children, cloudUser }: { children: ReactNode;
       setHydrated(true);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [cloudUser, replaceState]);
+  }, [cloudUser, demoMode, replaceState]);
 
   useEffect(() => {
-    if (!hydrated || cloudUser) return;
+    if (!hydrated || cloudUser || demoMode) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
       const timer = window.setTimeout(() => setStorageUnavailable(true), 0);
       return () => window.clearTimeout(timer);
     }
-  }, [cloudUser, hydrated, state]);
+  }, [cloudUser, demoMode, hydrated, state]);
 
   useEffect(() => {
     if (!cloudUser || !hydrated || !dirty.current) return;
@@ -185,13 +192,13 @@ export function AppStateProvider({ children, cloudUser }: { children: ReactNode;
       receiveCrypto,
       transferCrypto,
       transactFiat,
-      reset: () => setState(createSeedState()),
-      backendMode: cloudUser ? "cloud" : "local",
+      reset: () => setState(demoMode ? createDemoState() : createEmptyState({ ...state.user, onboarded: true })),
+      backendMode: demoMode ? "demo" : cloudUser ? "cloud" : "local",
       syncStatus,
       userEmail: cloudUser?.email,
-      signOut: async () => { await getSupabase()?.auth.signOut(); },
+      signOut: async () => { if (demoMode) onExitDemo?.(); else await getSupabase()?.auth.signOut(); },
     }),
-    [cloudUser, state, setState, stakeCrypto, receiveCrypto, transferCrypto, syncStatus, transactFiat],
+    [cloudUser, demoMode, onExitDemo, state, setState, stakeCrypto, receiveCrypto, transferCrypto, syncStatus, transactFiat],
   );
 
   return (

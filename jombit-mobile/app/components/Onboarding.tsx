@@ -67,7 +67,7 @@ export function Onboarding() {
           </label>
 
           <button className="primary-button" onClick={finish}>Continue to JomBit</button>
-          <p className="onboarding-helper">Sample groups are included so you can explore receipt splitting right away.</p>
+          <p className="onboarding-helper">Your workspace starts empty. Create a group or scan your first receipt when you’re ready.</p>
           <p className="fine-print">Preview mode uses test balances. No banking, card or crypto transaction is submitted.</p>
         </div>
       </section>
