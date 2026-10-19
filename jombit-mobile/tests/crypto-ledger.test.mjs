@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { executeCryptoCommand, executeCryptoReceive, executeCryptoTransfer, holdingMetrics, normalizeCryptoHistory, validQuote } from "../lib/crypto-ledger.ts";
+import { executeCryptoCommand, executeCryptoReceive, executeCryptoTransfer, holdingMetrics, normalizeCryptoHistory, serverClockOffset, validQuote } from "../lib/crypto-ledger.ts";
 
 const NOW = Date.parse("2026-10-05T08:00:00.000Z");
 const OLD = "2026-09-20T01:00:00.000Z";
@@ -208,4 +208,24 @@ test("Public valuation quotes still reject invalid and stale market data", () =>
   assert.equal(validQuote({ ...quote, priceMyr: 0 }, NOW), false);
   assert.equal(validQuote({ ...quote, updatedAt: new Date(NOW - 181000).toISOString() }, NOW), false);
   assert.equal(validQuote({ ...quote, source: "demo", updatedAt: null }, NOW), true);
+});
+
+test("Live quote freshness follows the server clock, so a wrong device clock does not reject live prices", () => {
+  const serverNow = Date.parse("2026-10-19T07:18:30.000Z");
+  const quote = { asset: "ETH", priceMyr: 9930.66, source: "coingecko", updatedAt: new Date(serverNow - 40_000).toISOString() };
+  const date = new Date(serverNow).toUTCString();
+  // The bug: a device clock 5 minutes fast (or 2 minutes slow) made a 40-second-old quote look invalid.
+  assert.equal(validQuote(quote, serverNow + 5 * 60_000), false);
+  assert.equal(validQuote(quote, serverNow - 2 * 60_000), false);
+  for (const skew of [-10 * 60_000, -2 * 60_000, 0, 5 * 60_000, 2 * 86_400_000]) {
+    const device = serverNow + skew;
+    assert.equal(validQuote(quote, device + serverClockOffset({ date }, device)), true, `device clock off by ${skew / 1000}s`);
+  }
+  // CDN-cached replies: the Date header is when the reply was made, Age says how long it was cached.
+  assert.equal(serverClockOffset({ date: new Date(serverNow - 50_000).toUTCString(), age: "50" }, serverNow - 120_000), 120_000);
+  // Without a Date header, the server's fetch time is used.
+  assert.equal(serverClockOffset({ fetchedAt: new Date(serverNow).toISOString() }, serverNow + 300_000), -300_000);
+  for (const reply of [{}, { date: "not a date" }, { date: null, fetchedAt: 42 }]) assert.equal(serverClockOffset(reply, serverNow), 0);
+  // The server clock still rejects genuinely stale quotes.
+  assert.equal(validQuote({ ...quote, updatedAt: new Date(serverNow - 181_000).toISOString() }, serverNow + 600_000 + serverClockOffset({ date }, serverNow + 600_000)), false);
 });

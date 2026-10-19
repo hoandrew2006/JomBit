@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { CryptoAsset, CryptoQuote } from "./models";
-import { CRYPTO_ASSETS, validQuote } from "./crypto-ledger";
+import { CRYPTO_ASSETS, serverClockOffset, validQuote } from "./crypto-ledger";
 
 export function supportsLiveCryptoPrices(location: { protocol: string; hostname: string }) {
   return location.protocol === "https:" || (location.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname));
@@ -11,6 +11,8 @@ export function useCryptoMarket() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [now, setNow] = useState(Date.now);
+  // Server time minus device time, so a wrong device clock cannot mark every quote as outdated.
+  const [clockOffset, setClockOffset] = useState(0);
   const refreshRef = useRef<() => void>(() => {});
   useEffect(() => { const timer = window.setInterval(() => setNow(Date.now()), 1000); return () => window.clearInterval(timer); }, []);
   useEffect(() => {
@@ -29,8 +31,9 @@ export function useCryptoMarket() {
         if (!response.headers.get("content-type")?.includes("application/json")) throw new Error("The market service is not available on this website.");
         const body = await response.json();
         if (!response.ok) throw new Error(typeof body.error === "string" ? body.error : "Live prices are unavailable.");
-        if (!CRYPTO_ASSETS.every((asset) => body.quotes?.[asset]?.source === "coingecko" && body.quotes[asset].asset === asset && validQuote(body.quotes[asset], Date.now()))) throw new Error("The market feed returned outdated or invalid prices.");
-        if (active) { setQuotes(body.quotes); setError(""); setNow(Date.now()); }
+        const offset = serverClockOffset({ date: response.headers.get("date"), age: response.headers.get("age"), fetchedAt: body.fetchedAt }, Date.now());
+        if (!CRYPTO_ASSETS.every((asset) => body.quotes?.[asset]?.source === "coingecko" && body.quotes[asset].asset === asset && validQuote(body.quotes[asset], Date.now() + offset))) throw new Error("The market feed returned outdated or invalid prices.");
+        if (active) { setQuotes(body.quotes); setClockOffset(offset); setError(""); setNow(Date.now()); }
       } catch (reason) {
         if (active) setError(reason instanceof Error && reason.name !== "AbortError" ? reason.message : "The price request timed out. Please retry.");
       } finally { window.clearTimeout(timer); busy = false; if (active) setLoading(false); }
@@ -42,6 +45,6 @@ export function useCryptoMarket() {
     document.addEventListener("visibilitychange", resume);
     return () => { active = false; controller?.abort(); window.clearInterval(interval); document.removeEventListener("visibilitychange", resume); refreshRef.current = () => {}; };
   }, []);
-  const fresh = Boolean(quotes && !error && CRYPTO_ASSETS.every((asset) => validQuote(quotes[asset], now)));
+  const fresh = Boolean(quotes && !error && CRYPTO_ASSETS.every((asset) => validQuote(quotes[asset], now + clockOffset)));
   return { quotes, loading, error, fresh, now, refresh: () => refreshRef.current() };
 }

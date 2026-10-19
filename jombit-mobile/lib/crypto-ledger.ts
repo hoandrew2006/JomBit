@@ -56,6 +56,20 @@ export function executeCryptoTransfer(state: AppState, command: CryptoTransferCo
 
 const units = (quantity: number) => Math.round(quantity * CRYPTO_PRECISION);
 const quantity = (atomic: number) => atomic / CRYPTO_PRECISION;
+/**
+ * How far the server's clock is ahead of this device (ms). Quote freshness is judged on the server's
+ * clock so a device whose time is wrong does not reject every live price. Uses the HTTP Date header
+ * (plus Age for CDN-cached replies), then the reply's fetchedAt, else assumes no difference.
+ */
+export function serverClockOffset(reply: { date?: string | null; age?: string | null; fetchedAt?: unknown }, receivedAt: number) {
+  const date = reply.date ? Date.parse(reply.date) : NaN;
+  const age = Number(reply.age);
+  const serverNow = Number.isFinite(date)
+    ? date + (Number.isFinite(age) && age > 0 ? age * 1000 : 0)
+    : typeof reply.fetchedAt === "string" ? Date.parse(reply.fetchedAt) : NaN;
+  return Number.isFinite(serverNow) && Number.isFinite(receivedAt) ? serverNow - receivedAt : 0;
+}
+
 export function validQuote(quote: CryptoQuote | undefined, now: number) {
   if (!quote || !CRYPTO_ASSETS.includes(quote.asset) || !Number.isFinite(quote.priceMyr) || quote.priceMyr <= 0 || quote.priceMyr > 1e9) return false;
   if (quote.source === "demo") return quote.updatedAt === null;
