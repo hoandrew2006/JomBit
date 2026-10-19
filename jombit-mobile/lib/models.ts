@@ -89,7 +89,10 @@ export type WalletTransactionKind =
   | "settlement"
   | "payment"
   | "received"
-  | "staking-reward";
+  | "staking-reward"
+  // Paid a merchant with crypto: amountCents is the MYR the recipient received; crypto holds the coin and fee.
+  | "crypto-payment"
+  | "withdrawal";
 
 export interface WalletTransaction {
   id: string;
@@ -104,6 +107,8 @@ export interface WalletTransaction {
   fiat?: FiatConversionDetails;
   category?: SpendCategory;
   myrRate?: number;
+  // Settle-ups: the group they belong to. Older records may not have it.
+  groupId?: string;
 }
 
 export interface FiatConversionDetails {

@@ -37,6 +37,8 @@ test("Fiat screen presents one MYR wallet, equivalent values, privacy and preser
       date: "2026-10-02T00:00:00.000Z",
       direction: "out",
     });
+    // A fixed balance keeps this display test independent of the replayed demo history.
+    fixture.state.fiatBalances.MYR = 184250;
     // Keep the original starter records at the top of the list; generated Insights activity is tested separately.
     const generated = fixture.state.walletTransactions.filter((tx) => tx.id.startsWith("seed-"));
     fixture.state.walletTransactions = fixture.state.walletTransactions.filter((tx) => !tx.id.startsWith("seed-"));
@@ -51,7 +53,9 @@ test("Fiat screen presents one MYR wallet, equivalent values, privacy and preser
     assert.match(html, /MYR wallet deposit/);
     assert.match(html, /aria-pressed="true"/);
     fixture.state.walletTransactions.push(...generated);
+    fixture.state.walletTransactions.unshift({ id: "paid-with-eth", kind: "crypto-payment", title: "Crypto café", subtitle: "Crypto payment preview", amountCents: 4500, currency: "MYR", date: new Date().toISOString(), direction: "out", crypto: { asset: "ETH", quantity: 0.0046, priceMyr: 9955, priceSource: "demo", priceUpdatedAt: null, feeCents: 90 } });
     html = render();
+    assert.doesNotMatch(html, /Crypto café/, "crypto payments are paid from crypto, never shown as MYR wallet debits");
     assert.doesNotMatch(html, /Sample staking reward/, "Crypto reward records never appear in the MYR wallet history");
     assert.match(html, /MYR wallet payment · preview|JomBit Card · preview/);
     assert.match(render(false), /••••••/);

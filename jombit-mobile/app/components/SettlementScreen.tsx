@@ -65,6 +65,7 @@ export function SettlementScreen({ group, fromId, toId, amountCents, onClose, on
       walletTransactions: [{
         id: `tx-${Date.now()}`,
         kind: "settlement",
+        groupId: group.id,
         title: `${from.name} settled with ${to.name}`,
         subtitle: paymentMethod === "crypto" && cryptoQuantity !== null ? `${group.name} · ${cryptoAmountLabel(cryptoQuantity)} ${cryptoAsset} settlement preview` : `${group.name} · Fiat settlement preview`,
         amountCents,

@@ -114,20 +114,38 @@ The old root app: `npm install && npm run dev` / `npm test` at the repo root.
 
 These rules live in `jombit-mobile/lib/insights.ts` and are covered by `tests/insights.test.mjs`. Keep them when you change spending, wallet or ledger code.
 
-- **Spend** = the user's own **share** of group expenses (`expense.shares.me`, whoever paid) + the user's own payments (wallet `payment` records and card spend). Never count the full bill the user paid upfront for the group.
-- **Settle-up payments** (`settlement`) are never spend or money in, because they repay shares that are already counted.
-- **Money in** = staking rewards + money received from others (`received`) that isn't a settle-up repayment.
-- **Not money in:** top-ups (`topup`), moves between the user's own balances (`exchange`), crypto received or staked, and crypto price changes.
-- **Ordinary transfers to friends** (`transfer`, e.g. "Sent to Maya") are not spend.
-- **Staking rewards** in the demo are clearly labelled *sample* records. They never change balances, and demo staking still accrues nothing. Do not describe them as real returns.
+- **The calculation lives in one place:** `insightEntries()` in `lib/insights.ts` turns every expense and wallet record into Insights entries. Screens only display them.
+- **Spend** = the user's own **share** of group expenses (`expense.shares.me`, whoever paid) + the user's own payments:
+  - wallet payments (`payment`) and card spend (`card`)
+  - **crypto payments** (`crypto-payment`). Count the MYR the recipient received as **one** spend entry in its normal category (e.g. Food & Drink). Show a "Paid with [coin]" badge and the crypto amount in its details.
+- **Crypto conversion fees** are a separate spend entry in the **Fees** category. Fees can't be recategorised.
+- **Not spend:**
+  - the full bill the user paid upfront for a group
+  - settle-ups the user paid to friends (`settlement`, out), because they repay shares that are already counted
+  - withdrawals to the user's bank (`withdrawal`)
+  - ordinary transfers to friends (`transfer`, e.g. "Sent to Maya")
+- **Money in** = all money entering the JomBit wallet, from four sources:
+  - **Top-ups** (`topup`)
+  - **Received from others** (`received`)
+  - **Repayments**: settle-ups received into the wallet (`settlement`, in). These count under the **Group** filter.
+  - **Staking rewards** (`staking-reward`)
+- The Summary screen's Money in breakdown shows these four sources (amount, count, %) instead of spending categories. The tile is always labelled "Money in", never "Income".
+- **Not money in:**
+  - the MYR converted from crypto to fund a crypto payment (it's part of that payment, not new money)
+  - crypto price changes
+  - conversions between the user's own balances (`exchange`)
+  - crypto received or staked
+- **Staking rewards** in the demo are clearly labelled *sample* records. They are added to the coin's available balance, but staking in the preview never creates new rewards. Do not describe them as real returns.
+- **Balances follow the history.** Demo balances are opening balances from about three months ago plus every top-up, payment, crypto payment, reward, repayment and withdrawal shown (`applyHistory()` in `lib/balance-effects.ts`). A crypto payment spends its coin quantity, fee included, from the available balance. Running balances must never go below zero.
+- **Crypto payments** are paid from crypto, so they never appear in the MYR wallet history. Describe them as converting crypto to MYR for the recipient, never as buying or selling crypto.
 - **Amounts are always MYR.** Foreign-currency items are converted at the rate stored on the transaction day (`myrRate`; new expenses store the rate on the day they're saved). Older records without one fall back to the static demo rates.
-- **Categories:** Food & Drink, Groceries, Transport, Shopping, Entertainment, Travel, Bills, Others.
+- **Spending categories:** Food & Drink, Groceries, Transport, Shopping, Entertainment, Travel, Bills, Others, plus the automatic **Fees** category.
   - A category is suggested from the merchant (`suggestCategory`).
   - Users pick one when adding an expense and can change it later in Insights.
   - A stored choice always beats the suggestion. Records without a category still load and get the suggestion.
 - **Filters:** All / Personal / Group.
   - Group expenses keep their normal category and show a small "Group" badge in transaction lists.
-  - Personal = wallet records.
+  - Group = the user's share of group expenses + repayments from friends. Personal = all other wallet records.
 - **Periods** use Malaysia time (UTC+8). Weeks run Monday–Sunday.
   - Charts never show future days.
   - Users can't step past the current period.

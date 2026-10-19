@@ -1,6 +1,7 @@
 import { calculateExpenseShares } from "./calculations.ts";
 import type { AppState, Expense, ExpenseItem } from "./models";
 import { demoActivity, PHUKET_GROUP } from "./seed-activity.ts";
+import { applyHistory } from "./balance-effects.ts";
 
 const item = (
   id: string,
@@ -27,7 +28,8 @@ const makeExpense = (
   ),
 });
 
-export function createSeedState(now: Date = new Date()): AppState {
+/** Demo data with its opening balances from about three months ago, before any history is applied. */
+export function createSeedOpeningState(now: Date = new Date()): AppState {
   const activity = demoActivity(now);
   const mamakItems = [
     item("seed-i1", "Nasi Goreng Kampung", 2, 1650, ["me", "maya"]),
@@ -113,7 +115,7 @@ export function createSeedState(now: Date = new Date()): AppState {
       ...activity.expenses,
     ],
     settlements: activity.settlements,
-    fiatBalances: { MYR: 184250, SGD: 0, THB: 0, IDR: 0 },
+    fiatBalances: { MYR: 120000, SGD: 0, THB: 0, IDR: 0 },
     counterpartBalances: {
       maya: { MYR: 25600 },
       daniel: { MYR: 9300 },
@@ -159,5 +161,12 @@ export function createSeedState(now: Date = new Date()): AppState {
       paymentAsset: "ETH",
     },
   };
+}
+
+/** Demo data with today's balances: the opening balances plus every payment, top-up and reward shown. */
+export function createSeedState(now: Date = new Date()): AppState {
+  const state = createSeedOpeningState(now);
+  const { fiatBalances, crypto } = applyHistory(state, state.walletTransactions);
+  return { ...state, fiatBalances, crypto };
 }
 

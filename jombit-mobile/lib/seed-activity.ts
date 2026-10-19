@@ -100,7 +100,7 @@ export function demoActivity(now: Date) {
     if (rewardDate) {
       const priceMyr = Math.round(DEMO_CRYPTO_PRICES_MYR[reward.asset] * (0.94 + rand() * 0.12) * 100) / 100;
       const quantity = Number(((reward.staked * reward.yearly * 7) / 365).toFixed(8));
-      walletTransactions.push({ id: `seed-reward-${d}`, kind: "staking-reward", title: `Sample staking reward · ${reward.asset}`, subtitle: "Illustrative sample record · not added to your balance", date: rewardDate, direction: "neutral", crypto: { asset: reward.asset, quantity, priceMyr, priceSource: "demo", priceUpdatedAt: null, feeCents: 0, seeded: true } });
+      walletTransactions.push({ id: `seed-reward-${d}`, kind: "staking-reward", title: `Sample staking reward · ${reward.asset}`, subtitle: "Sample reward · added to your available balance", date: rewardDate, direction: "neutral", crypto: { asset: reward.asset, quantity, priceMyr, priceSource: "demo", priceUpdatedAt: null, feeCents: 0, seeded: true } });
     }
   }
 
@@ -115,10 +115,34 @@ export function demoActivity(now: Date) {
     const date = at(daysAgo, 13, 15);
     if (date) walletTransactions.push({ id: `seed-received-${daysAgo}`, kind: "received", title, subtitle, amountCents, currency: "MYR", date, direction: "in" });
   }
-  for (const [daysAgo, amountCents] of [[20, 30000], [52, 50000], [79, 40000]]) {
+  // Monthly top-ups that cover the month's spending, plus a few smaller ones.
+  for (const [daysAgo, amountCents] of [[5, 20000], [12, 220000], [20, 30000], [36, 25000], [42, 220000], [52, 50000], [66, 30000], [72, 220000], [79, 40000], [88, 60000]]) {
     const date = at(daysAgo, 8, 40);
     if (date) walletTransactions.push({ id: `seed-topup-${daysAgo}`, kind: "topup", title: "MYR wallet deposit", subtitle: "Top-up from your bank · preview", amountCents, currency: "MYR", date, direction: "in" });
   }
+  // Paying merchants with crypto: one spend entry for what the merchant received, plus a conversion fee.
+  const cryptoMerchants: Template[] = [
+    { title: "Starbucks Pavilion", category: "food", min: 1590, max: 3290 },
+    { title: "Uniqlo KLCC", category: "shopping", min: 7900, max: 21900 },
+    { title: "GSC Pavilion", category: "entertainment", min: 2200, max: 4800 },
+    { title: "Grab ride", category: "transport", min: 1400, max: 3800 },
+    { title: "Sushi Zanmai", category: "food", min: 4500, max: 9800 },
+    { title: "Shopee order", category: "shopping", min: 3500, max: 12900 },
+  ];
+  const cryptoAssets: CryptoAsset[] = ["ETH", "SOL", "BTC", "ADA"];
+  for (let d = DAYS - 2, index = 0; d >= 0; d -= 7, index++) {
+    const date = at(d, 19, 10);
+    if (!date) continue;
+    const merchant = cryptoMerchants[index % cryptoMerchants.length];
+    const asset = cryptoAssets[index % cryptoAssets.length];
+    const amountCents = between(merchant.min, merchant.max);
+    const feeCents = Math.max(50, Math.round(amountCents * 0.01));
+    const priceMyr = Math.round(DEMO_CRYPTO_PRICES_MYR[asset] * (0.94 + rand() * 0.12) * 100) / 100;
+    const quantity = Number(((amountCents + feeCents) / 100 / priceMyr).toFixed(8));
+    walletTransactions.push({ id: `seed-crypto-pay-${d}`, kind: "crypto-payment", title: merchant.title, subtitle: `Crypto payment preview · ${asset} converted to MYR for the merchant`, amountCents, currency: "MYR", date, direction: "out", category: merchant.category, crypto: { asset, quantity, priceMyr, priceSource: "demo", priceUpdatedAt: null, feeCents, recipient: merchant.title, seeded: true } });
+  }
+  const withdrawalDate = at(40, 10, 20);
+  if (withdrawalDate) walletTransactions.push({ id: "seed-withdrawal-40", kind: "withdrawal", title: "Withdrawal to your bank", subtitle: "MYR wallet to bank account · preview", amountCents: 25000, currency: "MYR", date: withdrawalDate, direction: "out" });
   const transferDate = at(33, 21, 5);
   if (transferDate) walletTransactions.push({ id: "seed-transfer-33", kind: "transfer", title: "Sent to Daniel", subtitle: "JomBit-to-JomBit transfer · MYR wallet", amountCents: 3500, currency: "MYR", date: transferDate, direction: "out", fiat: { fromCurrency: "MYR", toCurrency: "MYR", fromCents: 3500, toCents: 3500, rate: 1, feeCents: 0, source: "demo" } });
 
@@ -159,18 +183,21 @@ export function demoActivity(now: Date) {
     expenses.push({ id: `seed-hkt-${plan.daysAgo}-${plan.payerId}`, groupId: PHUKET_GROUP.id, merchant: plan.merchant, date: keyOf(plan.daysAgo), payerId: plan.payerId, currency: "THB" as Currency, items, taxCents: 0, serviceCents: 0, shares: calculateExpenseShares(items, 0, 0), category: plan.category, myrRate });
   }
 
-  // Two settle-ups: repayments of shares already counted, so Insights ignores them.
-  const owedToMaya = expenses.find((expense) => expense.groupId === "g-kl" && expense.payerId === "maya" && expense.date <= keyOf(30));
-  const owedByDaniel = expenses.find((expense) => expense.groupId === "g-kl" && expense.payerId === "me" && expense.date <= keyOf(30));
-  const settle = (expense: Expense | undefined, fromId: string, toId: string, title: string, daysAgo: number) => {
+  // Settle-ups. Ones I pay are never spend; ones friends pay me are "Repayments" in Money in.
+  const used = new Set<string>();
+  const settle = (fromId: string, toId: string, daysAgo: number) => {
     const date = at(daysAgo, 20, 30);
+    const creditor = fromId === "me" ? toId : "me";
+    const expense = expenses.find((item) => item.groupId === "g-kl" && item.payerId === creditor && item.date <= keyOf(daysAgo + 1) && !used.has(item.id) && (item.shares[fromId]?.totalCents ?? 0) > 0);
     const amountCents = expense?.shares[fromId]?.totalCents ?? 0;
     if (!expense || !date || amountCents <= 0) return;
-    settlements.push({ id: `seed-settle-${daysAgo}`, groupId: "g-kl", fromId, toId, amountCents, currency: "MYR", date });
-    walletTransactions.push({ id: `seed-settle-tx-${daysAgo}`, kind: "settlement", title, subtitle: "KL Food Crew · Settlement preview", amountCents, currency: "MYR", date, direction: fromId === "me" ? "out" : "in" });
+    used.add(expense.id);
+    const name = (id: string) => id === "me" ? "Aisha" : id[0].toUpperCase() + id.slice(1);
+    settlements.push({ id: `seed-settle-${daysAgo}`, groupId: "g-kl", fromId, toId, amountCents, currency: "MYR", date, paymentMethod: "fiat" });
+    walletTransactions.push({ id: `seed-settle-tx-${daysAgo}`, groupId: "g-kl", kind: "settlement", title: `${name(fromId)} settled with ${name(toId)}`, subtitle: "KL Food Crew · Fiat settlement preview", amountCents, currency: "MYR", date, direction: fromId === "me" ? "out" : "in" });
   };
-  settle(owedToMaya, "me", "maya", "Aisha settled with Maya", 25);
-  settle(owedByDaniel, "daniel", "me", "Daniel settled with Aisha", 18);
+  settle("me", "maya", 25);
+  for (const [fromId, daysAgo] of [["sarah", 80], ["maya", 62], ["daniel", 45], ["daniel", 18], ["sarah", 9], ["maya", 2]] as const) settle(fromId, "me", daysAgo);
 
   return { expenses, settlements, walletTransactions };
 }

@@ -38,23 +38,44 @@ function baseState() {
       { id: "x4", kind: "exchange", title: "SGD → MYR", subtitle: "", amountCents: 9000, currency: "MYR", date: "2026-10-16T05:00:00.000Z", direction: "in" },
       { id: "x5", kind: "transfer", title: "Sent to Maya", subtitle: "", amountCents: 2000, currency: "MYR", date: "2026-10-16T05:00:00.000Z", direction: "out" },
       { id: "x6", kind: "stake", title: "Staked SOL", subtitle: "", date: "2026-10-16T05:00:00.000Z", direction: "neutral", crypto: { asset: "SOL", quantity: 1, priceMyr: null, priceSource: null, priceUpdatedAt: null, feeCents: 0 } },
+      // Paid a café RM45.00 with ETH; the merchant got RM45.00 and the conversion fee was RM0.90.
+      { id: "c1", kind: "crypto-payment", title: "Starbucks Pavilion", subtitle: "", amountCents: 4500, currency: "MYR", date: "2026-10-14T11:00:00.000Z", direction: "out", category: "food", crypto: { asset: "ETH", quantity: 0.00461, priceMyr: 9955, priceSource: "demo", priceUpdatedAt: null, feeCents: 90 } },
+      { id: "x8", kind: "withdrawal", title: "Withdrawal to your bank", subtitle: "", amountCents: 25000, currency: "MYR", date: "2026-10-16T05:00:00.000Z", direction: "out" },
       { id: "x7", kind: "crypto-receive", title: "Received ETH", subtitle: "", date: "2026-10-16T05:00:00.000Z", direction: "in", crypto: { asset: "ETH", quantity: 1, priceMyr: 14000, priceSource: "demo", priceUpdatedAt: null, feeCents: 0 } },
     ],
     card: { virtualActive: false, frozen: false, paymentSource: "fiat" },
   };
 }
 
-test("Spend counts only my share of group bills plus my own payments; settle-ups and transfers never count", () => {
+test("Spend counts my share of group bills plus wallet, card and crypto payments; settle-ups paid and withdrawals never count", () => {
   const week = summarise(insightEntries(baseState()), { range: periodRange("week", 0, NOW), flow: "out" });
-  // RM50 share (not the RM120 I paid) + THB1,000 × 0.13 + RM15 Grab + RM40 Shopee.
-  assert.equal(week.totalCents, 5000 + 13000 + 1500 + 4000);
-  assert.deepEqual(week.entries.map((entry) => entry.id).sort(), ["e1", "e2", "w1", "w2"]);
+  // RM50 share (not the RM120 I paid) + THB1,000 × 0.13 + RM15 Grab + RM40 Shopee + RM45 crypto payment + RM0.90 fee.
+  assert.equal(week.totalCents, 5000 + 13000 + 1500 + 4000 + 4500 + 90);
+  assert.deepEqual(week.entries.map((entry) => entry.id).sort(), ["c1", "c1:fee", "e1", "e2", "w1", "w2"]);
+  for (const excluded of ["x2", "x5", "x8"]) assert.equal(week.entries.some((entry) => entry.id === excluded), false, `${excluded} is not spend`);
 });
 
-test("Money in is sample staking rewards plus non-settle-up money received; top-ups, exchanges and crypto receipts are excluded", () => {
+test("A crypto payment is one spend entry in its own category with a Paid-with coin, and its fee goes to Fees", () => {
+  const entries = insightEntries(baseState());
+  const payment = entries.filter((entry) => entry.id === "c1");
+  assert.equal(payment.length, 1);
+  assert.deepEqual([payment[0].flow, payment[0].category, payment[0].myrCents, payment[0].paidWith], ["out", "food", 4500, { asset: "ETH", quantity: 0.00461 }]);
+  const fee = entries.find((entry) => entry.id === "c1:fee");
+  assert.deepEqual([fee.flow, fee.category, fee.myrCents, fee.paidWith], ["out", "fees", 90, undefined]);
+  // Never also counted as money in: the MYR converted from ETH is part of the payment, not new money.
+  assert.equal(entries.some((entry) => entry.flow === "in" && entry.id.startsWith("c1")), false);
+  const week = summarise(entries, { range: periodRange("week", 0, NOW), flow: "out" });
+  assert.deepEqual(week.categories.find((row) => row.category === "fees"), { category: "fees", count: 1, cents: 90, percent: 0 });
+  // The fee keeps its own category; only the payment itself can be recategorised.
+  const changed = insightEntries(setEntryCategory(baseState(), { id: "c1", source: "wallet" }, "entertainment"));
+  assert.deepEqual(changed.filter((entry) => entry.id.startsWith("c1")).map((entry) => entry.category).sort(), ["entertainment", "fees"]);
+});
+
+test("Money in is top-ups, received money, repayments and staking rewards; conversions and crypto receipts are excluded", () => {
   const week = summarise(insightEntries(baseState()), { range: periodRange("week", 0, NOW), flow: "in" });
-  assert.equal(week.totalCents, 3000 + 700);
-  assert.deepEqual(week.categories.map((row) => [row.category, row.cents, row.percent]), [["received", 3000, 81], ["staking", 700, 19]]);
+  assert.equal(week.totalCents, 50000 + 5000 + 3000 + 700);
+  assert.deepEqual(week.categories.map((row) => [row.category, row.cents, row.count, row.percent]), [["topup", 50000, 1, 85], ["repayment", 5000, 1, 9], ["received", 3000, 1, 5], ["staking", 700, 1, 1]]);
+  assert.deepEqual(week.entries.map((entry) => entry.id).sort(), ["w3", "w4", "x1", "x3"]);
 });
 
 test("Foreign amounts use the stored day rate, falling back to the demo rate for older records", () => {
@@ -92,10 +113,16 @@ test("Personal and Group filters split wallet spend from group shares", () => {
   const entries = insightEntries(baseState());
   const range = periodRange("week", 0, NOW);
   assert.equal(summarise(entries, { range, flow: "out", scope: "group" }).totalCents, 18000);
-  assert.equal(summarise(entries, { range, flow: "out", scope: "personal" }).totalCents, 5500);
+  assert.equal(summarise(entries, { range, flow: "out", scope: "personal" }).totalCents, 1500 + 4000 + 4500 + 90);
   const group = entries.find((entry) => entry.id === "e1");
   assert.equal(group.scope, "group");
   assert.equal(group.groupName, "Crew");
+  // Repayments from friends are group money in; top-ups, received money and rewards are personal.
+  assert.equal(summarise(entries, { range, flow: "in", scope: "group" }).totalCents, 5000);
+  assert.equal(summarise(entries, { range, flow: "in", scope: "personal" }).totalCents, 50000 + 3000 + 700);
+  const state = baseState();
+  state.walletTransactions.find((tx) => tx.id === "x1").groupId = "g1";
+  assert.deepEqual((({ scope, groupName }) => ({ scope, groupName }))(insightEntries(state).find((entry) => entry.id === "x1")), { scope: "group", groupName: "Crew" });
 });
 
 test("Periods use Malaysia days, never chart the future and can only step backwards", () => {
@@ -126,10 +153,11 @@ test("Periods use Malaysia days, never chart the future and can only step backwa
 test("Older saved state without categories or new kinds still produces insights", () => {
   const legacy = createSeedState(NOW);
   legacy.expenses = legacy.expenses.map(({ category, myrRate, ...expense }) => expense);
-  legacy.walletTransactions = legacy.walletTransactions.filter((tx) => !["payment", "received", "staking-reward"].includes(tx.kind));
+  legacy.walletTransactions = legacy.walletTransactions.filter((tx) => !["payment", "received", "staking-reward", "crypto-payment", "withdrawal"].includes(tx.kind));
   const entries = insightEntries(legacy);
   assert.ok(entries.length > 0);
-  assert.ok(entries.every((entry) => entry.flow === "out" && entry.scope === "group" && entry.category));
+  assert.ok(entries.filter((entry) => entry.flow === "out").every((entry) => entry.scope === "group" && entry.category));
+  assert.ok(entries.filter((entry) => entry.flow === "in").every((entry) => ["topup", "repayment"].includes(entry.category)));
 });
 
 test("Demo data populates every period across the last three months without future records", () => {
@@ -144,10 +172,20 @@ test("Demo data populates every period across the last three months without futu
     }
   }
   const quarter = summarise(entries, { range: periodRange("year", 0, NOW), flow: "out" });
-  assert.equal(new Set(quarter.categories.map((row) => row.category)).size, 8, "every spend category appears");
+  assert.equal(new Set(quarter.categories.map((row) => row.category)).size, 9, "every spend category and Fees appear");
+  assert.ok(quarter.entries.filter((entry) => entry.paidWith).length >= 6, "several crypto payments carry a Paid-with coin");
+  const moneyIn = summarise(entries, { range: periodRange("year", 0, NOW), flow: "in" });
+  assert.deepEqual(moneyIn.categories.map((row) => row.category).sort(), ["received", "repayment", "staking", "topup"], "all four money-in sources appear");
+  for (let offset = 0; offset > -3; offset--) {
+    const month = summarise(entries, { range: periodRange("month", offset, NOW), flow: "in" });
+    for (const source of ["topup", "repayment", "staking"]) assert.ok(month.categories.some((row) => row.category === source), `month ${offset} has ${source}`);
+  }
   assert.ok(quarter.entries.some((entry) => entry.scope === "group") && quarter.entries.some((entry) => entry.scope === "personal"));
   assert.ok(state.walletTransactions.every((tx) => Date.parse(tx.date) <= NOW.getTime()));
-  assert.ok(state.walletTransactions.some((tx) => tx.kind === "settlement") && state.settlements.length === 2);
+  assert.ok(state.walletTransactions.some((tx) => tx.kind === "settlement" && tx.direction === "out"), "a settle-up I paid");
+  assert.ok(state.walletTransactions.filter((tx) => tx.kind === "settlement" && tx.direction === "in").length >= 5, "repayments received");
+  assert.equal(state.settlements.length, state.walletTransactions.filter((tx) => tx.kind === "settlement").length);
+  assert.ok(state.walletTransactions.some((tx) => tx.kind === "withdrawal"));
   assert.ok(state.walletTransactions.filter((tx) => tx.kind === "staking-reward").every((tx) => tx.amountCents === undefined && /Sample/.test(tx.title)), "sample rewards never move MYR");
   assert.ok(state.expenses.some((expense) => expense.currency === "THB" && expense.myrRate));
   assert.equal(state.walletTransactions.filter((tx) => tx.kind === "crypto-buy" || tx.kind === "crypto-sell").length, 0);
