@@ -5,7 +5,8 @@ import { checkedRates, DEMO_FX_RATES, executeFiatCommand, FOREIGN_CURRENCIES, le
 const NOW = Date.parse("2026-10-05T10:00:00Z");
 const state = () => ({ user: { id: "me" }, members: { me: { id: "me", name: "Me" }, maya: { id: "maya", name: "Maya" } }, fiatBalances: { MYR: 10000, SGD: 0, THB: 0, IDR: 0 }, counterpartBalances: { maya: { MYR: 2000, SGD: 300 } }, crypto: { BTC: { available: 0.1 } }, groups: [{ id: "preserved" }], walletTransactions: [] });
 const deposit = (patch = {}) => ({ id: "deposit", action: "deposit", currency: "MYR", amount: "100.00", ...patch });
-const send = (patch = {}) => ({ id: "send", action: "send", currency: "SGD", amount: "10.00", recipientId: "maya", ...patch });
+const recipient = { accountHolder: "Maya Tan", bankName: "Maybank", accountNumber: "1234567890" };
+const send = (patch = {}) => ({ id: "send", action: "send", currency: "SGD", amount: "10.00", recipient, ...patch });
 
 test("Deposits fund MYR only and foreign-currency estimates update without separate balances", () => {
   const initial = state();
@@ -44,16 +45,17 @@ test("A foreign-currency send deducts MYR and records exactly what the recipient
   const result = executeFiatCommand(initial, send(), NOW);
   assert.deepEqual(initial, before);
   assert.deepEqual(result.fiatBalances, { MYR: 6540, SGD: 0, THB: 0, IDR: 0 });
-  assert.deepEqual(result.counterpartBalances.maya, { MYR: 2000, SGD: 1300 });
+  assert.deepEqual(result.counterpartBalances.maya, { MYR: 2000, SGD: 300 });
   assert.equal(result.walletTransactions[0].amountCents, 3460);
   assert.equal(result.walletTransactions[0].currency, "MYR");
-  assert.deepEqual(result.walletTransactions[0].fiat, { fromCurrency: "MYR", toCurrency: "SGD", fromCents: 3460, toCents: 1000, rate: 1 / 3.46, feeCents: 0, source: "demo" });
+  assert.deepEqual(result.walletTransactions[0].fiat, { fromCurrency: "MYR", toCurrency: "SGD", fromCents: 3460, toCents: 1000, rate: 1 / 3.46, feeCents: 0, source: "demo", recipientName: "Maya Tan", recipientBank: "Maybank", recipientAccountLast4: "7890" });
+  assert.doesNotMatch(JSON.stringify(result), /1234567890/);
 });
 
 test("Domestic sends stay in MYR and may spend the entire available balance", () => {
   const result = executeFiatCommand(state(), send({ currency: "MYR", amount: "100.00" }), NOW);
   assert.equal(result.fiatBalances.MYR, 0);
-  assert.equal(result.counterpartBalances.maya.MYR, 12000);
+  assert.equal(result.counterpartBalances.maya.MYR, 2000);
   assert.equal(result.walletTransactions[0].fiat.rate, 1);
 });
 
@@ -63,7 +65,7 @@ test("Tiny foreign transfers always debit at least a sen, with exact integer rou
   assert.equal(myrDebitForPayment(1000, "SGD"), 3460);
   const result = executeFiatCommand(state(), send({ currency: "IDR", amount: "0.01" }), NOW);
   assert.equal(result.fiatBalances.MYR, 9999);
-  assert.equal(result.counterpartBalances.maya.IDR, 1);
+  assert.equal(result.counterpartBalances.maya.IDR, undefined);
 });
 
 test("Foreign holdings cannot fund a send when there is not enough MYR", () => {
@@ -80,17 +82,25 @@ test("Rejects duplicate deposits/transfers and competing orders against the late
   assert.throws(() => executeFiatCommand(first, send({ id: "another" }), NOW), /too low/);
 });
 
-test("Invalid amounts, currencies, recipients and unsafe balances fail before mutation", () => {
+test("Invalid amounts, currencies, bank recipients and unsafe balances fail before mutation", () => {
   for (const amount of ["", "0", "-1", "NaN", "Infinity", "1e2", "1,000", "0.001", "1.000", "9007199254740999", "1.2.3"]) assert.throws(() => executeFiatCommand(state(), deposit({ amount }), NOW));
   assert.equal(parseFiatAmount(" 42.30 "), 4230);
-  for (const recipientId of ["me", "unknown", "__proto__", "constructor"]) assert.throws(() => executeFiatCommand(state(), send({ recipientId }), NOW), /another JomBit member/);
+  for (const invalidRecipient of [
+    { ...recipient, accountHolder: "" },
+    { ...recipient, accountHolder: "<script>" },
+    { ...recipient, bankName: "" },
+    { ...recipient, bankName: "<bank>" },
+    { ...recipient, accountNumber: "12345" },
+    { ...recipient, accountNumber: "123456789012345678901" },
+    { ...recipient, accountNumber: "not-an-account" },
+  ]) assert.throws(() => executeFiatCommand(state(), send({ recipient: invalidRecipient }), NOW), /account holder|bank name|account number/);
   assert.throws(() => executeFiatCommand(state(), send({ currency: "INVALID" }), NOW), /Unsupported currency/);
   for (const value of [-1, 1.5, NaN, Infinity]) {
     const initial = state(); initial.fiatBalances.MYR = value;
     assert.throws(() => executeFiatCommand(initial, deposit(), NOW), /invalid/);
   }
-  const overflow = state(); overflow.counterpartBalances.maya.SGD = Number.MAX_SAFE_INTEGER;
-  assert.throws(() => executeFiatCommand(overflow, send(), NOW), /limit/);
+  const overflow = state(); overflow.fiatBalances.MYR = Number.MAX_SAFE_INTEGER;
+  assert.throws(() => executeFiatCommand(overflow, deposit(), NOW), /limit/);
 });
 
 test("Earlier foreign balances remain untouched by deposits and payments", () => {
@@ -134,7 +144,7 @@ test("Live rates drive estimates and transfers, and the record keeps the live ra
   const result = executeFiatCommand(state(), send({ rates: LIVE }), NOW);
   assert.equal(result.walletTransactions[0].amountCents, myrDebitForPayment(1000, "SGD", LIVE));
   assert.equal(result.walletTransactions[0].amountCents, 3282);
-  assert.deepEqual(result.walletTransactions[0].fiat, { fromCurrency: "MYR", toCurrency: "SGD", fromCents: 3282, toCents: 1000, rate: 0.3047, feeCents: 0, source: "live", rateUpdatedAt: LIVE.updatedAt });
+  assert.deepEqual(result.walletTransactions[0].fiat, { fromCurrency: "MYR", toCurrency: "SGD", fromCents: 3282, toCents: 1000, rate: 0.3047, feeCents: 0, source: "live", rateUpdatedAt: LIVE.updatedAt, recipientName: "Maya Tan", recipientBank: "Maybank", recipientAccountLast4: "7890" });
   assert.match(result.walletTransactions[0].subtitle, /live rate/);
 });
 

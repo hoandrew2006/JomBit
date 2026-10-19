@@ -121,6 +121,11 @@ export interface FiatConversionDetails {
   source: "demo" | "live";
   // Provider timestamp of the live rate used; absent for static demo rates and older records.
   rateUpdatedAt?: string;
+  // Bank-transfer previews retain only the display name, bank and final four digits.
+  // The full account number is deliberately never saved in JomBit state.
+  recipientName?: string;
+  recipientBank?: string;
+  recipientAccountLast4?: string;
 }
 
 export type CryptoPriceSource = "demo" | "coingecko";
