@@ -50,7 +50,7 @@ What counts is defined in one place, `insightEntries()` in `lib/insights.ts`, an
   - A crypto payment counts once, as the MYR the recipient received, in its normal category. It carries a "Paid with ETH" (etc.) badge and shows the crypto amount.
   - JomBit's spread on it appears separately under **Fees**.
   - Settle-ups you pay, bank withdrawals and transfers to friends are not spend.
-- **Money in** is everything entering your JomBit wallet: Top-ups, Received from others, Repayments (settle-ups paid to you) and Staking rewards. The Summary's Money in view breaks it down by these four sources.
+- **Money in** is everything entering your JomBit wallet: Top-ups (MYR deposits and crypto deposited into the wallet, valued at the price when it arrived), Received from others, Repayments (settle-ups paid to you) and Staking rewards. The Summary's Money in view breaks it down by these four sources.
   - The MYR converted from crypto to fund a crypto payment is not money in.
   - Crypto price changes are not money in.
 - Everything is shown in MYR, using the rate stored on the transaction day.
@@ -76,7 +76,7 @@ The payment appears in Wallet and Insights. This is separate from group settle-u
 
 Open **Wallet → Crypto**. JomBit presents a simulated crypto wallet for holding, receiving and staking; it does not provide crypto buying or selling, including paper orders. Each asset row shows the MYR reference value of the complete holding, while its live unit price remains in the selected asset details. The command layer rejects buying and selling, not just the UI.
 
-The receive flow uses a deliberately non-payable JomBit preview address and QR. Recording a test transfer adds units to the available balance and preserves a dated incoming activity record, but it never watches a blockchain, creates a custody account or moves real crypto. Because an external transfer does not supply purchase data, its acquisition cost remains unknown rather than being invented.
+The receive flow uses a deliberately non-payable JomBit preview address and QR. Recording a test transfer adds units to the available balance and preserves a dated incoming activity record, but it never watches a blockchain, creates a custody account or moves real crypto. When a live price is available, the deposit records it, its MYR value at arrival is added to the coin's recorded cost, and Insights counts it as a **Top-up** in Money in. Without a live price, the cost of that holding becomes unknown rather than being invented.
 
 The prototype supports **demo staking and unstaking of existing ADA, ATOM, AVAX, DOT, ETH, NEAR and SOL holdings**. BTC can be held but is not stakeable. Each asset clearly separates the amount available to stake from the amount already staked. Review an amount before confirming; units move between those balances with no MYR movement. Duplicate confirmations and excessive amounts are rejected against current balances. Staking actions accrue no rewards and no provider fees or waiting periods are simulated. Instant demo unstaking does not imply instant provider withdrawals.
 

@@ -27,6 +27,8 @@ export interface CryptoReceiveCommand {
   id: string;
   asset: CryptoAsset;
   amount: string;
+  // Live reference price at the moment of deposit, so Insights can value it in MYR.
+  quote?: CryptoQuote;
 }
 
 export interface CryptoTransferCommand extends CryptoReceiveCommand {
@@ -118,6 +120,7 @@ export function executeCryptoReceive(state: AppState, command: CryptoReceiveComm
   const received = units(parseAmount(command.amount, 8));
   if (received < 1) throw new Error("Enter at least 0.00000001 units.");
   if (!Number.isSafeInteger(available + received)) throw new Error("Holding quantity exceeds the preview limit.");
+  const priced = Boolean(command.quote && command.quote.asset === command.asset && command.quote.source === "coingecko" && validQuote(command.quote, now));
   const transaction: WalletTransaction = {
     id: command.id,
     date: new Date(now).toISOString(),
@@ -125,8 +128,14 @@ export function executeCryptoReceive(state: AppState, command: CryptoReceiveComm
     title: `Received ${command.asset}`,
     subtitle: "Wallet transfer preview · no blockchain transfer",
     direction: "in",
-    crypto: { asset: command.asset, quantity: quantity(received), priceMyr: null, priceSource: null, priceUpdatedAt: null, feeCents: 0 },
+    crypto: priced
+      ? { asset: command.asset, quantity: quantity(received), priceMyr: command.quote!.priceMyr, priceSource: command.quote!.source, priceUpdatedAt: command.quote!.updatedAt, feeCents: 0 }
+      : { asset: command.asset, quantity: quantity(received), priceMyr: null, priceSource: null, priceUpdatedAt: null, feeCents: 0 },
   };
+  // With a live price, the deposit's MYR value at arrival becomes its recorded cost. Without one, the
+  // cost of the holding becomes unknown rather than invented.
+  const cost = holdingMetrics(holding).cost;
+  const costBasisCents = priced && cost !== null ? cost + Math.round(quantity(received) * command.quote!.priceMyr * 100) : null;
   return {
     ...state,
     crypto: {
@@ -134,8 +143,7 @@ export function executeCryptoReceive(state: AppState, command: CryptoReceiveComm
       [command.asset]: {
         ...holding,
         available: quantity(available + received),
-        // A transfer does not provide acquisition cost information.
-        costBasisCents: null,
+        costBasisCents,
       },
     },
     walletTransactions: [transaction, ...state.walletTransactions],

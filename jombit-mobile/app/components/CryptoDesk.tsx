@@ -105,7 +105,7 @@ export function CryptoDesk({ balancesVisible }: { balancesVisible: boolean }) {
   const prepareReceive = () => {
     setError("");
     try {
-      const command: CryptoReceiveCommand = { id: `crypto-receive-${crypto.randomUUID()}`, asset, amount: receiveAmount };
+      const command: CryptoReceiveCommand = { id: `crypto-receive-${crypto.randomUUID()}`, asset, amount: receiveAmount, quote: market.fresh ? market.quotes?.[asset] : undefined };
       const preview = executeCryptoReceive(state, command);
       setReceiveReview({ command, order: preview.walletTransactions[0] });
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Check the incoming amount."); }
@@ -211,7 +211,7 @@ export function CryptoDesk({ balancesVisible }: { balancesVisible: boolean }) {
         </> : <>
           <div className="crypto-review-icon"><CheckCircle2 size={26} /></div>
           <p className="crypto-review-heading" ref={reviewTitle} tabIndex={-1}>Check incoming transfer</p>
-          <dl className="crypto-review-details"><div><dt>Asset</dt><dd>{asset}</dd></div><div><dt>Amount</dt><dd>{quantity(receiveReview.order.crypto!.quantity)} {asset}</dd></div><div><dt>Added to</dt><dd>Available balance</dd></div><div><dt>MYR movement</dt><dd>None</dd></div><div><dt>Blockchain transfer</dt><dd>Not performed</dd></div></dl>
+          <dl className="crypto-review-details"><div><dt>Asset</dt><dd>{asset}</dd></div><div><dt>Amount</dt><dd>{quantity(receiveReview.order.crypto!.quantity)} {asset}</dd></div><div><dt>Added to</dt><dd>Available balance</dd></div><div><dt>MYR movement</dt><dd>None</dd></div><div><dt>Value when received</dt><dd>{receiveReview.order.crypto!.priceMyr != null ? `${formatMoney(Math.round(receiveReview.order.crypto!.quantity * receiveReview.order.crypto!.priceMyr * 100))} · counts as a top-up in Insights` : "Live price unavailable"}</dd></div><div><dt>Blockchain transfer</dt><dd>Not performed</dd></div></dl>
           <button className="primary-button" type="button" onClick={confirmReceive}>Record test transfer</button>
           <button className="secondary-button" type="button" onClick={() => { submitted.current = false; setReceiveReview(undefined); setError(""); }}>Edit amount</button>
         </>}

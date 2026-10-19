@@ -120,6 +120,19 @@ test("Receiving crypto adds only to the available balance and records an incomin
   assert.match(result.walletTransactions[0].subtitle, /no blockchain transfer/i);
 });
 
+test("A deposit with a live price records that price and adds its value at arrival to the recorded cost", () => {
+  const quote = { asset: "BTC", priceMyr: 400000, change24h: 0, updatedAt: new Date(NOW - 20_000).toISOString(), source: "coingecko" };
+  const result = executeCryptoReceive(state(), { id: "receive-priced", asset: "BTC", amount: "0.00012", quote }, NOW);
+  const tx = result.walletTransactions[0];
+  assert.deepEqual([tx.crypto.priceMyr, tx.crypto.priceSource, tx.amountCents], [400000, "coingecko", undefined], "no MYR moves");
+  assert.equal(result.crypto.BTC.costBasisCents, 80000 + 4800, "0.00012 BTC × RM400,000 = RM48.00 added to the cost");
+  // A stale, wrong-coin or sample price is not recorded, so the cost becomes unknown as before.
+  for (const bad of [{ ...quote, updatedAt: new Date(NOW - 600_000).toISOString() }, { ...quote, asset: "ETH" }, { ...quote, source: "demo", updatedAt: null }]) {
+    const unpriced = executeCryptoReceive(state(), { id: "receive-bad", asset: "BTC", amount: "0.00012", quote: bad }, NOW);
+    assert.deepEqual([unpriced.walletTransactions[0].crypto.priceMyr, unpriced.crypto.BTC.costBasisCents], [null, null]);
+  }
+});
+
 test("Incoming crypto rejects duplicate, invalid and unsafe transfers", () => {
   const received = executeCryptoReceive(state(), { id: "receive-eth", asset: "ETH", amount: "0.1" }, NOW);
   assert.throws(() => executeCryptoReceive(received, { id: "receive-eth", asset: "ETH", amount: "0.1" }, NOW), /already recorded/);

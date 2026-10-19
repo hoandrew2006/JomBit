@@ -1,11 +1,12 @@
-import { DEMO_FX_IN_MYR } from "./mock-services.ts";
+import { DEMO_CRYPTO_PRICES_MYR, DEMO_FX_IN_MYR } from "./mock-services.ts";
 import type { AppState, CryptoAsset, Currency, SpendCategory } from "./models";
 
 // Insights business rules (see AGENTS.md → Business rules). All classification happens in insightEntries().
 // - Spend = my own share of group expenses + my own payments: wallet payments, card spend and crypto payments.
 //   A crypto payment counts once, as the MYR the recipient received, in its normal category; its conversion
 //   fee is a separate "Fees" entry. Never the full bill I paid upfront, settle-ups I paid, or bank withdrawals.
-// - Money in = top-ups + money received from others + repayments (settle-ups received) + staking rewards.
+// - Money in = top-ups (MYR or crypto deposited) + money received from others + repayments (settle-ups
+//   received) + staking rewards. A crypto deposit is valued at the price recorded when it arrived.
 //   The MYR converted from crypto to fund a crypto payment is part of that payment, not money in.
 // - Excluded: transfers to friends, conversions between my own balances, crypto receipts and price changes.
 // - Everything is shown in MYR, converted with the rate stored on the transaction day.
@@ -88,6 +89,8 @@ export interface InsightEntry {
   groupName?: string;
   // Crypto payments: the coin and amount spent, shown as a "Paid with" badge.
   paidWith?: { asset: CryptoAsset; quantity: number };
+  // Crypto deposits: the coin and amount received, shown as a "Deposited" badge.
+  deposited?: { asset: CryptoAsset; quantity: number };
 }
 
 export function insightEntries(state: AppState): InsightEntry[] {
@@ -126,6 +129,12 @@ export function insightEntries(state: AppState): InsightEntry[] {
       if (tx.crypto.feeCents > 0) entries.push({ ...base, id: `${tx.id}:fee`, title: `JomBit spread · ${tx.title}`, subtitle: `Paid with ${tx.crypto.asset}`, flow: "out", category: "fees", myrCents: tx.crypto.feeCents });
     } else if (tx.kind === "topup" && tx.direction === "in" && amount) {
       entries.push({ ...base, flow: "in", category: "topup", myrCents: amount });
+    } else if (tx.kind === "crypto-receive" && tx.direction === "in" && tx.crypto && tx.crypto.quantity > 0) {
+      // Crypto deposited into the wallet is a top-up, valued at the price recorded when it arrived.
+      // Older deposits without a recorded price fall back to the static demo price.
+      const priceMyr = tx.crypto.priceMyr ?? DEMO_CRYPTO_PRICES_MYR[tx.crypto.asset];
+      const myrCents = Math.round(tx.crypto.quantity * priceMyr * 100);
+      if (myrCents > 0) entries.push({ ...base, flow: "in", category: "topup", myrCents, deposited: { asset: tx.crypto.asset, quantity: tx.crypto.quantity } });
     } else if (tx.kind === "received" && tx.direction === "in" && amount) {
       entries.push({ ...base, flow: "in", category: "received", myrCents: amount });
     } else if (tx.kind === "settlement" && tx.direction === "in" && amount) {

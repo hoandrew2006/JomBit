@@ -41,7 +41,7 @@ function baseState() {
       // Paid a café RM45.00 with ETH; the merchant got RM45.00 and JomBit's spread was RM0.90.
       { id: "c1", kind: "crypto-payment", title: "Starbucks Pavilion", subtitle: "", amountCents: 4500, currency: "MYR", date: "2026-10-14T11:00:00.000Z", direction: "out", category: "food", crypto: { asset: "ETH", quantity: 0.00461, priceMyr: 9955, priceSource: "demo", priceUpdatedAt: null, feeCents: 90 } },
       { id: "x8", kind: "withdrawal", title: "Withdrawal to your bank", subtitle: "", amountCents: 25000, currency: "MYR", date: "2026-10-16T05:00:00.000Z", direction: "out" },
-      { id: "x7", kind: "crypto-receive", title: "Received ETH", subtitle: "", date: "2026-10-16T05:00:00.000Z", direction: "in", crypto: { asset: "ETH", quantity: 1, priceMyr: 14000, priceSource: "demo", priceUpdatedAt: null, feeCents: 0 } },
+      { id: "x7", kind: "crypto-receive", title: "Received ETH", subtitle: "", date: "2026-10-16T05:00:00.000Z", direction: "in", crypto: { asset: "ETH", quantity: 0.01, priceMyr: 14000, priceSource: "demo", priceUpdatedAt: null, feeCents: 0 } },
     ],
     card: { virtualActive: false, frozen: false, paymentSource: "fiat" },
   };
@@ -71,11 +71,26 @@ test("A crypto payment is one spend entry in its own category with a Paid-with c
   assert.deepEqual(changed.filter((entry) => entry.id.startsWith("c1")).map((entry) => entry.category).sort(), ["entertainment", "fees"]);
 });
 
-test("Money in is top-ups, received money, repayments and staking rewards; conversions and crypto receipts are excluded", () => {
+test("Money in is top-ups (MYR and crypto deposits), received money, repayments and staking rewards; conversions are excluded", () => {
   const week = summarise(insightEntries(baseState()), { range: periodRange("week", 0, NOW), flow: "in" });
-  assert.equal(week.totalCents, 50000 + 5000 + 3000 + 700);
-  assert.deepEqual(week.categories.map((row) => [row.category, row.cents, row.count, row.percent]), [["topup", 50000, 1, 85], ["repayment", 5000, 1, 9], ["received", 3000, 1, 5], ["staking", 700, 1, 1]]);
-  assert.deepEqual(week.entries.map((entry) => entry.id).sort(), ["w3", "w4", "x1", "x3"]);
+  // RM500 MYR top-up + 0.01 ETH deposited at RM14,000 (RM140) are both Top-ups.
+  assert.equal(week.totalCents, 50000 + 14000 + 5000 + 3000 + 700);
+  assert.deepEqual(week.categories.map((row) => [row.category, row.cents, row.count, row.percent]), [["topup", 64000, 2, 88], ["repayment", 5000, 1, 7], ["received", 3000, 1, 4], ["staking", 700, 1, 1]]);
+  assert.deepEqual(week.entries.map((entry) => entry.id).sort(), ["w3", "w4", "x1", "x3", "x7"]);
+  const deposit = week.entries.find((entry) => entry.id === "x7");
+  assert.deepEqual([deposit.category, deposit.myrCents, deposit.deposited, deposit.paidWith], ["topup", 14000, { asset: "ETH", quantity: 0.01 }, undefined]);
+});
+
+test("Crypto deposits are valued at the price recorded when they arrived, never today's price", () => {
+  const state = baseState();
+  const tx = state.walletTransactions.find((item) => item.id === "x7");
+  assert.equal(insightEntries(state).find((entry) => entry.id === "x7").myrCents, 14000);
+  // An older deposit with no recorded price falls back to the static demo price (RM14,250 per ETH).
+  tx.crypto = { ...tx.crypto, priceMyr: null, priceSource: null };
+  assert.equal(insightEntries(state).find((entry) => entry.id === "x7").myrCents, 14250);
+  // Sending crypto out to another wallet is neither money in nor spend.
+  state.walletTransactions.push({ id: "out", kind: "crypto-transfer", title: "Sent ETH", subtitle: "", date: "2026-10-16T06:00:00.000Z", direction: "out", crypto: { asset: "ETH", quantity: 0.01, priceMyr: 14000, priceSource: "demo", priceUpdatedAt: null, feeCents: 0 } });
+  assert.equal(insightEntries(state).some((entry) => entry.id === "out"), false);
 });
 
 test("Foreign amounts use the stored day rate, falling back to the demo rate for older records", () => {
@@ -119,7 +134,7 @@ test("Personal and Group filters split wallet spend from group shares", () => {
   assert.equal(group.groupName, "Crew");
   // Repayments from friends are group money in; top-ups, received money and rewards are personal.
   assert.equal(summarise(entries, { range, flow: "in", scope: "group" }).totalCents, 5000);
-  assert.equal(summarise(entries, { range, flow: "in", scope: "personal" }).totalCents, 50000 + 3000 + 700);
+  assert.equal(summarise(entries, { range, flow: "in", scope: "personal" }).totalCents, 50000 + 14000 + 3000 + 700);
   const state = baseState();
   state.walletTransactions.find((tx) => tx.id === "x1").groupId = "g1";
   assert.deepEqual((({ scope, groupName }) => ({ scope, groupName }))(insightEntries(state).find((entry) => entry.id === "x1")), { scope: "group", groupName: "Crew" });
@@ -174,6 +189,7 @@ test("Demo data populates every period across the last three months without futu
   const quarter = summarise(entries, { range: periodRange("year", 0, NOW), flow: "out" });
   assert.equal(new Set(quarter.categories.map((row) => row.category)).size, 9, "every spend category and Fees appear");
   assert.ok(quarter.entries.filter((entry) => entry.paidWith).length >= 6, "several crypto payments carry a Paid-with coin");
+  assert.ok(summarise(entries, { range: periodRange("year", 0, NOW), flow: "in" }).entries.filter((entry) => entry.deposited).length >= 3, "crypto deposits count as top-ups");
   const moneyIn = summarise(entries, { range: periodRange("year", 0, NOW), flow: "in" });
   assert.deepEqual(moneyIn.categories.map((row) => row.category).sort(), ["received", "repayment", "staking", "topup"], "all four money-in sources appear");
   for (let offset = 0; offset > -3; offset--) {
