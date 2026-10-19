@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Home, Sparkles, UserRound, Users, WalletCards } from "lucide-react";
+import { Camera, Home, QrCode, ReceiptText, Sparkles, UserRound, Users, WalletCards } from "lucide-react";
 import { useState } from "react";
 import { groupBalances, simplifyDebts } from "@/lib/calculations";
 import type { Expense, Group } from "@/lib/models";
@@ -11,7 +11,9 @@ import { HomeScreen } from "./HomeScreen";
 import { Onboarding } from "./Onboarding";
 import { ProfileScreen } from "./ProfileScreen";
 import { SettlementScreen } from "./SettlementScreen";
-import { Brand } from "./ui";
+import { Brand, Modal } from "./ui";
+import { QrPayFlow } from "./QrPayFlow";
+import "../../src/qr-pay.css";
 import { WalletScreen } from "./WalletScreen";
 import { AuthGate } from "./AuthGate";
 import type { User } from "@supabase/supabase-js";
@@ -33,6 +35,8 @@ function JomBitExperience() {
   const [expenseGroupId, setExpenseGroupId] = useState<string>();
   const [editingExpense, setEditingExpense] = useState<Expense>();
   const [settlement, setSettlement] = useState<SettlementRoute>();
+  const [scanMenuOpen, setScanMenuOpen] = useState(false);
+  const [qrPayOpen, setQrPayOpen] = useState(false);
 
   if (!state.user.onboarded) return <Onboarding />;
 
@@ -58,6 +62,10 @@ function JomBitExperience() {
     return <ExpenseFlow initialGroupId={expenseGroupId} editingExpense={editingExpense} onClose={() => { setExpenseOpen(false); setEditingExpense(undefined); }} onSaved={(groupId) => { setExpenseOpen(false); setEditingExpense(undefined); setSelectedGroupId(groupId); setNav("groups"); }} />;
   }
 
+  if (qrPayOpen) {
+    return <QrPayFlow onClose={() => setQrPayOpen(false)} onDone={() => { setQrPayOpen(false); setNav("wallet"); }} />;
+  }
+
   if (settlement) {
     return <SettlementScreen {...settlement} onClose={() => setSettlement(undefined)} onDone={() => { setSettlement(undefined); openGroup(settlement.group); }} />;
   }
@@ -74,10 +82,16 @@ function JomBitExperience() {
       <nav className="bottom-nav" aria-label="Primary navigation">
         <button className={nav === "home" ? "active" : ""} aria-current={nav === "home" ? "page" : undefined} onClick={() => setNav("home")}><Home size={21} /><span>Home</span></button>
         <button className={nav === "groups" ? "active" : ""} aria-current={nav === "groups" ? "page" : undefined} onClick={() => setNav("groups")}><Users size={21} /><span>Groups</span></button>
-        <button className="scan-nav" onClick={() => openExpense()} aria-label="Scan receipt"><span><Camera size={24} /></span><small>Scan</small></button>
+        <button className="scan-nav" onClick={() => setScanMenuOpen(true)} aria-label="Scan" aria-haspopup="dialog"><span><Camera size={24} /></span><small>Scan</small></button>
         <button className={nav === "wallet" ? "active" : ""} aria-current={nav === "wallet" ? "page" : undefined} onClick={() => setNav("wallet")}><WalletCards size={21} /><span>Wallet</span></button>
         <button className={nav === "profile" ? "active" : ""} aria-current={nav === "profile" ? "page" : undefined} onClick={() => setNav("profile")}><UserRound size={21} /><span>Profile</span></button>
       </nav>
+      <Modal open={scanMenuOpen} onClose={() => setScanMenuOpen(false)} title="What do you want to scan?" eyebrow="SCAN">
+        <div className="scan-choice">
+          <button type="button" onClick={() => { setScanMenuOpen(false); openExpense(); }}><span><ReceiptText size={22} /></span><span><strong>Scan a receipt</strong><small>Split a bill item by item with your group.</small></span></button>
+          <button type="button" onClick={() => { setScanMenuOpen(false); setQrPayOpen(true); }}><span><QrCode size={22} /></span><span><strong>Scan DuitNow QR to pay</strong><small>Pay a shop or a friend with cash (MYR wallet) or crypto.</small></span></button>
+        </div>
+      </Modal>
     </div>
   );
 }

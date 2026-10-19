@@ -35,6 +35,8 @@ JomBit/
 │   │   ├── calculations.ts Item splitting, tax/service allocation, balances, debt simplification
 │   │   ├── fiat-ledger.ts  MYR wallet commands (deposit, send, convert legacy balances)
 │   │   ├── insights.ts     Spend / money-in rules, categories and period charts for Wallet → Insights
+│   │   ├── duitnow-qr.ts   Reads DuitNow (EMVCo) QR codes; builds sample QR codes for demos
+│   │   ├── qr-payment.ts   Pay-with-QR command: cash from the MYR wallet or crypto converted to MYR
 │   │   ├── crypto-ledger.ts Stake/unstake commands (buy/sell is deliberately rejected)
 │   │   ├── state.tsx       React context; saves state to browser localStorage
 │   │   ├── seed.ts         Sample demo data
@@ -150,6 +152,24 @@ These rules live in `jombit-mobile/lib/insights.ts` and are covered by `tests/in
   - Charts never show future days.
   - Users can't step past the current period.
   - Records dated after today are ignored.
+
+### Pay with DuitNow QR (Scan button → "Scan DuitNow QR to pay")
+
+These rules live in `jombit-mobile/lib/duitnow-qr.ts` and `lib/qr-payment.ts` and are covered by `tests/qr-payment.test.mjs`.
+
+- **Separate from settling up.** QR payments are general payments to any person or merchant. They never touch groups, expenses or settle-ups. Group settlement stays on Home → "Ready to settle up?".
+- **Preview only.** No money or crypto reaches the recipient, even when a real DuitNow QR is scanned. A real QR shows a warning that the payee will not be paid. QR codes are read on the device; nothing is sent anywhere.
+- **Reading a QR:**
+  - Only Malaysian (`58 = MY`) ringgit (`53 = 458`) EMVCo QR codes with a valid CRC checksum are accepted.
+  - A fixed amount in the QR (tag 54) can't be changed.
+  - Sample QR codes (`MY.JOMBIT.SAMPLE`) are marked "Sample QR".
+- **Paying:**
+  - **Cash** takes the amount from the MYR wallet and records a `payment`.
+  - **Crypto** converts the chosen coin's *available* balance (never staked) to MYR for the recipient. It uses the live reference price shown at review, so a fresh price is required. It records one `crypto-payment` with the coin quantity and conversion fee.
+  - The **conversion fee** (`CRYPTO_PAYMENT_FEE_BASIS_POINTS`, currently 1%, minimum RM0.50) is added on top. It is a placeholder, not a quoted price; changing it is a human decision.
+  - Preview payments are limited to RM5,000.
+- **In Insights,** QR payments follow the normal Spend rules: one entry in the chosen category, a "Paid with [coin]" badge for crypto, and the fee under Fees.
+- Never describe the conversion as buying or selling crypto.
 
 ## Rules for every agent (Claude Code, Codex, others)
 

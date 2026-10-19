@@ -59,6 +59,19 @@ New expenses get a suggested category from the merchant, which you can change wh
 
 The demo data generates about three months of fictional activity relative to today. It includes top-ups, repayments, sample staking rewards, a bank withdrawal and weekly crypto payments with conversion fees. Use **Explore the demo** on the account screen to open the standardized sample workspace; **Profile → Reset data** restores that template. Resetting a signed-in account instead clears its product data while preserving its profile and sign-in. The demo balances are the result of this history: three months ago the demo wallet started with opening balances, and every top-up, payment, crypto payment, sample staking reward, repayment and withdrawal shown has been applied to them. Crypto payments reduce that coin's available balance, and sample rewards add to it. Staking rewards in the demo are clearly labelled **sample records**; staking in the preview doesn't create new rewards. Repayments from friends count under the **Group** filter.
 
+## Pay with DuitNow QR
+
+Tap the **Scan** button and choose **Scan DuitNow QR to pay**. (**Scan a receipt** is the existing bill-splitting flow.)
+
+1. Point the camera at a DuitNow QR, choose a QR image, or try one of the sample QR codes (a shop, a fixed-amount bill, or a friend).
+2. Enter the amount the recipient should get, unless the QR fixes it.
+3. Choose **Cash (MYR wallet)** or **Crypto**. Crypto uses your available (not staked) balance at the live reference price, plus a conversion fee (1%, minimum RM0.50).
+4. Check the suggested category and confirm.
+
+The payment appears in Wallet and Insights. This is separate from group settle-ups on Home → "Ready to settle up?".
+
+**Preview only:** nothing reaches the recipient, even when you scan a real DuitNow QR, and the app says so. QR codes are read on your device with the open-source `jsqr` library; nothing is uploaded. See `design/qr-payments.md`.
+
 ## Crypto staking and planned Luno integration
 
 Open **Wallet → Crypto**. JomBit presents a simulated crypto wallet for holding, receiving and staking; it does not provide crypto buying or selling, including paper orders. Each asset row shows the MYR reference value of the complete holding, while its live unit price remains in the selected asset details. The command layer rejects buying and selling, not just the UI.
