@@ -21,9 +21,10 @@ interface Props {
   onOpenGroup: (group: Group) => void;
   onSettleGroup: (group: Group) => void;
   onWallet: () => void;
+  onProfile: () => void;
 }
 
-export function HomeScreen({ onScan, onCreateGroup, onOpenGroup, onSettleGroup, onWallet }: Props) {
+export function HomeScreen({ onScan, onCreateGroup, onOpenGroup, onSettleGroup, onWallet, onProfile }: Props) {
   const { state } = useAppState();
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
@@ -53,7 +54,7 @@ export function HomeScreen({ onScan, onCreateGroup, onOpenGroup, onSettleGroup, 
       <PageHeader
         eyebrow="Your shared money, simplified"
         title={`${greeting}, ${state.user.name.split(" ")[0]}`}
-        action={<Avatar name={state.user.name} size="lg" />}
+        action={<button type="button" className="profile-shortcut" onClick={onProfile} aria-label="Open profile"><Avatar name={state.user.name} size="lg" /></button>}
       />
 
       <GroupLedgerHero onScan={onScan} />
