@@ -42,7 +42,7 @@ Open **Wallet → Insights**. Pick **This week / This month / This year** and st
 
 - **Tiles:** Money in, Spend, Staking rewards and Top category, each with a small daily bar chart. Tap a tile for the **Summary**.
 - **Summary:** a Money in / Spend toggle, a bar chart (daily for a week, weekly for a month, monthly for a year) with a tap/hover tooltip, and a category list. Tap a category to see its transactions and change their category.
-- **Filters:** All / Personal / Group. Group shares show a "Group" badge.
+- **Filters:** All / Personal / Group. Group covers your share of group bills and repayments from friends; both show a "Group" badge.
 
 What counts is defined in one place, `insightEntries()` in `lib/insights.ts`, and in AGENTS.md → *Business rules*:
 
@@ -57,7 +57,7 @@ What counts is defined in one place, `insightEntries()` in `lib/insights.ts`, an
 
 New expenses get a suggested category from the merchant, which you can change while adding the expense or later.
 
-The demo data generates about three months of fictional activity relative to today. It includes top-ups, repayments, sample staking rewards, a bank withdrawal and weekly crypto payments with conversion fees. Use **Explore the demo** on the account screen to open the standardized sample workspace; **Profile → Reset data** restores that template. Resetting a signed-in account instead clears its product data while preserving its profile and sign-in. The staking rewards in the demo are clearly labelled **sample records**: they do not change any balance, and demo staking still earns nothing.
+The demo data generates about three months of fictional activity relative to today. It includes top-ups, repayments, sample staking rewards, a bank withdrawal and weekly crypto payments with conversion fees. Use **Explore the demo** on the account screen to open the standardized sample workspace; **Profile → Reset data** restores that template. Resetting a signed-in account instead clears its product data while preserving its profile and sign-in. The demo balances are the result of this history: three months ago the demo wallet started with opening balances, and every top-up, payment, crypto payment, sample staking reward, repayment and withdrawal shown has been applied to them. Crypto payments reduce that coin's available balance, and sample rewards add to it. Staking rewards in the demo are clearly labelled **sample records**; staking in the preview doesn't create new rewards. Repayments from friends count under the **Group** filter.
 
 ## Crypto staking and planned Luno integration
 

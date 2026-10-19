@@ -97,7 +97,7 @@ export function InsightsScreen({ balancesVisible = true, now }: { balancesVisibl
   const filters = <div className="insight-filters">
     <Segmented value={scope} onChange={(value) => { setScope(value); setShown(8); }} options={SCOPES} />
   </div>;
-  const disclosure = <p className="product-disclosure"><ShieldCheck size={15} /> Insights are calculated from your preview ledger in MYR. Staking rewards are illustrative sample records; demo staking does not earn rewards.</p>;
+  const disclosure = <p className="product-disclosure"><ShieldCheck size={15} /> Insights are calculated from your preview ledger in MYR. Staking rewards are sample records in the demo data; staking in the preview does not create new rewards.</p>;
 
   if (summaryFlow) {
     const summary = summarise(entries, { range, scope, flow: summaryFlow });

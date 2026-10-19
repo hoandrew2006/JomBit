@@ -16,7 +16,7 @@ test("Card screen offers MYR and available crypto sources without implying payme
       name: "isolated-card-render-fixture",
       resolveId(id) { if (id === "virtual:jombit-card-state") return `\0${id}`; },
       load(id) {
-        if (id === "\0virtual:jombit-card-state") return `import { createSeedState } from '/lib/seed.ts'; export const fixture = { state: createSeedState() }; fixture.state.user.onboarded = true; fixture.state.card.virtualActive = true; fixture.state.card.paymentSource = 'crypto'; fixture.state.card.paymentAsset = 'SOL'; export function useAppState() { return { state: fixture.state, setState() { throw new Error('Rendering must not change card state'); } }; }`;
+        if (id === "\0virtual:jombit-card-state") return `import { createSeedState } from '/lib/seed.ts'; export const fixture = { state: createSeedState() }; fixture.state.crypto.SOL.available = 1.4; fixture.state.user.onboarded = true; fixture.state.card.virtualActive = true; fixture.state.card.paymentSource = 'crypto'; fixture.state.card.paymentAsset = 'SOL'; export function useAppState() { return { state: fixture.state, setState() { throw new Error('Rendering must not change card state'); } }; }`;
       },
     }],
     server: { middlewareMode: true, hmr: false, ws: false, watch: null }, appType: "custom",

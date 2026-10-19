@@ -100,7 +100,7 @@ export function demoActivity(now: Date) {
     if (rewardDate) {
       const priceMyr = Math.round(DEMO_CRYPTO_PRICES_MYR[reward.asset] * (0.94 + rand() * 0.12) * 100) / 100;
       const quantity = Number(((reward.staked * reward.yearly * 7) / 365).toFixed(8));
-      walletTransactions.push({ id: `seed-reward-${d}`, kind: "staking-reward", title: `Sample staking reward · ${reward.asset}`, subtitle: "Illustrative sample record · not added to your balance", date: rewardDate, direction: "neutral", crypto: { asset: reward.asset, quantity, priceMyr, priceSource: "demo", priceUpdatedAt: null, feeCents: 0, seeded: true } });
+      walletTransactions.push({ id: `seed-reward-${d}`, kind: "staking-reward", title: `Sample staking reward · ${reward.asset}`, subtitle: "Sample reward · added to your available balance", date: rewardDate, direction: "neutral", crypto: { asset: reward.asset, quantity, priceMyr, priceSource: "demo", priceUpdatedAt: null, feeCents: 0, seeded: true } });
     }
   }
 
@@ -115,7 +115,8 @@ export function demoActivity(now: Date) {
     const date = at(daysAgo, 13, 15);
     if (date) walletTransactions.push({ id: `seed-received-${daysAgo}`, kind: "received", title, subtitle, amountCents, currency: "MYR", date, direction: "in" });
   }
-  for (const [daysAgo, amountCents] of [[5, 20000], [20, 30000], [36, 25000], [52, 50000], [66, 30000], [79, 40000]]) {
+  // Monthly top-ups that cover the month's spending, plus a few smaller ones.
+  for (const [daysAgo, amountCents] of [[5, 20000], [12, 220000], [20, 30000], [36, 25000], [42, 220000], [52, 50000], [66, 30000], [72, 220000], [79, 40000], [88, 60000]]) {
     const date = at(daysAgo, 8, 40);
     if (date) walletTransactions.push({ id: `seed-topup-${daysAgo}`, kind: "topup", title: "MYR wallet deposit", subtitle: "Top-up from your bank · preview", amountCents, currency: "MYR", date, direction: "in" });
   }
@@ -193,7 +194,7 @@ export function demoActivity(now: Date) {
     used.add(expense.id);
     const name = (id: string) => id === "me" ? "Aisha" : id[0].toUpperCase() + id.slice(1);
     settlements.push({ id: `seed-settle-${daysAgo}`, groupId: "g-kl", fromId, toId, amountCents, currency: "MYR", date, paymentMethod: "fiat" });
-    walletTransactions.push({ id: `seed-settle-tx-${daysAgo}`, kind: "settlement", title: `${name(fromId)} settled with ${name(toId)}`, subtitle: "KL Food Crew · Fiat settlement preview", amountCents, currency: "MYR", date, direction: fromId === "me" ? "out" : "in" });
+    walletTransactions.push({ id: `seed-settle-tx-${daysAgo}`, groupId: "g-kl", kind: "settlement", title: `${name(fromId)} settled with ${name(toId)}`, subtitle: "KL Food Crew · Fiat settlement preview", amountCents, currency: "MYR", date, direction: fromId === "me" ? "out" : "in" });
   };
   settle("me", "maya", 25);
   for (const [fromId, daysAgo] of [["sarah", 80], ["maya", 62], ["daniel", 45], ["daniel", 18], ["sarah", 9], ["maya", 2]] as const) settle(fromId, "me", daysAgo);

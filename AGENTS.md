@@ -127,7 +127,7 @@ These rules live in `jombit-mobile/lib/insights.ts` and are covered by `tests/in
 - **Money in** = all money entering the JomBit wallet, from four sources:
   - **Top-ups** (`topup`)
   - **Received from others** (`received`)
-  - **Repayments**: settle-ups received into the wallet (`settlement`, in)
+  - **Repayments**: settle-ups received into the wallet (`settlement`, in). These count under the **Group** filter.
   - **Staking rewards** (`staking-reward`)
 - The Summary screen's Money in breakdown shows these four sources (amount, count, %) instead of spending categories. The tile is always labelled "Money in", never "Income".
 - **Not money in:**
@@ -135,7 +135,8 @@ These rules live in `jombit-mobile/lib/insights.ts` and are covered by `tests/in
   - crypto price changes
   - conversions between the user's own balances (`exchange`)
   - crypto received or staked
-- **Staking rewards** in the demo are clearly labelled *sample* records. They never change balances, and demo staking still accrues nothing. Do not describe them as real returns.
+- **Staking rewards** in the demo are clearly labelled *sample* records. They are added to the coin's available balance, but staking in the preview never creates new rewards. Do not describe them as real returns.
+- **Balances follow the history.** Demo balances are opening balances from about three months ago plus every top-up, payment, crypto payment, reward, repayment and withdrawal shown (`applyHistory()` in `lib/balance-effects.ts`). A crypto payment spends its coin quantity, fee included, from the available balance. Running balances must never go below zero.
 - **Crypto payments** are paid from crypto, so they never appear in the MYR wallet history. Describe them as converting crypto to MYR for the recipient, never as buying or selling crypto.
 - **Amounts are always MYR.** Foreign-currency items are converted at the rate stored on the transaction day (`myrRate`; new expenses store the rate on the day they're saved). Older records without one fall back to the static demo rates.
 - **Spending categories:** Food & Drink, Groceries, Transport, Shopping, Entertainment, Travel, Bills, Others, plus the automatic **Fees** category.
@@ -144,7 +145,7 @@ These rules live in `jombit-mobile/lib/insights.ts` and are covered by `tests/in
   - A stored choice always beats the suggestion. Records without a category still load and get the suggestion.
 - **Filters:** All / Personal / Group.
   - Group expenses keep their normal category and show a small "Group" badge in transaction lists.
-  - Personal = wallet records.
+  - Group = the user's share of group expenses + repayments from friends. Personal = all other wallet records.
 - **Periods** use Malaysia time (UTC+8). Weeks run Monday–Sunday.
   - Charts never show future days.
   - Users can't step past the current period.

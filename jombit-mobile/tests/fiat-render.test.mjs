@@ -37,6 +37,8 @@ test("Fiat screen presents one MYR wallet, equivalent values, privacy and preser
       date: "2026-10-02T00:00:00.000Z",
       direction: "out",
     });
+    // A fixed balance keeps this display test independent of the replayed demo history.
+    fixture.state.fiatBalances.MYR = 184250;
     // Keep the original starter records at the top of the list; generated Insights activity is tested separately.
     const generated = fixture.state.walletTransactions.filter((tx) => tx.id.startsWith("seed-"));
     fixture.state.walletTransactions = fixture.state.walletTransactions.filter((tx) => !tx.id.startsWith("seed-"));

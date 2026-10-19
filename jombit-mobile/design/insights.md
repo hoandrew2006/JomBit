@@ -15,6 +15,8 @@ An expense-tracking view in the Wallet, next to Fiat, Crypto and Card. The layou
 - **Periods** use Malaysia time. Weeks run Monday–Sunday. A month is split into Monday–Sunday weeks, clipped to the month. Future buckets are drawn as an empty dashed baseline.
 - **Mini charts on tiles** show daily bars for a week or month, and monthly bars for a year.
 - **Categories** are optional fields on records. Older saved state gets a merchant-based suggestion without migration. A user's choice is stored on the expense or wallet record.
+- **Balances follow the history (19 Oct 2026):** demo balances are opening balances from about three months ago plus all the demo activity (`applyHistory()` in `lib/balance-effects.ts`). Crypto payments reduce the coin's available balance, sample rewards add to it, and a test checks running balances never go negative.
+- **Repayments count under "Group" (19 Oct 2026).** New settle-ups store their group so the group name can be shown.
 - **Demo data** (`lib/seed-activity.ts`) generates about 92 days of fictional activity relative to today. A fixed pseudo-random sequence produces the same data for the same day. It includes:
   - personal payments in every category
   - shared KL meals, some paid by friends

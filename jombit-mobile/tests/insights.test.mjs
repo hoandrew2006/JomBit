@@ -117,6 +117,12 @@ test("Personal and Group filters split wallet spend from group shares", () => {
   const group = entries.find((entry) => entry.id === "e1");
   assert.equal(group.scope, "group");
   assert.equal(group.groupName, "Crew");
+  // Repayments from friends are group money in; top-ups, received money and rewards are personal.
+  assert.equal(summarise(entries, { range, flow: "in", scope: "group" }).totalCents, 5000);
+  assert.equal(summarise(entries, { range, flow: "in", scope: "personal" }).totalCents, 50000 + 3000 + 700);
+  const state = baseState();
+  state.walletTransactions.find((tx) => tx.id === "x1").groupId = "g1";
+  assert.deepEqual((({ scope, groupName }) => ({ scope, groupName }))(insightEntries(state).find((entry) => entry.id === "x1")), { scope: "group", groupName: "Crew" });
 });
 
 test("Periods use Malaysia days, never chart the future and can only step backwards", () => {

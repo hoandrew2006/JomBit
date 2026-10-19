@@ -28,7 +28,7 @@ test("Insights shows MYR tiles, sample-reward disclosure, Group badges and no fu
     const { InsightsScreen } = await server.ssrLoadModule("/app/components/InsightsScreen.tsx");
     const render = (balancesVisible = true) => renderToStaticMarkup(createElement(InsightsScreen, { balancesVisible, now: NOW }));
     const html = render();
-    for (const text of ["This week", "12 Oct – 18 Oct", "Money in", "Spend", "Staking rewards", "Top category", "Recent transactions", "Personal", "Group", "Sample records", "illustrative sample records", "demo staking does not earn rewards"]) assert.ok(html.includes(text), text);
+    for (const text of ["This week", "12 Oct – 18 Oct", "Money in", "Spend", "Staking rewards", "Top category", "Recent transactions", "Personal", "Group", "Sample records", "sample records in the demo data", "staking in the preview does not create new rewards"]) assert.ok(html.includes(text), text);
     const { fixture } = await server.ssrLoadModule("virtual:jombit-insights-state");
     const personal = fixture.state.walletTransactions;
     fixture.state.walletTransactions = personal.filter((tx) => tx.kind !== "payment");

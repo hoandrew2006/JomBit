@@ -107,6 +107,8 @@ export interface WalletTransaction {
   fiat?: FiatConversionDetails;
   category?: SpendCategory;
   myrRate?: number;
+  // Settle-ups: the group they belong to. Older records may not have it.
+  groupId?: string;
 }
 
 export interface FiatConversionDetails {

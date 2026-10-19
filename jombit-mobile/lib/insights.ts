@@ -129,8 +129,8 @@ export function insightEntries(state: AppState): InsightEntry[] {
     } else if (tx.kind === "received" && tx.direction === "in" && amount) {
       entries.push({ ...base, flow: "in", category: "received", myrCents: amount });
     } else if (tx.kind === "settlement" && tx.direction === "in" && amount) {
-      // A friend repaying me. Settle-ups I pay are never spend: the shares behind them are already counted.
-      entries.push({ ...base, flow: "in", category: "repayment", myrCents: amount });
+      // A friend repaying me: a group record, so it counts under "Group". Settle-ups I pay are never spend.
+      entries.push({ ...base, scope: "group", flow: "in", category: "repayment", myrCents: amount, groupName: tx.groupId ? groups.get(tx.groupId)?.name : undefined });
     } else if (tx.kind === "staking-reward" && tx.crypto?.priceMyr && tx.crypto.quantity > 0) {
       // Valued at the reference price recorded on the reward day, not today's price.
       entries.push({ ...base, flow: "in", category: "staking", myrCents: Math.round(tx.crypto.quantity * tx.crypto.priceMyr * 100) });

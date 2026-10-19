@@ -17,7 +17,8 @@ No existing wallet is reset, relabelled as Luno data or migrated into a provider
 - No APR is displayed and staking actions accrue no rewards. Immediate local unstaking is not a
   representation of provider processing times.
 - The demo data includes labelled "Sample staking reward" records so Wallet → Insights can
-  show a populated rewards tile. They are illustrative, never change balances and are hidden
+  show a populated rewards tile. They are added to the coin's available balance (decided with
+  the founders, 19 Oct 2026), but stake/unstake actions still create no rewards. They are hidden
   from the crypto activity list and the MYR wallet history.
 - JomBit Card can save the MYR wallet or one available crypto asset as its
   preview payment source. Staked holdings are excluded. This preference does
