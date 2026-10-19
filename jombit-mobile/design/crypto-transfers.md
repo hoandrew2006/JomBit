@@ -7,7 +7,10 @@ staking, MYR and unrelated history are preserved. No provider is contacted.
 
 The existing cyan/charcoal brand and Lucide icons are unchanged. Desktop holdings
 and selected-asset details share two columns; phone rows put MYR value underneath
-the asset name to avoid crowding. Active tabs use dark text on cyan. The wallet's
+the asset name to avoid crowding. On phones, tapping a holding expands that asset's
+position, transfer, receive and staking actions immediately below the row; tapping
+the same holding again collapses it. Desktop retains the two-column detail panel.
+Active tabs use dark text on cyan. The wallet's
 entrance animation no longer retains a stacking context that trapped dialogs
 behind the navigation.
 

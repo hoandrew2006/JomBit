@@ -38,12 +38,21 @@ export function CryptoDesk({ balancesVisible }: { balancesVisible: boolean }) {
   const [toast, setToast] = useState("");
   const [filter, setFilter] = useState("all");
   const [shown, setShown] = useState(10);
+  const [compactHoldings, setCompactHoldings] = useState(false);
+  const [mobilePositionOpen, setMobilePositionOpen] = useState(false);
   const submitted = useRef(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const orderInput = useRef<HTMLInputElement>(null);
   const reviewTitle = useRef<HTMLParagraphElement>(null);
   const receiveInput = useRef<HTMLInputElement>(null);
   useEffect(() => () => clearTimeout(toastTimer.current), []);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 600px)");
+    const sync = () => setCompactHoldings(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
   useEffect(() => {
     if (action) (review ? reviewTitle.current : orderInput.current)?.focus();
   }, [action, review]);
@@ -116,6 +125,30 @@ export function CryptoDesk({ balancesVisible }: { balancesVisible: boolean }) {
     try { await navigator.clipboard.writeText(receivePayload); setToast("Preview address copied"); }
     catch { setToast("Copy unavailable. Press and hold the address instead."); }
   };
+  const selectAsset = (code: CryptoAsset) => {
+    if (!compactHoldings) {
+      setAsset(code);
+      return;
+    }
+    if (asset === code) {
+      setMobilePositionOpen((open) => !open);
+      return;
+    }
+    setAsset(code);
+    setMobilePositionOpen(true);
+  };
+  const positionPanel = (placement: "mobile" | "desktop") => <section
+    id={placement === "mobile" ? `crypto-position-${asset}` : undefined}
+    className={`crypto-position crypto-position-${placement}`}
+    aria-label={`${asset} holding details`}
+  ><div className="crypto-position-heading"><div><span>YOUR POSITION</span><h2>{CRYPTO_NAMES[asset]} <small>{asset}</small></h2></div><span className="crypto-paper-badge">PREVIEW</span></div>
+    <CryptoHoldingFacts asset={asset} holding={holding} referencePrice={quote?.priceMyr} priceLabel={market.fresh ? "Live reference price" : quote ? "Last known price" : "Reference price unavailable"} balancesVisible={balancesVisible} />
+    <p className="crypto-history-note">Latest staking activity: {hide(latestStaking ? dateLabel(latestStaking.date) : "None recorded")}.</p>
+    {metrics.cost === null && <p className="crypto-history-note">Purchase cost is incomplete, so profit and loss are unavailable.</p>}
+    <div className="crypto-wallet-actions"><button type="button" className="secondary-button" onClick={() => setTransferring(true)}><ArrowUpRight size={18} /> Transfer {asset}</button><button type="button" className="primary-button" onClick={() => { submitted.current = false; setReceiving(true); setReceiveAmount(""); setReceiveReview(undefined); setError(""); }}><QrCode size={17} /> Receive {asset}</button>{canStake && <button type="button" className="secondary-button" onClick={() => open("stake")} disabled={holding.available <= 0}><Flame size={15} /> Stake {asset}</button>}</div>
+    {canStake ? <div className="crypto-stake-actions"><button type="button" onClick={() => open("unstake")} disabled={holding.staked <= 0}>Unstake {asset}</button><small>Preview action only. Provider fees, rewards and unstaking delays are not applied.</small></div> : <p className="crypto-history-note">BTC can be held and received in this preview, but it cannot be staked here.</p>}
+    <p className="crypto-history-note">Your total holding is available + staked. Recorded acquisition details are informational; JomBit does not offer buying or selling. Value changes are not staking rewards.</p>
+  </section>;
 
   return <div className="crypto-desk">
     <section className="crypto-provider-note" aria-label="Luno integration status"><span className="crypto-paper-badge">CRYPTO WALLET · PREVIEW</span><h2>Hold, receive and stake your crypto.</h2><p>Track your available and staked balances in one place. JomBit is exploring a future Luno integration for eligible staking assets; buying and selling are not offered here.</p><a href={LUNO_STAKING_GUIDE} target="_blank" rel="noreferrer">How staking works at Luno <ArrowUpRight size={15} /></a><small>{LUNO_INTEGRATION_NOTE} This preview does not connect an account, blockchain or custody provider.</small></section>
@@ -135,17 +168,11 @@ export function CryptoDesk({ balancesVisible }: { balancesVisible: boolean }) {
       const coinQuote = market.quotes?.[code];
       const holding = state.crypto[code];
       const holdingValue = holdingMetrics(holding, coinQuote?.priceMyr).value;
-      return <button type="button" key={code} aria-pressed={asset === code} onClick={() => setAsset(code)}><span className={`asset-icon asset-${code.toLowerCase()}`}>{assetMark[code]}</span><span><strong>{CRYPTO_NAMES[code]} <em>{code}</em></strong><small className="crypto-balance-split"><b>{hide(`${quantity(holding.available)} available`)}</b><i aria-hidden="true" /><b>{hide(`${quantity(holding.staked)} staked`)}</b>{code === "BTC" && <mark>Hold only</mark>}</small></span><span><strong>{hide(holdingValue === null ? "Unavailable" : formatMoney(holdingValue))}</strong><small>Holding value</small></span></button>;
+      const selected = asset === code;
+      const expanded = compactHoldings && selected && mobilePositionOpen;
+      return <div className="crypto-holding-item" key={code}><button type="button" aria-pressed={selected} aria-expanded={compactHoldings ? expanded : undefined} aria-controls={compactHoldings ? `crypto-position-${code}` : undefined} onClick={() => selectAsset(code)}><span className={`asset-icon asset-${code.toLowerCase()}`}>{assetMark[code]}</span><span><strong>{CRYPTO_NAMES[code]} <em>{code}</em></strong><small className="crypto-balance-split"><b>{hide(`${quantity(holding.available)} available`)}</b><i aria-hidden="true" /><b>{hide(`${quantity(holding.staked)} staked`)}</b>{code === "BTC" && <mark>Hold only</mark>}</small></span><span><strong>{hide(holdingValue === null ? "Unavailable" : formatMoney(holdingValue))}</strong><small>Holding value</small></span><ChevronDown className="crypto-row-chevron" size={19} aria-hidden="true" /></button>{expanded && positionPanel("mobile")}</div>;
     })}</div></section>
-
-    <section className="crypto-position" aria-label={`${asset} holding details`}><div className="crypto-position-heading"><div><span>YOUR POSITION</span><h2>{CRYPTO_NAMES[asset]} <small>{asset}</small></h2></div><span className="crypto-paper-badge">PREVIEW</span></div>
-      <CryptoHoldingFacts asset={asset} holding={holding} referencePrice={quote?.priceMyr} priceLabel={market.fresh ? "Live reference price" : quote ? "Last known price" : "Reference price unavailable"} balancesVisible={balancesVisible} />
-      <p className="crypto-history-note">Latest staking activity: {hide(latestStaking ? dateLabel(latestStaking.date) : "None recorded")}.</p>
-      {metrics.cost === null && <p className="crypto-history-note">Purchase cost is incomplete, so profit and loss are unavailable.</p>}
-      <div className="crypto-wallet-actions"><button type="button" className="secondary-button" onClick={() => setTransferring(true)}><ArrowUpRight size={18} /> Transfer {asset}</button><button type="button" className="primary-button" onClick={() => { submitted.current = false; setReceiving(true); setReceiveAmount(""); setReceiveReview(undefined); setError(""); }}><QrCode size={17} /> Receive {asset}</button>{canStake && <button type="button" className="secondary-button" onClick={() => open("stake")} disabled={holding.available <= 0}><Flame size={15} /> Stake {asset}</button>}</div>
-      {canStake ? <div className="crypto-stake-actions"><button type="button" onClick={() => open("unstake")} disabled={holding.staked <= 0}>Unstake {asset}</button><small>Preview action only. Provider fees, rewards and unstaking delays are not applied.</small></div> : <p className="crypto-history-note">BTC can be held and received in this preview, but it cannot be staked here.</p>}
-      <p className="crypto-history-note">Your total holding is available + staked. Recorded acquisition details are informational; JomBit does not offer buying or selling. Value changes are not staking rewards.</p>
-    </section>
+    {!compactHoldings && positionPanel("desktop")}
 
     </div>
     <section className="section-block crypto-orders"><div className="section-heading"><h2>Crypto activity</h2><span>Dates shown in MYT</span></div><Segmented value={filter} onChange={(value) => { setFilter(value); setShown(10); }} options={[{ value: "all", label: "All" }, { value: "transfers", label: "Transfers" }, { value: "stake", label: "Staking" }]} />
