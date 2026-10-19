@@ -44,9 +44,10 @@ export function ProfileScreen() {
   return (
     <div className="screen profile-screen">
       <PageHeader title="Profile" />
-      <section className="profile-identity"><Avatar name={state.user.name} size="lg" /><div><h2>{state.user.name}</h2><p>{backendMode === "cloud" ? userEmail : "Saved on this device"}</p></div><span><Check size={14} /> {backendMode === "cloud" ? (syncStatus === "saved" ? "Synced" : syncStatus === "saving" ? "Saving" : "Cloud") : "Ready"}</span></section>
+      <section className="profile-identity"><Avatar name={state.user.name} size="lg" /><div><h2>{state.user.name}</h2><p>{backendMode === "cloud" ? userEmail : backendMode === "demo" ? "Temporary sample workspace" : "Saved on this device"}</p></div><span><Check size={14} /> {backendMode === "cloud" ? (syncStatus === "saved" ? "Synced" : syncStatus === "saving" ? "Saving" : "Cloud") : "Ready"}</span></section>
 
       {backendMode === "cloud" && <section className="profile-card"><div className="section-heading"><div><h2>JomBit Cloud</h2><p>Your app data is private to this signed-in account.</p></div><Cloud size={20} /></div><button className="secondary-button" onClick={() => void signOut()}><LogOut size={17} /> Sign out</button></section>}
+      {backendMode === "demo" && <section className="profile-card"><div className="section-heading"><div><h2>Demo workspace</h2><p>Sample data is temporary and is not connected to an account.</p></div><Database size={20} /></div><button className="secondary-button" onClick={() => void signOut()}><LogOut size={17} /> Leave demo</button></section>}
 
       <section className="profile-card">
         <div className="section-heading"><h2>Personal details</h2></div>
@@ -62,12 +63,12 @@ export function ProfileScreen() {
         <div className="about-jombit-heading"><Brand compact /><span>Preview mode</span></div>
         <h2>Built for fairer group spending</h2>
         <p>Split receipt items, keep every group balance clear and see the simplest way to settle up.</p>
-        <div className="about-jombit-facts"><span><Database size={17} /> {backendMode === "cloud" ? "Private cloud data" : "Stored on this device"}</span><span><ShieldCheck size={17} /> Test balances only</span><span><CircleHelp size={17} /> Wallet features are previews</span></div>
+        <div className="about-jombit-facts"><span><Database size={17} /> {backendMode === "cloud" ? "Private cloud data" : backendMode === "demo" ? "Temporary sample data" : "Stored on this device"}</span><span><ShieldCheck size={17} /> Test balances only</span><span><CircleHelp size={17} /> Wallet features are previews</span></div>
       </section>
 
-      <section className="danger-zone"><div><RefreshCcw size={21} /><span><strong>Reset JomBit</strong><small>Restore the original sample groups, balances and activity</small></span></div><button onClick={() => setResetOpen(true)}>Reset data</button></section>
+      <section className="danger-zone"><div><RefreshCcw size={21} /><span><strong>Reset JomBit</strong><small>{backendMode === "demo" ? "Restore the original sample workspace" : "Clear groups, balances and activity"}</small></span></div><button onClick={() => setResetOpen(true)}>Reset data</button></section>
 
-      <Modal open={resetOpen} onClose={() => setResetOpen(false)} title="Reset all JomBit data?"><div className="form-stack"><p className="modal-copy">This clears every {backendMode === "cloud" ? "cloud-synced" : "local"} change and restores the original sample groups, wallet balances, crypto holdings and card state.</p><button className="danger-button" onClick={resetDemo}>Yes, reset JomBit</button><button className="secondary-button" onClick={() => setResetOpen(false)}>Keep my data</button></div></Modal>
+      <Modal open={resetOpen} onClose={() => setResetOpen(false)} title="Reset all JomBit data?"><div className="form-stack"><p className="modal-copy">{backendMode === "demo" ? "This discards your demo changes and restores the original sample workspace." : "This clears your groups, expenses, wallet activity, crypto holdings and card state. Your profile stays signed in."}</p><button className="danger-button" onClick={resetDemo}>Yes, reset JomBit</button><button className="secondary-button" onClick={() => setResetOpen(false)}>Keep my data</button></div></Modal>
       <Toast message={toast} />
     </div>
   );

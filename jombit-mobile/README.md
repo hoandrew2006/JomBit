@@ -4,7 +4,7 @@ An independent company and product website for JomBit, built with React, TypeScr
 
 ## Supabase accounts and cloud data
 
-JomBit now has an optional Supabase backend mode. When `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are configured, the app shows email sign-up/sign-in and stores each account's current JomBit state in a private Row Level Security-protected database row. Changes are debounced, synchronized across signed-in devices with Realtime, and never use a service-role key in the browser. Profile shows whether data is saved or still syncing and provides sign-out.
+JomBit now has an optional Supabase backend mode. When `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are configured, the app shows email sign-up/sign-in and stores each account's current JomBit state in a private Row Level Security-protected database row. New accounts begin with an empty workspace: no groups, expenses, wallet history, balances or crypto holdings. The sign-in screen has a separate **Explore the demo** entry that opens standardized sample data without creating an account or writing to Supabase. Changes are debounced, synchronized across signed-in devices with Realtime, and never use a service-role key in the browser. Profile shows whether data is saved or still syncing and provides sign-out.
 
 Without those public configuration values, the app keeps the existing browser-only demo mode and local-storage key. This preserves standalone HTML exports and makes backend rollout reversible. Follow [SUPABASE-SETUP.md](SUPABASE-SETUP.md) to create the tables, access rules, authentication URLs and Vercel variables.
 
@@ -52,7 +52,7 @@ What counts is defined in `lib/insights.ts` and AGENTS.md → *Business rules*:
 
 New expenses get a suggested category from the merchant, which you can change while adding the expense or later.
 
-The demo data generates about three months of fictional activity relative to today. If your browser already has saved demo data, use **Profile → Reset data** to see it. The staking rewards in that data are clearly labelled **sample records**: they do not change any balance, and demo staking still earns nothing.
+The demo data generates about three months of fictional activity relative to today. Use **Explore the demo** on the account screen to open the standardized sample workspace; **Profile → Reset data** restores that template. Resetting a signed-in account instead clears its product data while preserving its profile and sign-in. The staking rewards in the demo are clearly labelled **sample records**: they do not change any balance, and demo staking still earns nothing.
 
 ## Crypto staking and planned Luno integration
 

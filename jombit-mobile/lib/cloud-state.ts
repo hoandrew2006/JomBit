@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import type { AppState } from "./models";
+import type { AppState, UserProfile } from "./models";
 import { normalizeCryptoHistory } from "./crypto-ledger.ts";
 import { createSeedState } from "./seed.ts";
 
@@ -35,16 +35,34 @@ export function normalizeCloudState(value: unknown): AppState | undefined {
 }
 
 export function createCloudState(user: Pick<User, "email" | "user_metadata">): AppState {
-  const state = createSeedState();
   const metadataName = typeof user.user_metadata?.display_name === "string"
     ? user.user_metadata.display_name.trim()
     : "";
   const emailName = user.email?.split("@")[0]?.replace(/[._-]+/g, " ").trim() ?? "";
   const name = metadataName || emailName || "JomBit Member";
 
+  return createEmptyState({ id: "me", name, defaultCurrency: "MYR", onboarded: false });
+}
+
+export function createEmptyState(profile: UserProfile): AppState {
+  const state = createSeedState();
+
   return {
     ...state,
-    user: { ...state.user, name, onboarded: false },
-    members: { ...state.members, me: { ...state.members.me, name } },
+    user: { ...profile },
+    members: { me: { id: "me", name: profile.name, hasDuitNowQr: Boolean(profile.duitNowQr) } },
+    groups: [],
+    expenses: [],
+    settlements: [],
+    fiatBalances: { MYR: 0, SGD: 0, THB: 0, IDR: 0 },
+    counterpartBalances: {},
+    crypto: Object.fromEntries(Object.keys(state.crypto).map((asset) => [asset, { asset, available: 0, staked: 0, costBasisCents: 0, firstBoughtAt: null, lastBoughtAt: null }])) as AppState["crypto"],
+    walletTransactions: [],
+    card: { virtualActive: false, frozen: false, paymentSource: "fiat", paymentAsset: "ETH" },
   };
+}
+
+export function createDemoState(): AppState {
+  const state = createSeedState();
+  return { ...state, user: { ...state.user, onboarded: true } };
 }

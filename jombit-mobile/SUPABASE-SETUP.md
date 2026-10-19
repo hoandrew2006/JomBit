@@ -44,7 +44,7 @@ Email/password authentication is enabled by default. During early testing, eithe
 
 ## 5. Verify
 
-Run `npm run dev`, open `http://127.0.0.1:5173/?app=1`, create an account, and make one small profile or group change. The Supabase Table Editor should show one private row in `jombit_states`. Sign in with the same account in another browser to confirm the state loads there.
+Run `npm run dev`, open `http://127.0.0.1:5173/?app=1`, create an account, and finish onboarding. The account should open with no groups, activity, balances or crypto holdings. Create one group; the Supabase Table Editor should show one private row in `jombit_states`. Sign in with the same account in another browser to confirm the state loads there. The separate **Explore the demo** button must not create or update a Supabase row.
 
 ## Current scope
 

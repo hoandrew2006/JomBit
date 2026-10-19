@@ -10,6 +10,7 @@ The intended result is a calmer hierarchy: the receipt action stays prominent, m
 
 - Interactive controls keep a minimum 44px touch target where space is tight.
 - Authentication uses one dominant submit action with a quieter account-mode switch, so sign-in and sign-up do not compete visually.
+- Authentication offers a secondary **Explore the demo** action. It opens a standardized sample workspace without an account, while every newly created account begins empty.
 - Passwords can be revealed with a labelled icon control, and authentication errors use plain, actionable copy with a non-colour icon cue.
 - Profile content uses one narrow settings column; the prototype explanation is a quiet information card and reset remains visually separate from routine actions.
 - Hover treatments run only on devices that support a precise pointer; touch feedback uses the pressed state.

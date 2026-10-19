@@ -64,7 +64,7 @@ function JomBitExperience() {
 
   return (
     <div className="app-shell" data-bd-group="app-shell">
-      <header className="topbar" data-bd-align-group="app-column"><Brand compact /><span className="topbar-demo"><Sparkles size={13} /> Preview mode · {backendMode === "cloud" ? (syncStatus === "saving" ? "saving" : "synced") : "on this device"}</span></header>
+      <header className="topbar" data-bd-align-group="app-column"><Brand compact /><span className="topbar-demo"><Sparkles size={13} /> Preview mode · {backendMode === "cloud" ? (syncStatus === "saving" ? "saving" : "synced") : backendMode === "demo" ? "sample workspace" : "on this device"}</span></header>
       <main className="app-main" data-bd-align-group="app-column">
         {nav === "home" && <HomeScreen onScan={() => openExpense()} onCreateGroup={() => { setNav("groups"); setSelectedGroupId(undefined); }} onOpenGroup={openGroup} onSettleGroup={openSuggestedSettlement} onWallet={() => setNav("wallet")} />}
         {nav === "groups" && <GroupsScreen selectedGroupId={selectedGroupId} onSelectGroup={setSelectedGroupId} onAddExpense={(groupId) => openExpense(groupId)} onEditExpense={(expense) => openExpense(expense.groupId, expense)} onSettle={(group, fromId, toId, amountCents) => setSettlement({ group, fromId, toId, amountCents })} />}
@@ -82,11 +82,11 @@ function JomBitExperience() {
   );
 }
 
-function AuthenticatedApp({ user }: { user?: User }) {
-  return <AppStateProvider cloudUser={user}><JomBitExperience /></AppStateProvider>;
+function AuthenticatedApp({ user, demo }: { user?: User; demo?: { exit: () => void } }) {
+  return <AppStateProvider cloudUser={user} demoMode={Boolean(demo)} onExitDemo={demo?.exit}><JomBitExperience /></AppStateProvider>;
 }
 
 export function JomBitApp() {
-  return <AuthGate>{(user) => <AuthenticatedApp user={user} />}</AuthGate>;
+  return <AuthGate>{(user, demo) => <AuthenticatedApp user={user} demo={demo} />}</AuthGate>;
 }
 
