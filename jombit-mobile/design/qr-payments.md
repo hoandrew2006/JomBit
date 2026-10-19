@@ -21,7 +21,13 @@ QR payments are deliberately separate from **Home → "Ready to settle up?"**. S
   - The live reference price shown at review is the price used. If the price isn't fresh, crypto is blocked rather than using a stale or sample price.
   - The coin amount is rounded up so the recipient always gets the full MYR amount.
   - The coin's recorded cost is reduced in proportion.
-- **Conversion fee:** 1% with a RM0.50 minimum. This is the same placeholder used by the demo history (merged in PR #31). It is not benchmarked against any exchange; the founders should set the real fee.
+- **JomBit's spread (founders' decision):** a percentage, always lower than both the maker and the taker fee a user pays on Luno's Exchange (advanced trading) in Malaysia.
+  - The spread is 0.30%, set against Luno's retail-tier fees of 0.35% maker and 0.60% taker.
+  - Those Luno figures could not be re-checked on Luno's own site from the development environment (its sites didn't resolve), and third-party sites disagree. Confirm them on Luno's Malaysian fee page.
+  - The spread is rounded down to the sen and has no minimum, so it never exceeds 0.30% even on small amounts.
+  - `tests/qr-payment.test.mjs` fails if the spread is not below both Luno fees.
+  - Demo crypto payments use the same spread.
+- **Live prices** are expected to be available. Crypto payments use only a fresh live price; there is no sample-price fallback (founders' decision).
 - **Insights:** cash payments are `payment` records and crypto payments are `crypto-payment` records, so the existing Spend rules apply. That means one entry in the chosen category (suggested from the payee name), a "Paid with [coin]" badge, and the fee under Fees.
 
 ## Not done

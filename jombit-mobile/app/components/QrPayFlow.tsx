@@ -9,7 +9,7 @@ import { useCryptoMarket } from "@/lib/crypto-market";
 import { buildSampleDuitNowQr, parseDuitNowQr, type DuitNowQr } from "@/lib/duitnow-qr";
 import { CATEGORY_LABELS, SPEND_CATEGORIES, suggestCategory } from "@/lib/insights";
 import type { CryptoAsset, SpendCategory } from "@/lib/models";
-import { CRYPTO_PAYMENT_FEE_BASIS_POINTS, CRYPTO_PAYMENT_MIN_FEE_CENTS, quoteQrPayment, type QrPaymentCommand, type QrPaymentMethod } from "@/lib/qr-payment";
+import { CRYPTO_PAYMENT_SPREAD_BASIS_POINTS, quoteQrPayment, type QrPaymentCommand, type QrPaymentMethod } from "@/lib/qr-payment";
 import { useAppState } from "@/lib/state";
 import { Brand, Segmented } from "./ui";
 import "../../src/receipt.css";
@@ -21,7 +21,7 @@ const SAMPLES = [
   { label: "Sample friend QR", hint: "Pay a person", payload: () => buildSampleDuitNowQr({ name: "Maya (sample)", city: "Kuala Lumpur" }) },
 ];
 const coin = (units: number) => (units / 1e8).toLocaleString("en-MY", { maximumFractionDigits: 8 });
-const feeLabel = `${CRYPTO_PAYMENT_FEE_BASIS_POINTS / 100}%, min ${formatMoney(CRYPTO_PAYMENT_MIN_FEE_CENTS)}`;
+const spreadLabel = `${(CRYPTO_PAYMENT_SPREAD_BASIS_POINTS / 100).toFixed(2)}%`;
 
 /** Reads a QR code from a video frame or image, scaled down so decoding stays quick on phones. */
 function decodeQr(source: CanvasImageSource, width: number, height: number) {
@@ -170,20 +170,20 @@ export function QrPayFlow({ onClose, onDone }: { onClose: () => void; onDone: ()
       {preview && <dl className="qr-summary">
         <div><dt>{qr.payeeName} receives</dt><dd>{formatMoney(preview.amountCents)}</dd></div>
         {method === "crypto" ? <>
-          <div><dt>Conversion fee ({feeLabel})</dt><dd>{formatMoney(preview.feeCents)}</dd></div>
+          <div><dt>JomBit spread ({spreadLabel})</dt><dd>{formatMoney(preview.feeCents)}</dd></div>
           <div className="qr-summary-total"><dt>You pay</dt><dd>{coin(preview.cryptoUnits)} {asset}</dd></div>
         </> : <div className="qr-summary-total"><dt>MYR wallet after</dt><dd>{formatMoney(state.fiatBalances.MYR - preview.amountCents)}</dd></div>}
       </dl>}
       {(previewError || error) && <p className="form-error" role="alert">{previewError || error}</p>}
       <button className="primary-button" disabled={!preview} onClick={confirm}>Confirm preview payment</button>
-      <p className="product-disclosure"><ShieldCheck size={15} /> {method === "crypto" ? `Your ${asset} is converted to MYR at the reference price shown, plus a ${feeLabel} conversion fee. ` : ""}Preview only: no money or crypto leaves JomBit and nothing reaches the recipient.</p>
+      <p className="product-disclosure"><ShieldCheck size={15} /> {method === "crypto" ? `Your ${asset} is converted to MYR at the reference price shown, plus JomBit's ${spreadLabel} spread. ` : ""}Preview only: no money or crypto leaves JomBit and nothing reaches the recipient.</p>
     </section>}
 
     {paid && qr && <section className="flow-stage success-stage">
       <div className="success-check"><CheckCircle2 size={44} /></div>
       <p className="eyebrow">PREVIEW PAYMENT RECORDED</p>
       <h1>{formatMoney(paid.amountCents)} to {qr.payeeName}</h1>
-      <p>{paid.method === "crypto" ? `Paid with ${coin(paid.cryptoUnits)} ${paid.asset}, including the ${formatMoney(paid.feeCents)} conversion fee.` : "Paid from your MYR wallet."} It now appears in Wallet and Insights.</p>
+      <p>{paid.method === "crypto" ? `Paid with ${coin(paid.cryptoUnits)} ${paid.asset}, including JomBit's ${formatMoney(paid.feeCents)} spread.` : "Paid from your MYR wallet."} It now appears in Wallet and Insights.</p>
       <p className="product-disclosure"><ShieldCheck size={15} /> No real money was sent. {qr.sample ? "This was a sample QR." : `${qr.payeeName} has not been paid.`}</p>
       <button className="primary-button" onClick={onDone}>Done</button>
     </section>}

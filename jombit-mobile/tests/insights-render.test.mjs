@@ -37,7 +37,7 @@ test("Insights shows MYR tiles, sample-reward disclosure, Group badges and no fu
     fixture.state.expenses = [];
     const crypto = render();
     assert.match(crypto, /class="insight-paid-badge">Paid with [A-Z]+<\/b>/, "crypto payments carry a Paid-with badge");
-    assert.match(crypto, /Conversion fee · /, "the conversion fee is listed separately");
+    assert.match(crypto, /JomBit spread · /, "the spread is listed separately");
     assert.match(crypto, / · \d[\d.,]* (ETH|SOL|BTC|ADA)</, "the crypto amount is shown in the details");
     assert.doesNotMatch(render(false), /\d[\d.,]* (ETH|SOL|BTC|ADA)</, "crypto amounts hide with balances");
     fixture.state.walletTransactions = personal;

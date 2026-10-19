@@ -6,12 +6,17 @@ import type { AppState, CryptoAsset, CryptoQuote, SpendCategory, WalletTransacti
 
 // Paying a DuitNow QR (preview only: nothing reaches the recipient, even for a real QR).
 // - Cash: the amount comes out of the MYR wallet.
-// - Crypto: the coin is converted to MYR for the recipient at the reviewed reference price. A conversion
-//   fee is added on top and recorded with the payment, so Insights shows it under "Fees".
+// - Crypto: the coin is converted to MYR for the recipient at the reviewed reference price. JomBit's
+//   spread is added on top and recorded as the payment's fee, so Insights shows it under "Fees".
 
-/** Preview conversion fee for crypto payments: 1% of the amount, at least RM0.50. A placeholder, not a quoted price. */
-export const CRYPTO_PAYMENT_FEE_BASIS_POINTS = 100;
-export const CRYPTO_PAYMENT_MIN_FEE_CENTS = 50;
+/**
+ * Founders' rule: JomBit's spread is a percentage that is always lower than both the maker and the taker
+ * fee Luno charges on its Exchange (advanced trading) in Malaysia. The Luno figures are the retail tier
+ * rates this was set against; re-check them on Luno's Malaysian fee page and update both here if they
+ * change. tests/qr-payment.test.mjs fails if the spread is not below them.
+ */
+export const LUNO_EXCHANGE_FEES_BASIS_POINTS = { maker: 35, taker: 60 };
+export const CRYPTO_PAYMENT_SPREAD_BASIS_POINTS = 30;
 export const QR_PAYMENT_LIMIT_CENTS = 500_000;
 
 export type QrPaymentMethod = "cash" | "crypto";
@@ -27,8 +32,9 @@ export interface QrPaymentCommand {
   quote?: CryptoQuote;
 }
 
+/** JomBit's spread on a crypto payment. Rounded down to the sen, so it never exceeds the percentage. */
 export function cryptoPaymentFeeCents(amountCents: number) {
-  return Math.max(CRYPTO_PAYMENT_MIN_FEE_CENTS, Math.round((amountCents * CRYPTO_PAYMENT_FEE_BASIS_POINTS) / 10_000));
+  return Math.floor((amountCents * CRYPTO_PAYMENT_SPREAD_BASIS_POINTS) / 10_000);
 }
 
 export function quoteQrPayment(state: AppState, command: QrPaymentCommand, now = Date.now()) {
@@ -46,7 +52,8 @@ export function quoteQrPayment(state: AppState, command: QrPaymentCommand, now =
   if (!quote || quote.asset !== asset || !validQuote(quote, now)) throw new Error("A current price is needed to pay with crypto. Refresh prices and try again.");
   const feeCents = cryptoPaymentFeeCents(amountCents);
   // Round the coin amount up so the recipient always gets the full MYR amount.
-  const cryptoUnits = Math.ceil(((amountCents + feeCents) / 100 / quote.priceMyr) * CRYPTO_PRECISION);
+  // Whole-number maths first, and a tiny tolerance, so float noise never adds an extra unit.
+  const cryptoUnits = Math.ceil(((amountCents + feeCents) * (CRYPTO_PRECISION / 100)) / quote.priceMyr - 1e-6);
   const holding = state.crypto[asset];
   if (!holding || !Number.isFinite(holding.available) || Math.round(holding.available * CRYPTO_PRECISION) < cryptoUnits) throw new Error(`Not enough available ${asset}. Staked ${asset} can't be used for payments.`);
   return { amountCents, feeCents, cryptoUnits };

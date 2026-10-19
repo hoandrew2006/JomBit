@@ -6,7 +6,7 @@ An expense-tracking view in the Wallet, next to Fiat, Crypto and Card. The layou
 
 - **What counts** is defined once in `lib/insights.ts` and documented in AGENTS.md → Business rules. The UI only displays it.
 - **Spend is the user's share.** If the user pays a RM120 group bill and their share is RM50, Insights shows RM50. Settle-ups the user pays repay shares that are already counted, so they are not spend; settle-ups paid to the user are Repayments in Money in.
-- **Crypto payments (19 Oct 2026):** one spend entry for the MYR the recipient received, in its normal category, with a "Paid with [coin]" badge and the crypto amount. The conversion fee is a separate **Fees** entry. The MYR converted from crypto is part of the payment, never money in. Crypto payments are hidden from the MYR wallet history because they are paid from crypto.
+- **Crypto payments (19 Oct 2026):** one spend entry for the MYR the recipient received, in its normal category, with a "Paid with [coin]" badge and the crypto amount. JomBit's spread is a separate **Fees** entry. The MYR converted from crypto is part of the payment, never money in. Crypto payments are hidden from the MYR wallet history because they are paid from crypto.
 - **Money in = all money entering the wallet (19 Oct 2026):** Top-ups, Received from others, Repayments (settle-ups paid to the user) and Staking rewards, shown as four sources on the Summary screen. Never labelled "Income".
 - **Not spend:** settle-ups the user paid and bank withdrawals.
 - **Transfers to friends are not spend** (decided with the founders, 18 Oct 2026). Neither are conversions between the user's own balances or crypto price changes.
@@ -21,7 +21,7 @@ An expense-tracking view in the Wallet, next to Fiat, Crypto and Card. The layou
   - personal payments in every category
   - shared KL meals, some paid by friends
   - a THB Phuket trip with day rates
-  - money received from friends, top-ups, repayments, a bank withdrawal, a transfer, weekly crypto payments with conversion fees, and one settle-up the user paid
+  - money received from friends, top-ups, repayments, a bank withdrawal, a transfer, weekly crypto payments with JomBit's spread, and one settle-up the user paid
 
 ## Not done
 

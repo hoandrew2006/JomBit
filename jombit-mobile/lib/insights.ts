@@ -121,9 +121,9 @@ export function insightEntries(state: AppState): InsightEntry[] {
     if ((tx.kind === "payment" || tx.kind === "card") && tx.direction === "out" && amount) {
       entries.push({ ...base, flow: "out", category: isSpendCategory(tx.category) ? tx.category : suggestCategory(tx.title), myrCents: amount });
     } else if (tx.kind === "crypto-payment" && tx.direction === "out" && amount && tx.crypto) {
-      // One spend entry for what the recipient received; the conversion fee is its own "Fees" entry.
+      // One spend entry for what the recipient received; JomBit's spread is its own "Fees" entry.
       entries.push({ ...base, flow: "out", category: isSpendCategory(tx.category) ? tx.category : suggestCategory(tx.title), sortKey: `${tx.date}~`, myrCents: amount, paidWith: { asset: tx.crypto.asset, quantity: tx.crypto.quantity } });
-      if (tx.crypto.feeCents > 0) entries.push({ ...base, id: `${tx.id}:fee`, title: `Conversion fee · ${tx.title}`, subtitle: `Paid with ${tx.crypto.asset}`, flow: "out", category: "fees", myrCents: tx.crypto.feeCents });
+      if (tx.crypto.feeCents > 0) entries.push({ ...base, id: `${tx.id}:fee`, title: `JomBit spread · ${tx.title}`, subtitle: `Paid with ${tx.crypto.asset}`, flow: "out", category: "fees", myrCents: tx.crypto.feeCents });
     } else if (tx.kind === "topup" && tx.direction === "in" && amount) {
       entries.push({ ...base, flow: "in", category: "topup", myrCents: amount });
     } else if (tx.kind === "received" && tx.direction === "in" && amount) {

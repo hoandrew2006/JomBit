@@ -121,7 +121,7 @@ export function demoActivity(now: Date) {
     const date = at(daysAgo, 8, 40);
     if (date) walletTransactions.push({ id: `seed-topup-${daysAgo}`, kind: "topup", title: "MYR wallet deposit", subtitle: "Top-up from your bank · preview", amountCents, currency: "MYR", date, direction: "in" });
   }
-  // Paying merchants with crypto: one spend entry for what the merchant received, plus a conversion fee.
+  // Paying merchants with crypto: one spend entry for what the merchant received, plus JomBit's spread.
   const cryptoMerchants: Template[] = [
     { title: "Starbucks Pavilion", category: "food", min: 1590, max: 3290 },
     { title: "Uniqlo KLCC", category: "shopping", min: 7900, max: 21900 },
