@@ -1,5 +1,6 @@
 import { calculateExpenseShares } from "./calculations.ts";
 import { DEMO_CRYPTO_PRICES_MYR, DEMO_FX_IN_MYR } from "./mock-services.ts";
+import { cryptoPaymentFeeCents } from "./qr-payment.ts";
 import type { CryptoAsset, Currency, Expense, ExpenseItem, Group, Settlement, SpendCategory, WalletTransaction } from "./models";
 
 // About three months of fictional demo activity, dated relative to `now` so every Insights
@@ -120,7 +121,7 @@ export function demoActivity(now: Date) {
     const date = at(daysAgo, 8, 40);
     if (date) walletTransactions.push({ id: `seed-topup-${daysAgo}`, kind: "topup", title: "MYR wallet deposit", subtitle: "Top-up from your bank · preview", amountCents, currency: "MYR", date, direction: "in" });
   }
-  // Paying merchants with crypto: one spend entry for what the merchant received, plus a conversion fee.
+  // Paying merchants with crypto: one spend entry for what the merchant received, plus JomBit's spread.
   const cryptoMerchants: Template[] = [
     { title: "Starbucks Pavilion", category: "food", min: 1590, max: 3290 },
     { title: "Uniqlo KLCC", category: "shopping", min: 7900, max: 21900 },
@@ -136,7 +137,7 @@ export function demoActivity(now: Date) {
     const merchant = cryptoMerchants[index % cryptoMerchants.length];
     const asset = cryptoAssets[index % cryptoAssets.length];
     const amountCents = between(merchant.min, merchant.max);
-    const feeCents = Math.max(50, Math.round(amountCents * 0.01));
+    const feeCents = cryptoPaymentFeeCents(amountCents);
     const priceMyr = Math.round(DEMO_CRYPTO_PRICES_MYR[asset] * (0.94 + rand() * 0.12) * 100) / 100;
     const quantity = Number(((amountCents + feeCents) / 100 / priceMyr).toFixed(8));
     walletTransactions.push({ id: `seed-crypto-pay-${d}`, kind: "crypto-payment", title: merchant.title, subtitle: `Crypto payment preview · ${asset} converted to MYR for the merchant`, amountCents, currency: "MYR", date, direction: "out", category: merchant.category, crypto: { asset, quantity, priceMyr, priceSource: "demo", priceUpdatedAt: null, feeCents, recipient: merchant.title, seeded: true } });

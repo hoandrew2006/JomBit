@@ -1,0 +1,37 @@
+/* Wallet → Pay with QR. Reuses the receipt flow's header, stages and camera overlay. */
+.qr-pay-start .receipt-capture-actions { margin-top: 18px; }
+.qr-samples { display: grid; gap: 8px; margin-top: 22px; }
+.qr-samples > p { margin: 0 0 2px; color: #9aa39f; font-size: 12px; }
+.qr-samples > button { display: flex; align-items: center; gap: 12px; justify-content: flex-start; min-height: 52px; padding: 10px 14px; text-align: left; }
+.qr-samples strong, .qr-samples small { display: block; }
+.qr-samples small { margin-top: 2px; color: #9aa39f; font-size: 11px; font-weight: 500; }
+.qr-camera-view { aspect-ratio: 1 / 1; }
+.qr-camera-guide { position: absolute; inset: 18%; border: 2px solid rgba(12,234,236,.75); border-radius: 18px; pointer-events: none; }
+
+.qr-pay-review { display: grid; gap: 16px; max-width: 560px; }
+.qr-payee { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 18px; background: #1d201f; }
+.qr-payee-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: #0b2424; background: var(--cyan); }
+.qr-payee strong, .qr-payee small { display: block; }
+.qr-payee strong { margin: 2px 0; font-size: 17px; overflow-wrap: anywhere; }
+.qr-payee small { color: #9aa39f; font-size: 11px; }
+.qr-badge { padding: 3px 8px; border-radius: 999px; color: #0b2424; background: #8ff3e9; font-size: 10px; font-weight: 800; white-space: nowrap; }
+.qr-badge.is-real { color: #2b1a00; background: var(--yellow); }
+.qr-real-warning { display: flex; gap: 9px; align-items: flex-start; margin: 0; padding: 12px 14px; border: 1px solid rgba(255,190,63,.4); border-radius: 14px; color: #ffe2a8; background: rgba(255,190,63,.08); font-size: 12px; line-height: 1.6; }
+.qr-real-warning svg { flex-shrink: 0; margin-top: 2px; }
+.qr-field { display: grid; gap: 8px; }
+.qr-field > span { color: #a4aaa7; font-size: 12px; font-weight: 700; }
+.qr-field .segmented { margin-bottom: 0; }
+.qr-balance { display: flex; align-items: center; gap: 6px; margin: -6px 0 0; color: #9aa39f; font-size: 12px; }
+.qr-summary { display: grid; gap: 10px; margin: 0; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: #1a1d1c; }
+.qr-summary > div { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+.qr-summary dt { color: #a4aaa7; }
+.qr-summary dd { margin: 0; font-weight: 700; text-align: right; overflow-wrap: anywhere; }
+.qr-summary-total { padding-top: 10px; border-top: 1px solid var(--line); }
+.qr-summary-total dd { color: var(--cyan); font-size: 16px; }
+
+.scan-choice { display: grid; gap: 10px; }
+.scan-choice button { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 12px; width: 100%; padding: 14px; text-align: left; color: #fff; border: 1px solid var(--line); border-radius: 16px; background: #1d201f; }
+.scan-choice button:hover { border-color: rgba(12,234,236,.35); background: #222826; }
+.scan-choice button > span:first-child { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: #0b2424; background: var(--cyan); }
+.scan-choice strong, .scan-choice small { display: block; }
+.scan-choice small { margin-top: 3px; color: #9aa39f; font-size: 12px; line-height: 1.5; }

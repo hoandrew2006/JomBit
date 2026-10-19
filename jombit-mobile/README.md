@@ -48,7 +48,7 @@ What counts is defined in one place, `insightEntries()` in `lib/insights.ts`, an
 
 - **Spend** is your own share of group bills plus your own wallet, card and crypto payments.
   - A crypto payment counts once, as the MYR the recipient received, in its normal category. It carries a "Paid with ETH" (etc.) badge and shows the crypto amount.
-  - Its conversion fee appears separately under **Fees**.
+  - JomBit's spread on it appears separately under **Fees**.
   - Settle-ups you pay, bank withdrawals and transfers to friends are not spend.
 - **Money in** is everything entering your JomBit wallet: Top-ups, Received from others, Repayments (settle-ups paid to you) and Staking rewards. The Summary's Money in view breaks it down by these four sources.
   - The MYR converted from crypto to fund a crypto payment is not money in.
@@ -57,7 +57,20 @@ What counts is defined in one place, `insightEntries()` in `lib/insights.ts`, an
 
 New expenses get a suggested category from the merchant, which you can change while adding the expense or later.
 
-The demo data generates about three months of fictional activity relative to today. It includes top-ups, repayments, sample staking rewards, a bank withdrawal and weekly crypto payments with conversion fees. Use **Explore the demo** on the account screen to open the standardized sample workspace; **Profile → Reset data** restores that template. Resetting a signed-in account instead clears its product data while preserving its profile and sign-in. The demo balances are the result of this history: three months ago the demo wallet started with opening balances, and every top-up, payment, crypto payment, sample staking reward, repayment and withdrawal shown has been applied to them. Crypto payments reduce that coin's available balance, and sample rewards add to it. Staking rewards in the demo are clearly labelled **sample records**; staking in the preview doesn't create new rewards. Repayments from friends count under the **Group** filter.
+The demo data generates about three months of fictional activity relative to today. It includes top-ups, repayments, sample staking rewards, a bank withdrawal and weekly crypto payments with JomBit's spread. Use **Explore the demo** on the account screen to open the standardized sample workspace; **Profile → Reset data** restores that template. Resetting a signed-in account instead clears its product data while preserving its profile and sign-in. The demo balances are the result of this history: three months ago the demo wallet started with opening balances, and every top-up, payment, crypto payment, sample staking reward, repayment and withdrawal shown has been applied to them. Crypto payments reduce that coin's available balance, and sample rewards add to it. Staking rewards in the demo are clearly labelled **sample records**; staking in the preview doesn't create new rewards. Repayments from friends count under the **Group** filter.
+
+## Pay with DuitNow QR
+
+Tap the **Scan** button and choose **Scan DuitNow QR to pay**. (**Scan a receipt** is the existing bill-splitting flow.)
+
+1. Point the camera at a DuitNow QR, choose a QR image, or try one of the sample QR codes (a shop, a fixed-amount bill, or a friend).
+2. Enter the amount the recipient should get, unless the QR fixes it.
+3. Choose **Cash (MYR wallet)** or **Crypto**. Crypto uses your available (not staked) balance at the live reference price, plus JomBit's spread (0.30%). By design the spread is always lower than Luno's Exchange maker and taker fees.
+4. Check the suggested category and confirm.
+
+The payment appears in Wallet and Insights. This is separate from group settle-ups on Home → "Ready to settle up?".
+
+**Preview only:** nothing reaches the recipient, even when you scan a real DuitNow QR, and the app says so. QR codes are read on your device with the open-source `jsqr` library; nothing is uploaded. See `design/qr-payments.md`.
 
 ## Crypto staking and planned Luno integration
 

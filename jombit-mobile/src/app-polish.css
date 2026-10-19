@@ -215,7 +215,7 @@
   box-shadow: inset 0 1px 3px rgba(0,0,0,.28);
 }
 .app-view .segmented button { min-height: 44px; color: #a3aaa7; transition: color .16s ease, background .16s ease, box-shadow .16s ease; }
-.app-view .segmented button.active { box-shadow: inset 0 1px 0 rgba(255,255,255,.34), 0 5px 14px -8px rgba(12,234,236,.75); }
+.app-view .segmented button.active { color: #082526; box-shadow: inset 0 1px 0 rgba(255,255,255,.34), 0 5px 14px -8px rgba(12,234,236,.75); }
 
 .app-view .bottom-nav {
   border-color: var(--app-line-strong);

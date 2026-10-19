@@ -38,7 +38,7 @@ function baseState() {
       { id: "x4", kind: "exchange", title: "SGD → MYR", subtitle: "", amountCents: 9000, currency: "MYR", date: "2026-10-16T05:00:00.000Z", direction: "in" },
       { id: "x5", kind: "transfer", title: "Sent to Maya", subtitle: "", amountCents: 2000, currency: "MYR", date: "2026-10-16T05:00:00.000Z", direction: "out" },
       { id: "x6", kind: "stake", title: "Staked SOL", subtitle: "", date: "2026-10-16T05:00:00.000Z", direction: "neutral", crypto: { asset: "SOL", quantity: 1, priceMyr: null, priceSource: null, priceUpdatedAt: null, feeCents: 0 } },
-      // Paid a café RM45.00 with ETH; the merchant got RM45.00 and the conversion fee was RM0.90.
+      // Paid a café RM45.00 with ETH; the merchant got RM45.00 and JomBit's spread was RM0.90.
       { id: "c1", kind: "crypto-payment", title: "Starbucks Pavilion", subtitle: "", amountCents: 4500, currency: "MYR", date: "2026-10-14T11:00:00.000Z", direction: "out", category: "food", crypto: { asset: "ETH", quantity: 0.00461, priceMyr: 9955, priceSource: "demo", priceUpdatedAt: null, feeCents: 90 } },
       { id: "x8", kind: "withdrawal", title: "Withdrawal to your bank", subtitle: "", amountCents: 25000, currency: "MYR", date: "2026-10-16T05:00:00.000Z", direction: "out" },
       { id: "x7", kind: "crypto-receive", title: "Received ETH", subtitle: "", date: "2026-10-16T05:00:00.000Z", direction: "in", crypto: { asset: "ETH", quantity: 1, priceMyr: 14000, priceSource: "demo", priceUpdatedAt: null, feeCents: 0 } },
