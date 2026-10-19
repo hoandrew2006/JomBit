@@ -1,16 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import type { CryptoAsset, CryptoQuote } from "./models";
-import { DEMO_CRYPTO_PRICES_MYR } from "./mock-services";
 import { CRYPTO_ASSETS, validQuote } from "./crypto-ledger";
-
-const demoQuotes = Object.fromEntries(CRYPTO_ASSETS.map((asset) => [asset, { asset, priceMyr: DEMO_CRYPTO_PRICES_MYR[asset], source: "demo", change24h: null, updatedAt: null }])) as Record<CryptoAsset, CryptoQuote>;
 
 export function supportsLiveCryptoPrices(location: { protocol: string; hostname: string }) {
   return location.protocol === "https:" || (location.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname));
 }
 
 export function useCryptoMarket() {
-  const [mode, setMode] = useState<"live" | "demo">(() => typeof window !== "undefined" && supportsLiveCryptoPrices(window.location) ? "live" : "demo");
   const [quotes, setQuotes] = useState<Record<CryptoAsset, CryptoQuote> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,14 +14,13 @@ export function useCryptoMarket() {
   const refreshRef = useRef<() => void>(() => {});
   useEffect(() => { const timer = window.setInterval(() => setNow(Date.now()), 1000); return () => window.clearInterval(timer); }, []);
   useEffect(() => {
-    if (mode === "demo") { setError(""); setLoading(false); refreshRef.current = () => {}; return; }
     let active = true;
     let busy = false;
     let lastAttempt = 0;
     let controller: AbortController | undefined;
     const refresh = async () => {
       if (busy || document.hidden || Date.now() - lastAttempt < 15000) return;
-      if (!supportsLiveCryptoPrices(window.location)) { setError("Live prices require the online JomBit app or local server. Choose Demo prices when opening the standalone file."); return; }
+      if (!supportsLiveCryptoPrices(window.location)) { setError("Live prices require the online JomBit app or local server."); return; }
       lastAttempt = Date.now(); busy = true; setLoading(true);
       controller = new AbortController();
       const timer = window.setTimeout(() => controller?.abort(), 12000);
@@ -46,8 +41,7 @@ export function useCryptoMarket() {
     const resume = () => { if (!document.hidden && Date.now() - lastAttempt >= 60000) void refresh(); };
     document.addEventListener("visibilitychange", resume);
     return () => { active = false; controller?.abort(); window.clearInterval(interval); document.removeEventListener("visibilitychange", resume); refreshRef.current = () => {}; };
-  }, [mode]);
-  const displayed = mode === "demo" ? demoQuotes : quotes;
-  const fresh = mode === "demo" || Boolean(quotes && !error && CRYPTO_ASSETS.every((asset) => validQuote(quotes[asset], now)));
-  return { mode, setMode, quotes: displayed, loading, error, fresh, now, refresh: () => refreshRef.current() };
+  }, []);
+  const fresh = Boolean(quotes && !error && CRYPTO_ASSETS.every((asset) => validQuote(quotes[asset], now)));
+  return { quotes, loading, error, fresh, now, refresh: () => refreshRef.current() };
 }

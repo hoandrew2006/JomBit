@@ -62,6 +62,9 @@ export interface Settlement {
   amountCents: number;
   currency: Currency;
   date: string;
+  paymentMethod?: "fiat" | "crypto";
+  cryptoAsset?: CryptoAsset;
+  cryptoQuantity?: number;
 }
 
 export interface Group {

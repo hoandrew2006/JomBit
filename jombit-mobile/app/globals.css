@@ -348,6 +348,20 @@ select { color-scheme: dark; }
 .payee-card > span { color: var(--muted); font-size: 11px; }
 .payee-card > strong { font-size: 39px; color: var(--cyan); margin: 8px 0; }
 .payee-card > small { color: var(--muted); }
+.settlement-method { margin: 16px 0; text-align: left; }
+.settlement-method > span { display: block; margin-bottom: 8px; color: var(--muted); font-size: 11px; font-weight: 700; }
+.settlement-method .segmented { margin-bottom: 0; }
+.settlement-crypto-options { display: grid; gap: 12px; margin: 0 0 16px; padding: 16px; border: 1px solid rgba(12,234,236,.16); border-radius: 18px; background: rgba(12,234,236,.05); text-align: left; }
+.settlement-crypto-options label { display: grid; gap: 7px; }
+.settlement-crypto-options label > span { color: var(--muted); font-size: 11px; font-weight: 700; }
+.settlement-crypto-options select { width: 100%; min-height: 46px; }
+.settlement-crypto-options > div { display: flex; align-items: flex-start; gap: 10px; padding-top: 2px; }
+.settlement-crypto-options > div > svg { flex-shrink: 0; color: var(--cyan); margin-top: 2px; }
+.settlement-crypto-options > div span { min-width: 0; }
+.settlement-crypto-options > div strong, .settlement-crypto-options > div small { display: block; overflow-wrap: anywhere; }
+.settlement-crypto-options > div strong { margin: 4px 0; font-size: 16px; }
+.settlement-crypto-options > div small { color: var(--muted); font-size: 10px; line-height: 1.5; }
+.settlement-crypto-options > p { margin: 0; color: var(--yellow); font-size: 11px; line-height: 1.6; }
 .warning-note { display: flex; gap: 11px; text-align: left; color: var(--yellow); background: rgba(255,171,0,.09); border-radius: 13px; padding: 13px; margin: 13px 0; }
 .warning-note strong, .warning-note small { display: block; }
 .warning-note small { margin-top: 4px; color: #baa66f; }
@@ -357,6 +371,7 @@ select { color-scheme: dark; }
 .qr-code { padding: 10px; background: white; border-radius: 15px; }
 .qr-panel > strong { margin: 14px 0 6px; }
 .qr-panel > small { color: var(--muted); font-size: 8px; overflow-wrap: anywhere; }
+.payment-recap > small { color: var(--muted); font-size: 10px; }
 .poc-warning { color: #777 !important; font-size: 10px; line-height: 1.5; }
 .spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,.22); border-top-color: #132d2e; border-radius: 50%; animation: spin .7s linear infinite; }
 .spinner.dark { border-color: rgba(255,255,255,.2); border-top-color: white; }

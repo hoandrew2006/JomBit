@@ -21,7 +21,7 @@ test("Crypto screen shows only account-created wallet and staking history", asyn
       resolveId(id) { if (id.startsWith("virtual:jombit-crypto-")) return `\0${id}`; },
       load(id) {
         if (id === "\0virtual:jombit-crypto-state") return `import { createSeedState } from '/lib/seed.ts'; export const fixture = { state: createSeedState() }; export function useAppState() { return { state: fixture.state, stakeCrypto() { throw new Error('Rendering must not execute orders'); }, receiveCrypto() { throw new Error('Rendering must not execute transfers'); } }; }`;
-        if (id === "\0virtual:jombit-crypto-market") return `import { DEMO_CRYPTO_PRICES_MYR } from '/lib/mock-services.ts'; export const market = { mode: 'demo', fresh: true, loading: false, error: '', now: Date.now(), quotes: Object.fromEntries(Object.entries(DEMO_CRYPTO_PRICES_MYR).map(([asset, priceMyr]) => [asset, { asset, priceMyr, source: 'demo', updatedAt: null, change24h: null }])), setMode() {}, refresh() {} }; export function useCryptoMarket() { return market; }`;
+        if (id === "\0virtual:jombit-crypto-market") return `import { DEMO_CRYPTO_PRICES_MYR } from '/lib/mock-services.ts'; export const market = { fresh: true, loading: false, error: '', now: Date.now(), quotes: Object.fromEntries(Object.entries(DEMO_CRYPTO_PRICES_MYR).map(([asset, priceMyr]) => [asset, { asset, priceMyr, source: 'coingecko', updatedAt: new Date().toISOString(), change24h: null }])), refresh() {} }; export function useCryptoMarket() { return market; }`;
       },
     }],
     server: { middlewareMode: true, hmr: false, ws: false, watch: null }, appType: "custom",
@@ -33,13 +33,14 @@ test("Crypto screen shows only account-created wallet and staking history", asyn
     const { supportsLiveCryptoPrices } = await server.ssrLoadModule("/lib/crypto-market.ts");
     for (const hostname of ["localhost", "127.0.0.1", "[::1]"]) assert.equal(supportsLiveCryptoPrices({ protocol: "http:", hostname }), true);
     assert.equal(supportsLiveCryptoPrices({ protocol: "https:", hostname: "jom-bit-6667.vercel.app" }), true);
-    for (const location of [{ protocol: "file:", hostname: "" }, { protocol: "about:", hostname: "" }, { protocol: "http:", hostname: "static.example" }]) assert.equal(supportsLiveCryptoPrices(location), false, "Offline and insecure non-local hosts must default to labelled demo prices");
+    for (const location of [{ protocol: "file:", hostname: "" }, { protocol: "about:", hostname: "" }, { protocol: "http:", hostname: "static.example" }]) assert.equal(supportsLiveCryptoPrices(location), false, "Offline and insecure non-local hosts cannot request live prices");
     const render = (visible = true) => renderToStaticMarkup(createElement(CryptoDesk, { balancesVisible: visible }));
     let html = render();
     for (const content of ["CRYPTO PORTFOLIO", "Available balance", "Currently staked", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Crypto activity", "No crypto activity yet", "Crypto wallet preview only", "Receive ETH", "Transfer ETH", "Stake ETH", "Unstake ETH", "Holding value", "Luno integration is planned, not connected", "BTC", "Hold only", "Cardano", "Cosmos", "Avalanche", "Polkadot", "NEAR Protocol"]) assert.ok(html.includes(content), content);
     assert.equal([...html.matchAll(/class="crypto-order"/g)].length, 0);
     assert.match(html, /aria-pressed="true"/);
     assert.doesNotMatch(html, />\s*(Buy|Sell) (BTC|ETH|SOL)|MYR to spend|Buy &amp; sell|MYR available to practise/);
+    assert.doesNotMatch(html, /Sample prices|Static sample prices|Demo prices/);
     assert.doesNotMatch(html, /NaN|Infinity|\bundefined\b|\bWEY\b/);
     const hidden = render(false);
     assert.match(hidden, /••••••/);
@@ -65,7 +66,6 @@ test("Crypto screen shows only account-created wallet and staking history", asyn
     assert.match(html, /Staked ETH/);
     assert.doesNotMatch(html, /Old purchase|Shared starting activity|Earlier record/);
 
-    market.mode = "live";
     market.fresh = false;
     market.quotes = null;
     market.error = "The price feed is unavailable.";

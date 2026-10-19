@@ -78,3 +78,13 @@ export function demoPaymentPayload(
   ).toFixed(2)}&currency=${currency}`;
 }
 
+export function demoCryptoPaymentPayload(
+  toId: string,
+  asset: CryptoAsset,
+  quantity: number,
+  fiatAmountCents: number,
+  fiatCurrency: Currency,
+) {
+  return `jombit-demo://crypto-pay?to=${encodeURIComponent(toId)}&asset=${asset}&amount=${quantity.toFixed(8)}&fiatAmount=${(fiatAmountCents / 100).toFixed(2)}&fiatCurrency=${fiatCurrency}`;
+}
+

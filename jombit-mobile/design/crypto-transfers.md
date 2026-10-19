@@ -18,3 +18,9 @@ the persisted record is crypto-transfer. The mobile confirmation screenshot was
 checked after repairing the modal layering. Real devices and cloud sync were not
 tested. Better Design principles, review rules and separate entry/review copy
 checks were used; its measured-spacing review was blocked by the free-query limit.
+
+Group settlements now offer separate Fiat QR and Crypto QR paths. A crypto QR
+uses the selected asset's current CoinGecko reference price to express the group
+balance as a crypto quantity and records that choice with the settlement. The QR
+is a `jombit-demo://crypto-pay` payload, not a blockchain address, and it neither
+checks a chain nor moves or reserves a holding. Staked balances are unaffected.
