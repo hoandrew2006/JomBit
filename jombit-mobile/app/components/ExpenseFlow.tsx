@@ -13,7 +13,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type InputHTMLAttributes } from "react";
 import { calculateExpenseShares, expenseSubtotal, expenseTotal, formatMoney } from "@/lib/calculations";
 import type { Expense, ExpenseItem, MemberShare, SpendCategory } from "@/lib/models";
 import { CATEGORY_LABELS, SPEND_CATEGORIES, isSpendCategory, suggestCategory } from "@/lib/insights";
@@ -23,10 +23,38 @@ import { Avatar, Brand } from "./ui";
 import { ReceiptCamera } from "./ReceiptCamera";
 import { prepareReceiptPhoto, scanReceipt, type PreparedReceipt } from "@/lib/receipt-client";
 import { receiptReviewError } from "@/lib/receipt-review";
+import { centsToMoneyDraft, isMoneyDraft, moneyDraftToCents, normalizeMoneyDraft } from "@/lib/receipt-money-input";
 import "../../src/receipt.css";
 import "../../src/receipt-refresh.css";
 
 type Phase = "upload" | "scanning" | "edit" | "assign" | "success";
+
+function ReceiptMoneyInput({ valueCents, onValueCents, allowEmpty = false, ...props }: {
+  valueCents: number | null;
+  onValueCents: (value: number | null) => void;
+  allowEmpty?: boolean;
+} & Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "onChange" | "inputMode">) {
+  const [draft, setDraft] = useState(() => centsToMoneyDraft(valueCents));
+
+  const change = (nextValue: string) => {
+    const next = normalizeMoneyDraft(nextValue);
+    if (!isMoneyDraft(next)) return;
+    setDraft(next);
+    onValueCents(moneyDraftToCents(next));
+  };
+
+  const finish = () => {
+    const cents = moneyDraftToCents(draft);
+    if (cents === null && !allowEmpty) {
+      setDraft("0.00");
+      onValueCents(0);
+      return;
+    }
+    setDraft(centsToMoneyDraft(cents));
+  };
+
+  return <input {...props} type="text" inputMode="decimal" autoComplete="off" maxLength={11} value={draft} onChange={(event) => change(event.target.value)} onBlur={finish} />;
+}
 
 interface Props {
   initialGroupId?: string;
@@ -269,7 +297,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
                     <span className="item-index">{index + 1}</span>
                     <label className="grow"><span>Item</span><input value={item.name} onChange={(event) => updateItem(item.id, { name: event.target.value })} /></label>
                     <label className="qty-field"><span>Qty</span><input type="number" min="1" value={item.quantity} onChange={(event) => updateItem(item.id, { quantity: Math.max(1, Number(event.target.value)) })} /></label>
-                    <label className="price-field"><span>Unit price ({group.currency})</span><input type="number" min="0" step="0.01" value={(item.unitCents / 100).toFixed(2)} onChange={(event) => updateItem(item.id, { unitCents: Math.round(Number(event.target.value) * 100) })} /></label>
+                    <label className="price-field"><span>Unit price ({group.currency})</span><ReceiptMoneyInput aria-label={`${item.name || `Item ${index + 1}`} unit price in ${group.currency}`} valueCents={item.unitCents} onValueCents={(value) => updateItem(item.id, { unitCents: value ?? 0 })} /></label>
                     <button className="icon-button" aria-label={`Delete ${item.name}`} onClick={() => { setReviewed(false); setItems((current) => current.filter((value) => value.id !== item.id)); }}><Trash2 size={17} /></button>
                   </div>
                 ))}
@@ -279,15 +307,15 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
             <aside className="receipt-totals-card">
               <p className="eyebrow">RECEIPT TOTAL</p>
               <div><span>Items subtotal</span><strong>{formatMoney(expenseSubtotal(items), group.currency)}</strong></div>
-              <label><span>SST / tax</span><input type="number" min="0" step="0.01" value={(taxCents / 100).toFixed(2)} onChange={(event) => setTaxCents(Math.max(0, Math.round(Number(event.target.value) * 100)))} /></label>
-              <label><span>Service charge</span><input type="number" min="0" step="0.01" value={(serviceCents / 100).toFixed(2)} onChange={(event) => setServiceCents(Math.max(0, Math.round(Number(event.target.value) * 100)))} /></label>
+              <label><span>SST / tax</span><ReceiptMoneyInput aria-label={`SST or tax in ${group.currency}`} valueCents={taxCents} onValueCents={(value) => { setReviewed(false); setTaxCents(value ?? 0); }} /></label>
+              <label><span>Service charge</span><ReceiptMoneyInput aria-label={`Service charge in ${group.currency}`} valueCents={serviceCents} onValueCents={(value) => { setReviewed(false); setServiceCents(value ?? 0); }} /></label>
               <div className="grand-total"><span>Total</span><strong>{formatMoney(total, group.currency)}</strong></div>
               <small>Charges will be allocated proportionally to each person’s items.</small>
             </aside>
           </div>
           {source === "gemini" && <div className="receipt-review-extra">
             <label><span>Receipt currency — must match this group ({group.currency})</span><select value={receiptCurrency} onChange={(event) => { setReceiptCurrency(event.target.value); setReviewed(false); }}><option value="">Select the printed currency</option>{["MYR", "SGD", "THB", "IDR"].map((currency) => <option key={currency}>{currency}</option>)}{receiptCurrency && !["MYR", "SGD", "THB", "IDR"].includes(receiptCurrency) && <option value={receiptCurrency}>{receiptCurrency} — not supported yet</option>}</select></label>
-            <label><span>Printed grand total — verify against your photo</span><input type="number" min="0" step="0.01" value={printedTotalCents === null ? "" : (printedTotalCents / 100).toFixed(2)} onChange={(event) => { setPrintedTotalCents(event.target.value === "" ? null : Math.round(Number(event.target.value) * 100)); setReviewed(false); }} /></label>
+            <label><span>Printed grand total — verify against your photo</span><ReceiptMoneyInput aria-label={`Printed grand total in ${group.currency}`} allowEmpty valueCents={printedTotalCents} onValueCents={(value) => { setPrintedTotalCents(value); setReviewed(false); }} /></label>
             <p className={`receipt-total-match ${printedTotalCents !== total ? "is-mismatch" : ""}`}>{printedTotalCents === null ? "Enter the total printed on your receipt." : printedTotalCents === total ? "Items + tax + service match the printed total." : `Difference to resolve: ${formatMoney(total - printedTotalCents, group.currency)}`}</p>
             <label className="receipt-consent"><input data-review-confirmation type="checkbox" checked={reviewed} onChange={(event) => setReviewed(event.target.checked)} /><span>I checked the merchant, date, currency, items, quantities, charges and total against the receipt.</span></label>
           </div>}
