@@ -58,3 +58,26 @@ export function addGroupMember(state: AppState, groupId: string, rawName: string
     },
   };
 }
+
+/** Where a member still appears in a group's ledger: expenses they paid for or share in, and settle-ups. */
+export function memberUsage(state: AppState, groupId: string, memberId: string) {
+  const expenses = state.expenses.filter((expense) => expense.groupId === groupId && (expense.payerId === memberId || expense.items.some((item) => item.allocation.memberIds.includes(memberId))));
+  const settlements = state.settlements.filter((settlement) => settlement.groupId === groupId && (settlement.fromId === memberId || settlement.toId === memberId));
+  return { expenses, settlements };
+}
+
+/**
+ * Removes someone from a group. You can't remove yourself, and someone still on an expense or a settle-up
+ * can't be removed, because that would quietly change everyone's balances: edit those expenses first.
+ */
+export function removeGroupMember(state: AppState, groupId: string, memberId: string) {
+  const group = state.groups.find((item) => item.id === groupId);
+  if (!group) throw new Error("This group no longer exists.");
+  if (memberId === "me") throw new Error("You can't remove yourself from a group.");
+  if (!group.memberIds.includes(memberId)) throw new Error("This person isn't in the group.");
+  const name = state.members[memberId]?.name ?? "This person";
+  const { expenses, settlements } = memberUsage(state, groupId, memberId);
+  if (expenses.length) throw new Error(`${name} is still on ${expenses.length === 1 ? "1 expense" : `${expenses.length} expenses`}. Edit ${expenses.length === 1 ? "it" : "them"} to move their items to someone else first.`);
+  if (settlements.length) throw new Error(`${name} has a recorded settle-up in this group, so they can't be removed.`);
+  return { ...state, groups: state.groups.map((item) => item.id === groupId ? { ...item, memberIds: item.memberIds.filter((id) => id !== memberId) } : item) };
+}

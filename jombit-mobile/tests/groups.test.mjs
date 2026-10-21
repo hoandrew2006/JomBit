@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { addGroupMember, createGroup, splitMemberNames } from "../lib/groups.ts";
+import { addGroupMember, createGroup, memberUsage, removeGroupMember, splitMemberNames } from "../lib/groups.ts";
 
 const base = () => ({
   user: { id: "me", name: "Ian", defaultCurrency: "MYR", onboarded: true },
@@ -39,4 +39,27 @@ test("Adding a member at the last minute puts them in that group only, ready to 
   assert.equal(trip.memberIds.at(-1), result.memberId);
   assert.equal(result.state.groups.find((item) => item.name === "Other").memberIds.length, 1);
   assert.ok(!Object.keys(state.members).includes(result.memberId), "a fresh id even when created in the same millisecond");
+});
+
+test("Removing a member only works once they're on no expense or settle-up in that group", () => {
+  let { state, groupId } = createGroup(base(), { name: "Trip", currency: "MYR", memberNames: ["Maya", "Ian 2", "Daniel"] }, 1000);
+  const [, maya, dup, daniel] = state.groups[0].memberIds;
+  const item = (id, memberIds) => ({ id, name: id, quantity: 1, unitCents: 1000, allocation: { memberIds } });
+  state = { ...state,
+    expenses: [{ id: "e1", groupId, merchant: "Dinner", date: "2026-10-20", payerId: "me", currency: "MYR", items: [item("a", ["me", dup]), item("b", [maya])], taxCents: 0, serviceCents: 0, shares: {} }],
+    settlements: [{ id: "s1", groupId, fromId: maya, toId: "me", amountCents: 500, currency: "MYR", date: "2026-10-21" }] };
+  assert.throws(() => removeGroupMember(state, groupId, "me"), /can't remove yourself/);
+  assert.throws(() => removeGroupMember(state, groupId, dup), /Ian 2 is still on 1 expense\. Edit it/);
+  assert.deepEqual(memberUsage(state, groupId, dup).expenses.map((expense) => expense.id), ["e1"]);
+  assert.throws(() => removeGroupMember(state, groupId, maya), /still on 1 expense/, "Maya shares an item");
+  // Move the duplicate's item to you, then removal works and nothing else changes.
+  state = { ...state, expenses: [{ ...state.expenses[0], items: [item("a", ["me"]), item("b", [maya])] }] };
+  const after = removeGroupMember(state, groupId, dup);
+  assert.deepEqual(after.groups[0].memberIds, ["me", maya, daniel]);
+  assert.deepEqual(after.expenses, state.expenses);
+  // Someone with only a settle-up can't be removed; someone on nothing can.
+  state = { ...after, expenses: [] };
+  assert.throws(() => removeGroupMember(state, groupId, maya), /settle-up/);
+  assert.deepEqual(removeGroupMember(state, groupId, daniel).groups[0].memberIds, ["me", maya]);
+  assert.throws(() => removeGroupMember(state, groupId, "nobody"), /isn't in the group/);
 });

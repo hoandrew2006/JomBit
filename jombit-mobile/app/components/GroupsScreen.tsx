@@ -8,6 +8,7 @@ import {
   Plus,
   ReceiptText,
   Trash2,
+  UserMinus,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -15,7 +16,7 @@ import { useEffect, useState } from "react";
 import { expenseTotal, formatMoney, groupBalances, simplifyDebts } from "@/lib/calculations";
 import type { Currency, Expense, Group } from "@/lib/models";
 import { useAppState } from "@/lib/state";
-import { addGroupMember, createGroup as createGroupInState, splitMemberNames } from "@/lib/groups";
+import { addGroupMember, createGroup as createGroupInState, memberUsage, removeGroupMember, splitMemberNames } from "@/lib/groups";
 import { Avatar, EmptyState, Modal, PageHeader } from "./ui";
 
 interface Props {
@@ -40,6 +41,7 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
   const [deleteId, setDeleteId] = useState<string>();
   const [groupError, setGroupError] = useState("");
   const [memberError, setMemberError] = useState("");
+  const [removeId, setRemoveId] = useState<string>();
   const selected = state.groups.find((group) => group.id === selectedGroupId);
   useEffect(() => { if (createForExpense) setCreateOpen(true); }, [createForExpense]);
   const closeCreate = () => {
@@ -106,11 +108,27 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
               const member = state.members[id];
               const value = balances[id] ?? 0;
               const isMe = id === "me";
+              const usage = removeId === id ? memberUsage(state, selected.id, id) : undefined;
               return (
-                <div className="balance-row" key={id}>
+                <div className="balance-row-wrap" key={id}>
+                <div className="balance-row">
                   <Avatar name={member.name} />
                   <span><strong>{member.name}{isMe ? " (You)" : ""}</strong><small>{value > 0 ? "Should receive" : value < 0 ? "Owes the group" : "All square"}</small></span>
                   <strong className={value > 0 ? "positive" : value < 0 ? "negative" : "muted"}>{value > 0 ? "+" : value < 0 ? "−" : ""}{formatMoney(Math.abs(value), selected.currency)}</strong>
+                  {!isMe && <button className="icon-button member-remove" onClick={() => setRemoveId(removeId === id ? undefined : id)} aria-label={`Remove ${member.name}`} aria-expanded={removeId === id}><UserMinus size={16} /></button>}
+                </div>
+                {usage && (usage.expenses.length || usage.settlements.length ? (
+                  <div className="member-remove-panel" role="status">
+                    <p>{usage.expenses.length ? `${member.name} is still on ${usage.expenses.length === 1 ? "this expense" : "these expenses"}. Move their items to someone else, then remove them.` : `${member.name} has a recorded settle-up in this group, so they can't be removed.`}</p>
+                    {usage.expenses.length > 0 && <div className="member-remove-actions">{usage.expenses.map((expense) => <button key={expense.id} className="secondary-button" onClick={() => { setRemoveId(undefined); onEditExpense(expense); }}>Edit {expense.merchant}</button>)}</div>}
+                    <button className="text-button" onClick={() => setRemoveId(undefined)}>Close</button>
+                  </div>
+                ) : (
+                  <div className="member-remove-panel">
+                    <p>Remove {member.name} from {selected.name}? They're not on any expense, so no balances change.</p>
+                    <div className="delete-confirm"><button onClick={() => { setState(removeGroupMember(state, selected.id, id)); setRemoveId(undefined); }}>Remove</button><button onClick={() => setRemoveId(undefined)}>Keep</button></div>
+                  </div>
+                ))}
                 </div>
               );
             })}
