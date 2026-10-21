@@ -10,7 +10,7 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { expenseTotal, formatMoney, groupBalances, simplifyDebts } from "@/lib/calculations";
 import type { Currency, Expense, Group } from "@/lib/models";
 import { useAppState } from "@/lib/state";
@@ -22,9 +22,12 @@ interface Props {
   onAddExpense: (groupId?: string) => void;
   onEditExpense: (expense: Expense) => void;
   onSettle: (group: Group, fromId: string, toId: string, amountCents: number) => void;
+  // Set when the user tried to add an expense with no group yet: open the create form straight away.
+  createForExpense?: boolean;
+  onCreateForExpenseDone?: (groupId?: string) => void;
 }
 
-export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onEditExpense, onSettle }: Props) {
+export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onEditExpense, onSettle, createForExpense = false, onCreateForExpenseDone }: Props) {
   const { state, setState } = useAppState();
   const [createOpen, setCreateOpen] = useState(false);
   const [groupName, setGroupName] = useState("");
@@ -34,6 +37,11 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
   const [newMember, setNewMember] = useState("");
   const [deleteId, setDeleteId] = useState<string>();
   const selected = state.groups.find((group) => group.id === selectedGroupId);
+  useEffect(() => { if (createForExpense) setCreateOpen(true); }, [createForExpense]);
+  const closeCreate = () => {
+    setCreateOpen(false);
+    if (createForExpense) onCreateForExpenseDone?.();
+  };
 
   const createGroup = () => {
     if (!groupName.trim()) return;
@@ -54,7 +62,9 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
     setCreateOpen(false);
     setGroupName("");
     setMemberNames("");
-    onSelectGroup(id);
+    // Came here to add an expense: carry on to the receipt for the new group.
+    if (createForExpense) onCreateForExpenseDone?.(id);
+    else onSelectGroup(id);
   };
 
   if (selected) {
@@ -189,13 +199,14 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
         <button className="new-group-card" onClick={() => setCreateOpen(true)}><Plus size={26} /><strong>Create a group</strong><span>Dinner, housemates or a getaway</span></button>
       </div>
 
-      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Create a new group" eyebrow="START A SHARED LEDGER">
+      <Modal open={createOpen} onClose={closeCreate} title="Create a new group" eyebrow="START A SHARED LEDGER">
         <div className="form-stack">
+          {createForExpense && <p className="inline-note" role="status">Bills are split within a group. Create one first, and we'll take you straight to your receipt.</p>}
           <div className="emoji-name-row"><label><span>Icon</span><input className="emoji-input" value={emoji} onChange={(event) => setEmoji(event.target.value.slice(0, 3))} /></label><label className="grow"><span>Group name</span><input value={groupName} onChange={(event) => setGroupName(event.target.value)} placeholder="e.g. Penang road trip" /></label></div>
           <label><span>Default currency</span><select value={currency} onChange={(event) => setCurrency(event.target.value as Currency)}><option value="MYR">MYR — Malaysian Ringgit</option><option value="SGD">SGD — Singapore Dollar</option><option value="THB">THB — Thai Baht</option><option value="IDR">IDR — Indonesian Rupiah</option></select></label>
           <label><span>Invite names <small>(comma separated)</small></span><textarea value={memberNames} onChange={(event) => setMemberNames(event.target.value)} placeholder="Maya, Daniel, Sarah" /></label>
           <p className="inline-note">You’re added automatically. You can add more people from the group page later.</p>
-          <button className="primary-button" disabled={!groupName.trim()} onClick={createGroup}>Create JomBit group</button>
+          <button className="primary-button" disabled={!groupName.trim()} onClick={createGroup}>{createForExpense ? "Create group and add receipt" : "Create JomBit group"}</button>
         </div>
       </Modal>
     </div>

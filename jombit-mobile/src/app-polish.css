@@ -42,7 +42,8 @@
 }
 .app-view .topbar-demo { font-weight: 700; letter-spacing: .01em; }
 
-.app-view .screen { animation: appPageIn .34s var(--app-ease) both; }
+/* backwards, not both: a transform kept after the animation would trap fixed pop-ups inside the screen. */
+.app-view .screen { animation: appPageIn .34s var(--app-ease) backwards; }
 @keyframes appPageIn { from { opacity: 0; transform: translateY(8px) scale(.995); } }
 
 .app-view .page-header { align-items: center; }

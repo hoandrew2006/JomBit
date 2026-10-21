@@ -37,10 +37,18 @@ function JomBitExperience() {
   const [settlement, setSettlement] = useState<SettlementRoute>();
   const [scanMenuOpen, setScanMenuOpen] = useState(false);
   const [qrPayOpen, setQrPayOpen] = useState(false);
+  const [groupForExpense, setGroupForExpense] = useState(false);
 
   if (!state.user.onboarded) return <Onboarding />;
 
   const openExpense = (groupId?: string, editing?: Expense) => {
+    // A bill is always split within a group: with none yet, go to group creation first.
+    if (!editing && !state.groups.length) {
+      setSelectedGroupId(undefined);
+      setNav("groups");
+      setGroupForExpense(true);
+      return;
+    }
     setExpenseGroupId(groupId);
     setEditingExpense(editing);
     setExpenseOpen(true);
@@ -75,7 +83,7 @@ function JomBitExperience() {
       <header className="topbar" data-bd-align-group="app-column"><Brand compact /><span className="topbar-demo"><Sparkles size={13} /> Preview mode · {backendMode === "cloud" ? (syncStatus === "saving" ? "saving" : "synced") : backendMode === "demo" ? "sample workspace" : "on this device"}</span></header>
       <main className="app-main" data-bd-align-group="app-column">
         {nav === "home" && <HomeScreen onScan={() => openExpense()} onCreateGroup={() => { setNav("groups"); setSelectedGroupId(undefined); }} onOpenGroup={openGroup} onSettleGroup={openSuggestedSettlement} onWallet={() => setNav("wallet")} onProfile={() => setNav("profile")} />}
-        {nav === "groups" && <GroupsScreen selectedGroupId={selectedGroupId} onSelectGroup={setSelectedGroupId} onAddExpense={(groupId) => openExpense(groupId)} onEditExpense={(expense) => openExpense(expense.groupId, expense)} onSettle={(group, fromId, toId, amountCents) => setSettlement({ group, fromId, toId, amountCents })} />}
+        {nav === "groups" && <GroupsScreen selectedGroupId={selectedGroupId} onSelectGroup={setSelectedGroupId} onAddExpense={(groupId) => openExpense(groupId)} onEditExpense={(expense) => openExpense(expense.groupId, expense)} onSettle={(group, fromId, toId, amountCents) => setSettlement({ group, fromId, toId, amountCents })} createForExpense={groupForExpense} onCreateForExpenseDone={(groupId) => { setGroupForExpense(false); if (groupId) { setSelectedGroupId(groupId); setExpenseGroupId(groupId); setEditingExpense(undefined); setExpenseOpen(true); } }} />}
         {nav === "wallet" && <WalletScreen />}
         {nav === "profile" && <ProfileScreen />}
       </main>
