@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { expenseTotal, formatMoney, groupBalances, simplifyDebts } from "@/lib/calculations";
 import type { Currency, Expense, Group } from "@/lib/models";
 import { useAppState } from "@/lib/state";
+import { addGroupMember, createGroup as createGroupInState, splitMemberNames } from "@/lib/groups";
 import { Avatar, EmptyState, Modal, PageHeader } from "./ui";
 
 interface Props {
@@ -36,6 +37,8 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
   const [memberNames, setMemberNames] = useState("");
   const [newMember, setNewMember] = useState("");
   const [deleteId, setDeleteId] = useState<string>();
+  const [groupError, setGroupError] = useState("");
+  const [memberError, setMemberError] = useState("");
   const selected = state.groups.find((group) => group.id === selectedGroupId);
   useEffect(() => { if (createForExpense) setCreateOpen(true); }, [createForExpense]);
   const closeCreate = () => {
@@ -45,20 +48,13 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
 
   const createGroup = () => {
     if (!groupName.trim()) return;
-    const id = `g-${Date.now()}`;
-    const names = memberNames.split(",").map((name) => name.trim()).filter(Boolean);
-    const additions = names.map((name, index) => ({ id: `m-${Date.now()}-${index}`, name }));
-    setState((current) => ({
-      ...current,
-      members: {
-        ...current.members,
-        ...Object.fromEntries(additions.map((member) => [member.id, member])),
-      },
-      groups: [
-        ...current.groups,
-        { id, name: groupName.trim(), emoji, currency, memberIds: ["me", ...additions.map((member) => member.id)] },
-      ],
-    }));
+    let id = "";
+    try {
+      const result = createGroupInState(state, { name: groupName, emoji, currency, memberNames: splitMemberNames(memberNames) });
+      id = result.groupId;
+      setState(result.state);
+    } catch (reason) { setGroupError(reason instanceof Error ? reason.message : "This group couldn't be created."); return; }
+    setGroupError("");
     setCreateOpen(false);
     setGroupName("");
     setMemberNames("");
@@ -74,12 +70,9 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
     const total = expenses.reduce((sum, expense) => sum + expenseTotal(expense.items, expense.taxCents, expense.serviceCents), 0);
     const addMember = () => {
       if (!newMember.trim()) return;
-      const id = `m-${Date.now()}`;
-      setState((current) => ({
-        ...current,
-        members: { ...current.members, [id]: { id, name: newMember.trim() } },
-        groups: current.groups.map((group) => group.id === selected.id ? { ...group, memberIds: [...group.memberIds, id] } : group),
-      }));
+      try { setState(addGroupMember(state, selected.id, newMember).state); }
+      catch (reason) { setMemberError(reason instanceof Error ? reason.message : "This person couldn't be added."); return; }
+      setMemberError("");
       setNewMember("");
     };
     const removeExpense = (id: string) => {
@@ -123,9 +116,10 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
           </div>
           <div className="member-add-row">
             <label className="sr-only" htmlFor="new-member">New member name</label>
-            <input id="new-member" value={newMember} onChange={(event) => setNewMember(event.target.value)} placeholder="Add a member by name" onKeyDown={(event) => event.key === "Enter" && addMember()} />
+            <input id="new-member" value={newMember} onChange={(event) => { setNewMember(event.target.value); setMemberError(""); }} placeholder="Add a member by name" onKeyDown={(event) => event.key === "Enter" && addMember()} />
             <button className="secondary-button" onClick={addMember}><UserPlus size={17} /> Add</button>
           </div>
+          {memberError && <p className="form-error" role="alert">{memberError}</p>}
         </section>
 
         <section className="section-block settlement-block">
@@ -204,8 +198,9 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
           {createForExpense && <p className="inline-note" role="status">Bills are split within a group. Create one first, and we'll take you straight to your receipt.</p>}
           <div className="emoji-name-row"><label><span>Icon</span><input className="emoji-input" value={emoji} onChange={(event) => setEmoji(event.target.value.slice(0, 3))} /></label><label className="grow"><span>Group name</span><input value={groupName} onChange={(event) => setGroupName(event.target.value)} placeholder="e.g. Penang road trip" /></label></div>
           <label><span>Default currency</span><select value={currency} onChange={(event) => setCurrency(event.target.value as Currency)}><option value="MYR">MYR — Malaysian Ringgit</option><option value="SGD">SGD — Singapore Dollar</option><option value="THB">THB — Thai Baht</option><option value="IDR">IDR — Indonesian Rupiah</option></select></label>
-          <label><span>Invite names <small>(comma separated)</small></span><textarea value={memberNames} onChange={(event) => setMemberNames(event.target.value)} placeholder="Maya, Daniel, Sarah" /></label>
+          <label><span>Invite names <small>(comma separated)</small></span><textarea value={memberNames} onChange={(event) => { setMemberNames(event.target.value); setGroupError(""); }} placeholder="Maya, Daniel, Sarah" /></label>
           <p className="inline-note">You’re added automatically. You can add more people from the group page later.</p>
+          {groupError && <p className="form-error" role="alert">{groupError}</p>}
           <button className="primary-button" disabled={!groupName.trim()} onClick={createGroup}>{createForExpense ? "Create group and add receipt" : "Create JomBit group"}</button>
         </div>
       </Modal>
