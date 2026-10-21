@@ -10,6 +10,7 @@ import { useCryptoMarket } from "@/lib/crypto-market";
 import type { CryptoAsset, WalletTransaction } from "@/lib/models";
 import { Modal, Segmented, Toast } from "./ui";
 import { CryptoHoldingFacts } from "./CryptoHoldingFacts";
+import { CryptoAssetIcon } from "./CryptoAssetIcon";
 import { CryptoTransfer } from "./CryptoTransfer";
 import { LUNO_INTEGRATION_NOTE, LUNO_STAKING_GUIDE } from "../../lib/staking-config";
 import "../../src/crypto.css";
@@ -17,7 +18,6 @@ import "../../src/crypto.css";
 const quantity = (value: number) => value.toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 8 });
 const signedMoney = (cents: number) => `${cents >= 0 ? "+" : "−"}${formatMoney(Math.abs(cents))}`;
 const percent = (value: number | null | undefined) => value == null ? "—" : `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
-const assetMark: Record<CryptoAsset, string> = { BTC: "₿", ETH: "Ξ", SOL: "S", ADA: "A", ATOM: "C", AVAX: "A", DOT: "●", NEAR: "N" };
 function dateLabel(value: string | null | undefined, short = false) {
   if (!value || !Number.isFinite(Date.parse(value))) return "Unknown";
   return new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric", ...(short ? {} : { hour: "2-digit", minute: "2-digit" }), timeZone: "Asia/Kuala_Lumpur" }).format(new Date(value)) + (short ? "" : " MYT");
@@ -170,7 +170,8 @@ export function CryptoDesk({ balancesVisible }: { balancesVisible: boolean }) {
       const holdingValue = holdingMetrics(holding, coinQuote?.priceMyr).value;
       const selected = asset === code;
       const expanded = compactHoldings && selected && mobilePositionOpen;
-      return <div className="crypto-holding-item" key={code}><button type="button" aria-pressed={selected} aria-expanded={compactHoldings ? expanded : undefined} aria-controls={compactHoldings ? `crypto-position-${code}` : undefined} onClick={() => selectAsset(code)}><span className={`asset-icon asset-${code.toLowerCase()}`}>{assetMark[code]}</span><span><strong>{CRYPTO_NAMES[code]} <em>{code}</em></strong><small className="crypto-balance-split"><b>{hide(`${quantity(holding.available)} available`)}</b><i aria-hidden="true" /><b>{hide(`${quantity(holding.staked)} staked`)}</b>{code === "BTC" && <mark>Hold only</mark>}</small></span><span><strong>{hide(holdingValue === null ? "Unavailable" : formatMoney(holdingValue))}</strong><small>Holding value</small></span><ChevronDown className="crypto-row-chevron" size={19} aria-hidden="true" /></button>{expanded && positionPanel("mobile")}</div>;
+      const valueLabel = hide(holdingValue === null ? "Unavailable" : formatMoney(holdingValue));
+      return <div className="crypto-holding-item" key={code}><button type="button" aria-pressed={selected} aria-expanded={compactHoldings ? expanded : undefined} aria-controls={compactHoldings ? `crypto-position-${code}` : undefined} onClick={() => selectAsset(code)}><span className={`asset-icon asset-${code.toLowerCase()}`}><CryptoAssetIcon asset={code} /></span><span><strong>{CRYPTO_NAMES[code]} <em>{code}</em></strong><small className="crypto-balance-split"><b>{hide(`${quantity(holding.available)} available`)}</b><i aria-hidden="true" /><b>{hide(`${quantity(holding.staked)} staked`)}</b>{code === "BTC" && <mark>Hold only</mark>}</small></span><span aria-label={`Holding value ${valueLabel}`}><strong aria-hidden="true">{valueLabel}</strong></span><ChevronDown className="crypto-row-chevron" size={19} aria-hidden="true" /></button>{expanded && positionPanel("mobile")}</div>;
     })}</div></section>
     {!compactHoldings && positionPanel("desktop")}
 

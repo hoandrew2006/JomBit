@@ -36,6 +36,7 @@
 }
 .crypto-market-list > .crypto-holding-item > button[aria-pressed="true"] { background: #173330; border-color: #62d9c366; }
 .crypto-market-list .asset-icon { width: 36px; height: 36px; border-radius: 12px; font-size: 20px; }
+.crypto-market-list .asset-icon svg { width: 1.5rem; height: 1.5rem; color: currentColor; fill: currentColor; overflow: visible; }
 .crypto-market-list strong, .crypto-market-list small { display: block; }
 .crypto-market-list strong { font-size: 13px; }
 .crypto-market-list strong em { margin-left: 5px; color: #80908c; font-size: 9px; font-style: normal; letter-spacing: .06em; }

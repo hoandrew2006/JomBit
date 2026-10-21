@@ -37,6 +37,7 @@ test("Crypto screen shows only account-created wallet and staking history", asyn
     const render = (visible = true) => renderToStaticMarkup(createElement(CryptoDesk, { balancesVisible: visible }));
     let html = render();
     for (const content of ["CRYPTO PORTFOLIO", "Available balance", "Currently staked", "Average purchase price", "First purchase", "Latest purchase", "Unrealized profit / loss", "Crypto activity", "No crypto activity yet", "Crypto wallet preview only", "Receive ETH", "Transfer ETH", "Stake ETH", "Unstake ETH", "Holding value", "Luno integration is planned, not connected", "BTC", "Hold only", "Cardano", "Cosmos", "Avalanche", "Polkadot", "NEAR Protocol"]) assert.ok(html.includes(content), content);
+    for (const asset of ["btc", "eth", "sol", "ada", "atom", "avax", "dot", "near"]) assert.match(html, new RegExp(`asset-${asset}[^>]*><svg`), `${asset.toUpperCase()} uses its asset symbol`);
     assert.equal([...html.matchAll(/class="crypto-order"/g)].length, 0);
     assert.match(html, /aria-pressed="true"/);
     assert.doesNotMatch(html, />\s*(Buy|Sell) (BTC|ETH|SOL)|MYR to spend|Buy &amp; sell|MYR available to practise/);
