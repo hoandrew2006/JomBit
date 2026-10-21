@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
+  Pencil,
   Plus,
   ReceiptText,
   Trash2,
@@ -90,7 +91,7 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
         </section>
 
         <section className="group-total-card">
-          <div><span>Total shared spending</span><strong>{formatMoney(total, selected.currency)}</strong><small>{expenses.length} expenses in this group</small></div>
+          <div><span>Total shared spending</span><strong>{formatMoney(total, selected.currency)}</strong><small>{expenses.length} {expenses.length === 1 ? "expense" : "expenses"} in this group</small></div>
           <div className={(balances.me ?? 0) >= 0 ? "position-positive" : "position-negative"}>
             <span>Your position</span>
             <strong>{formatMoney(Math.abs(balances.me ?? 0), selected.currency)}</strong>
@@ -157,6 +158,7 @@ export function GroupsScreen({ selectedGroupId, onSelectGroup, onAddExpense, onE
                       <span><strong>{expense.merchant}</strong><small>{expense.date} · Paid by {state.members[expense.payerId]?.name}</small></span>
                       <span><strong>{formatMoney(expenseAmount, expense.currency)}</strong><small>Your share {formatMoney(expense.shares.me?.totalCents ?? 0, expense.currency)}</small></span>
                     </button>
+                    <button className="icon-button" onClick={() => onEditExpense(expense)} aria-label={`Edit ${expense.merchant}`} title="Edit who shared what"><Pencil size={17} /></button>
                     {deleteId === expense.id ? (
                       <div className="delete-confirm"><button onClick={() => removeExpense(expense.id)}>Delete</button><button onClick={() => setDeleteId(undefined)}>Keep</button></div>
                     ) : (

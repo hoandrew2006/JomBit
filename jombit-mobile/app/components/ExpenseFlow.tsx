@@ -11,6 +11,7 @@ import {
   ReceiptText,
   Sparkles,
   Trash2,
+  Pencil,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -68,7 +69,8 @@ interface Props {
 export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }: Props) {
   const { state, setState } = useAppState();
   const firstGroup = initialGroupId ?? editingExpense?.groupId ?? state.groups[0]?.id ?? "";
-  const [phase, setPhase] = useState<Phase>(editingExpense ? "edit" : "upload");
+  // Editing a saved expense reopens it on the assign step, where people usually change who shared what.
+  const [phase, setPhase] = useState<Phase>(editingExpense ? "assign" : "upload");
 
   const [preview, setPreview] = useState<string | undefined>(editingExpense?.receiptPreview);
   const [groupId, setGroupId] = useState(firstGroup);
@@ -250,7 +252,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
   return (
     <div className="expense-flow">
       <header className="expense-flow-header">
-        <button className="back-button" onClick={() => { if (phase === "upload" || editingExpense) { cancelScan(); onClose(); } else if (phase === "assign") setPhase("edit"); else cancelScan(); }}><ArrowLeft size={18} /> Back</button>
+        <button className="back-button" onClick={() => { if (phase === "assign") setPhase("edit"); else if (phase === "upload" || editingExpense) { cancelScan(); onClose(); } else cancelScan(); }}><ArrowLeft size={18} /> Back</button>
         <Brand compact />
         <span className="receipt-header-label">{editingExpense ? "Edit expense" : "New expense"}</span>
       </header>
@@ -353,7 +355,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
 
       {phase === "assign" && (
         <section className="flow-stage assignment-stage">
-          <div className="stage-heading"><div><p className="eyebrow">WHO HAD WHAT?</p><h1>Assign the receipt</h1><p>Tap everyone who shared each item. JomBit handles cent-perfect rounding.</p></div><button className="secondary-button" onClick={() => assignEveryone()}><Users size={17} /> Split everything evenly</button></div>
+          <div className="stage-heading"><div><p className="eyebrow">WHO HAD WHAT?</p><h1>{editingExpense ? "Update who shared what" : "Assign the receipt"}</h1><p>Tap everyone who shared each item. JomBit handles cent-perfect rounding.</p>{editingExpense && <button type="button" className="text-button receipt-edit-details" onClick={() => setPhase("edit")}><Pencil size={14} /> Change items, prices or group</button>}</div><button className="secondary-button" onClick={() => assignEveryone()}><Users size={17} /> Split everything evenly</button></div>
           <div className="assignment-layout">
             <div className="assignment-items">
               {items.map((item) => (
