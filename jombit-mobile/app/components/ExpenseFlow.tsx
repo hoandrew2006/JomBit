@@ -11,15 +11,18 @@ import {
   ReceiptText,
   Sparkles,
   Trash2,
+  Pencil,
+  UserPlus,
   Users,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type InputHTMLAttributes } from "react";
 import { calculateExpenseShares, expenseSubtotal, expenseTotal, formatMoney } from "@/lib/calculations";
-import type { Expense, ExpenseItem, MemberShare, SpendCategory } from "@/lib/models";
+import type { Currency, Expense, ExpenseItem, MemberShare, SpendCategory } from "@/lib/models";
+import { addGroupMember, createGroup, splitMemberNames } from "@/lib/groups";
 import { CATEGORY_LABELS, SPEND_CATEGORIES, isSpendCategory, suggestCategory } from "@/lib/insights";
 import { useFxRates } from "@/lib/fx-rates";
 import { useAppState } from "@/lib/state";
-import { Avatar, Brand } from "./ui";
+import { Avatar, Brand, Modal } from "./ui";
 import { ReceiptCamera } from "./ReceiptCamera";
 import { prepareReceiptPhoto, scanReceipt, type PreparedReceipt } from "@/lib/receipt-client";
 import { receiptReviewError } from "@/lib/receipt-review";
@@ -66,7 +69,8 @@ interface Props {
 export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }: Props) {
   const { state, setState } = useAppState();
   const firstGroup = initialGroupId ?? editingExpense?.groupId ?? state.groups[0]?.id ?? "";
-  const [phase, setPhase] = useState<Phase>(editingExpense ? "edit" : "upload");
+  // Editing a saved expense reopens it on the assign step, where people usually change who shared what.
+  const [phase, setPhase] = useState<Phase>(editingExpense ? "assign" : "upload");
 
   const [preview, setPreview] = useState<string | undefined>(editingExpense?.receiptPreview);
   const [groupId, setGroupId] = useState(firstGroup);
@@ -81,6 +85,10 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
   const fx = useFxRates();
   const [expandedShare, setExpandedShare] = useState<string>();
   const [error, setError] = useState("");
+  // Making a group or adding a person without leaving the receipt.
+  const [newGroup, setNewGroup] = useState<{ name: string; currency: Currency; members: string; error: string }>();
+  const [newPerson, setNewPerson] = useState("");
+  const [newPersonError, setNewPersonError] = useState("");
   const [cameraOpen, setCameraOpen] = useState(false);
   const [preparing, setPreparing] = useState(false);
   const [photo, setPhoto] = useState<PreparedReceipt>();
@@ -167,6 +175,26 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
     setItems((current) => current.map((item) => ({ ...item, allocation: { memberIds: [] } })));
   };
 
+  const saveNewGroup = () => {
+    if (!newGroup) return;
+    try {
+      const result = createGroup(state, { name: newGroup.name, currency: newGroup.currency, memberNames: splitMemberNames(newGroup.members) });
+      setState(result.state);
+      // The new group holds you plus the people just invited, so start the split fresh with you as payer.
+      setGroupId(result.groupId);
+      setPayerId("me");
+      setItems((current) => current.map((item) => ({ ...item, allocation: { memberIds: [] } })));
+      setNewGroup(undefined);
+    } catch (reason) { setNewGroup({ ...newGroup, error: reason instanceof Error ? reason.message : "This group couldn't be created." }); }
+  };
+
+  const addPerson = () => {
+    if (!newPerson.trim()) return;
+    try { setState(addGroupMember(state, group.id, newPerson).state); }
+    catch (reason) { setNewPersonError(reason instanceof Error ? reason.message : "This person couldn't be added."); return; }
+    setNewPerson(""); setNewPersonError("");
+  };
+
   const goToAssignment = () => {
     const reviewError = receiptReviewError({ merchant, date, items, taxCents, serviceCents, aiScan: source === "gemini", receiptCurrency, groupCurrency: group.currency, printedTotalCents, reviewed });
     if (reviewError) return setError(reviewError);
@@ -224,7 +252,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
   return (
     <div className="expense-flow">
       <header className="expense-flow-header">
-        <button className="back-button" onClick={() => { if (phase === "upload" || editingExpense) { cancelScan(); onClose(); } else if (phase === "assign") setPhase("edit"); else cancelScan(); }}><ArrowLeft size={18} /> Back</button>
+        <button className="back-button" onClick={() => { if (phase === "assign") setPhase("edit"); else if (phase === "upload" || editingExpense) { cancelScan(); onClose(); } else cancelScan(); }}><ArrowLeft size={18} /> Back</button>
         <Brand compact />
         <span className="receipt-header-label">{editingExpense ? "Edit expense" : "New expense"}</span>
       </header>
@@ -286,7 +314,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
               <div className="form-card receipt-meta-grid">
                 <label><span>Merchant</span><input value={merchant} onChange={(event) => setMerchant(event.target.value)} /></label>
                 <label><span>Date</span><input type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label>
-                <label><span>Group</span><select value={group.id} onChange={(event) => setSelectedGroup(event.target.value)}>{state.groups.map((item) => <option key={item.id} value={item.id}>{item.emoji} {item.name}</option>)}</select></label>
+                <div className="receipt-group-field"><label><span>Group</span><select value={group.id} onChange={(event) => setSelectedGroup(event.target.value)}>{state.groups.map((item) => <option key={item.id} value={item.id}>{item.emoji} {item.name}</option>)}</select></label><button type="button" className="text-button receipt-new-group" onClick={() => setNewGroup({ name: "", currency: group.currency, members: "", error: "" })}><Plus size={15} /> Create new group</button></div>
                 <label><span>Category{chosenCategory ? "" : " · suggested"}</span><select value={category} onChange={(event) => setChosenCategory(event.target.value as SpendCategory)}>{SPEND_CATEGORIES.map((value) => <option key={value} value={value}>{CATEGORY_LABELS[value]}</option>)}</select></label>
                 <label><span>Paid by</span><select value={payerId} onChange={(event) => setPayerId(event.target.value)}>{members.map((member) => <option key={member.id} value={member.id}>{member.name}{member.id === "me" ? " (You)" : ""}</option>)}</select></label>
               </div>
@@ -327,7 +355,7 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
 
       {phase === "assign" && (
         <section className="flow-stage assignment-stage">
-          <div className="stage-heading"><div><p className="eyebrow">WHO HAD WHAT?</p><h1>Assign the receipt</h1><p>Tap everyone who shared each item. JomBit handles cent-perfect rounding.</p></div><button className="secondary-button" onClick={() => assignEveryone()}><Users size={17} /> Split everything evenly</button></div>
+          <div className="stage-heading"><div><p className="eyebrow">WHO HAD WHAT?</p><h1>{editingExpense ? "Update who shared what" : "Assign the receipt"}</h1><p>Tap everyone who shared each item. JomBit handles cent-perfect rounding.</p>{editingExpense && <button type="button" className="text-button receipt-edit-details" onClick={() => setPhase("edit")}><Pencil size={14} /> Change items, prices or group</button>}</div><button className="secondary-button" onClick={() => assignEveryone()}><Users size={17} /> Split everything evenly</button></div>
           <div className="assignment-layout">
             <div className="assignment-items">
               {items.map((item) => (
@@ -357,6 +385,12 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
                   </button>
                 );
               })}
+              <div className="member-add-row receipt-add-person">
+                <label className="sr-only" htmlFor="receipt-add-person">Add someone to {group.name}</label>
+                <input id="receipt-add-person" value={newPerson} onChange={(event) => { setNewPerson(event.target.value); setNewPersonError(""); }} onKeyDown={(event) => { if (event.key === "Enter") addPerson(); }} placeholder={`Add someone to ${group.name}`} autoComplete="off" />
+                <button type="button" className="secondary-button" onClick={addPerson} disabled={!newPerson.trim()}><UserPlus size={17} /> Add</button>
+              </div>
+              {newPersonError && <p className="form-error" role="alert">{newPersonError}</p>}
               <div className={`split-check ${!hasUnassigned && assignedTotal === total ? "valid" : ""}`}><CheckCircle2 size={18} /><span>{!hasUnassigned && assignedTotal === total ? "Exact match — every cent assigned" : `${items.filter((item) => !item.allocation.memberIds.length).length} items still need people`}</span></div>
             </aside>
           </div>
@@ -376,6 +410,16 @@ export function ExpenseFlow({ initialGroupId, editingExpense, onClose, onSaved }
           <button className="text-button" onClick={onClose}>Back to home</button>
         </section>
       )}
+      <Modal open={Boolean(newGroup)} onClose={() => setNewGroup(undefined)} title="Create a new group" eyebrow="WITHOUT LEAVING YOUR RECEIPT">
+        {newGroup && <div className="form-stack">
+          <label><span>Group name</span><input value={newGroup.name} onChange={(event) => setNewGroup({ ...newGroup, name: event.target.value, error: "" })} placeholder="e.g. Penang road trip" /></label>
+          <label><span>Currency</span><select value={newGroup.currency} onChange={(event) => setNewGroup({ ...newGroup, currency: event.target.value as Currency })}><option value="MYR">MYR — Malaysian Ringgit</option><option value="SGD">SGD — Singapore Dollar</option><option value="THB">THB — Thai Baht</option><option value="IDR">IDR — Indonesian Rupiah</option></select></label>
+          <label><span>Invite names <small>(comma separated)</small></span><textarea value={newGroup.members} onChange={(event) => setNewGroup({ ...newGroup, members: event.target.value, error: "" })} placeholder="Maya, Daniel, Sarah" /></label>
+          <p className="inline-note">You're added automatically. Your receipt items stay as they are; you'll assign people on the next step.</p>
+          {newGroup.error && <p className="form-error" role="alert">{newGroup.error}</p>}
+          <button type="button" className="primary-button" disabled={!newGroup.name.trim()} onClick={saveNewGroup}>Create group and use it</button>
+        </div>}
+      </Modal>
       {cameraOpen && <ReceiptCamera onClose={() => setCameraOpen(false)} onPhoto={(file) => { void choosePhoto(file); }} />}
     </div>
   );

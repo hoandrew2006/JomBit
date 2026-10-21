@@ -389,3 +389,14 @@
 @media (prefers-reduced-motion: reduce) {
   .app-view .screen { animation: none; }
 }
+
+/* Remove someone from a group: an inline confirm, or why they can't be removed yet. */
+.balance-row .member-remove { width: 34px; height: 34px; margin-left: 4px; }
+.member-remove-panel { display: grid; gap: 10px; margin: 0 12px 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: #1b1e1d; }
+.member-remove-panel p { margin: 0; color: #c9d0cd; font-size: 12px; line-height: 1.6; }
+.member-remove-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.member-remove-actions .secondary-button { min-height: 38px; padding: 0 12px; font-size: 12px; }
+.member-remove-panel .text-button { justify-self: start; padding: 4px 0; font-size: 12px; }
+.balance-row-wrap { border-bottom: 1px solid var(--line); }
+.balance-row-wrap:last-child { border-bottom: 0; }
+.balance-row-wrap > .balance-row { border-bottom: 0; }

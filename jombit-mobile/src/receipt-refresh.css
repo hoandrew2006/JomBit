@@ -32,3 +32,10 @@
   .receipt-header-label { font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) { .expense-flow .scan-line { animation: none; } }
+
+/* Group field with a "Create new group" shortcut under the dropdown. */
+.receipt-group-field { display: grid; gap: 6px; align-content: start; }
+.receipt-group-field .receipt-new-group { justify-self: start; color: var(--cyan); display: inline-flex; align-items: center; gap: 5px; padding: 4px 2px; font-size: 13px; }
+/* Add a late arrival on the assign step. */
+.receipt-add-person { margin-top: 14px; }
+.assignment-stage .stage-heading .receipt-edit-details { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; padding: 6px 0; color: var(--cyan); font-size: 13px; }
